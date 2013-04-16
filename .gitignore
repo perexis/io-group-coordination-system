@@ -8,3 +8,9 @@
 build/
 bin/
 
+# vim
+*.swp
+
+# gedit
+*~
+
