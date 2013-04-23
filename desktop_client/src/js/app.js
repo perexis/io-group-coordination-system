@@ -3,8 +3,6 @@ goog.provide('io');
 goog.provide('io.start');
 
 goog.require('goog.dom');
-goog.require('goog.events');
-goog.require('goog.net.jsloader');
 
 io.start = function() {
   var newDiv = goog.dom.createDom('h1', {'id': 'map_canvas'});
@@ -21,5 +19,6 @@ io.start = function() {
   initialize();
 };
 
+goog.exportSymbol('io', io);
 goog.exportSymbol('io.start', io.start);
 
