@@ -5,7 +5,7 @@ goog.provide('io.start');
 goog.require('goog.dom');
 
 io.start = function() {
-  var newDiv = goog.dom.createDom('h1', {'class': 'map_canvas'});
+  var newDiv = goog.dom.createDom('div', {'class': 'map_canvas container'});
   goog.dom.appendChild(document.body, newDiv);
 
   var initialize = function() {

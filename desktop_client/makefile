@@ -37,7 +37,7 @@ copyres:
 	cp -R $(HTMLDIR)/App.html $(BUILDDIR)
 	mkdir -p $(BUILDDIR)/css
 	cp -R $(CSSDIR)/*.css $(BUILDDIR)/css
-	cp -R $(LIBDIR)/bootstrap/*.css $(BUILDDIR)/css
+	cp -R $(LIBDIR)/bootstrap $(BUILDDIR)
 
 clean:
 		rm -rf `find $(BUILDDIR) | tail -n +2`
