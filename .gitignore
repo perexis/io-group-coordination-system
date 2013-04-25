@@ -17,3 +17,6 @@ bin/
 # closure PYCs
 *.pyc
 
+# generated files
+desktop_client/src/js/gen/
+
