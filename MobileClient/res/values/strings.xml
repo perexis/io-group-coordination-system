@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Operations Coordinator</string>
+    <!-- Global -->
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+
+    <!-- LoginMethodActivity -->
+    <string name="app_name">Operations Coordinator</string>
+    <string name="label_login_method">Select login method</string>
+    <string name="button_accept">Accept</string>
+    <string name="radio_login_password">Login/password</string>
+    <string name="radio_nfc">NFC</string>
+    <string name="radio_fingerprint">Fingerprint</string>
+
+    <!-- NotImplementedYetActivity -->
     <string name="title_activity_not_implemented_yet">We are sorry…</string>
     <string name="label_we_are_sorry">We are sorry but this functionality has not been implemented yet. This is still work-in-progress program so please give us some time to add missing parts.</string>
+
+    <!-- LoginPasswordActivity -->
+    <string name="title_activity_login_password">Login</string>
+    <string name="label_login">Login</string>
+    <string name="label_password">Password</string>
+    <string name="button_login">Login</string>
 
 </resources>

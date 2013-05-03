@@ -26,6 +26,10 @@
             android:name="pl.edu.agh.io.coordinator.NotImplementedYetActivity"
             android:label="@string/title_activity_not_implemented_yet" >
         </activity>
+        <activity
+            android:name="pl.edu.agh.io.coordinator.LoginPasswordActivity"
+            android:label="@string/title_activity_login_password" >
+        </activity>
     </application>
 
 </manifest>

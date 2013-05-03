@@ -9,8 +9,45 @@
     tools:context=".LoginMethodActivity" >
 
     <TextView
+        android:id="@+id/labelPassword"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:text="@string/label_login_method" />
+
+    <RadioGroup
+        android:id="@+id/radioGroupLoginMethod"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/labelPassword"
+        android:layout_below="@+id/labelPassword" >
+
+        <RadioButton
+            android:id="@+id/radioLoginPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/radio_login_password" />
+
+        <RadioButton
+            android:id="@+id/radioNFC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/radio_nfc" />
+
+        <RadioButton
+            android:id="@+id/radioFingerprint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/radio_fingerprint" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="clickLoginMethod"
+        android:text="@string/button_accept" />
 
 </RelativeLayout>
