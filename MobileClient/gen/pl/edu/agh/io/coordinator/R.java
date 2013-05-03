@@ -24,13 +24,15 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int action_settings=0x7f08000a;
+        public static final int action_settings=0x7f08000c;
         public static final int button1=0x7f080005;
         public static final int buttonLogin=0x7f080009;
+        public static final int debugInfo=0x7f08000b;
         public static final int inputLogin=0x7f080007;
         public static final int inputPassword=0x7f080008;
         public static final int labelLogin=0x7f080006;
         public static final int labelPassword=0x7f080000;
+        public static final int loginProgressBar=0x7f08000a;
         public static final int radioFingerprint=0x7f080004;
         public static final int radioGroupLoginMethod=0x7f080001;
         public static final int radioLoginPassword=0x7f080002;
@@ -39,28 +41,42 @@ public final class R {
     public static final class layout {
         public static final int activity_login_method=0x7f030000;
         public static final int activity_login_password=0x7f030001;
-        public static final int activity_not_implemented_yet=0x7f030002;
+        public static final int activity_main_map=0x7f030002;
+        public static final int activity_not_implemented_yet=0x7f030003;
     }
     public static final class menu {
         public static final int login_method=0x7f070000;
         public static final int login_password=0x7f070001;
-        public static final int not_implemented_yet=0x7f070002;
+        public static final int main_map=0x7f070002;
+        public static final int not_implemented_yet=0x7f070003;
     }
     public static final class string {
-        public static final int action_settings=0x7f050001;
-        public static final int app_name=0x7f050000;
-        public static final int button_accept=0x7f050006;
-        public static final int button_login=0x7f05000d;
-        public static final int hello_world=0x7f050002;
-        public static final int label_login=0x7f05000b;
-        public static final int label_login_method=0x7f050005;
-        public static final int label_password=0x7f05000c;
-        public static final int label_we_are_sorry=0x7f050004;
-        public static final int radio_fingerprint=0x7f050009;
-        public static final int radio_login_password=0x7f050007;
-        public static final int radio_nfc=0x7f050008;
-        public static final int title_activity_login_password=0x7f05000a;
-        public static final int title_activity_not_implemented_yet=0x7f050003;
+        /**  Global 
+         */
+        public static final int action_settings=0x7f050000;
+        /**  LoginMethodActivity 
+         */
+        public static final int app_name=0x7f050003;
+        public static final int button_accept=0x7f050005;
+        public static final int button_cancel=0x7f050002;
+        public static final int button_login=0x7f05000e;
+        public static final int hello_world=0x7f050001;
+        public static final int label_login=0x7f05000c;
+        public static final int label_login_method=0x7f050004;
+        public static final int label_password=0x7f05000d;
+        public static final int label_we_are_sorry=0x7f05000a;
+        public static final int radio_fingerprint=0x7f050008;
+        public static final int radio_login_password=0x7f050006;
+        public static final int radio_nfc=0x7f050007;
+        /**  LoginPasswordActivity 
+         */
+        public static final int title_activity_login_password=0x7f05000b;
+        /**  MainMapActivity 
+         */
+        public static final int title_activity_main_map=0x7f05000f;
+        /**  NotImplementedYetActivity 
+         */
+        public static final int title_activity_not_implemented_yet=0x7f050009;
     }
     public static final class style {
         /** 
