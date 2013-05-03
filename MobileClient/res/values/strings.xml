@@ -4,5 +4,7 @@
     <string name="app_name">Operations Coordinator</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_not_implemented_yet">We are sorry…</string>
+    <string name="label_we_are_sorry">We are sorry but this functionality has not been implemented yet. This is still work-in-progress program so please give us some time to add missing parts.</string>
 
 </resources>
