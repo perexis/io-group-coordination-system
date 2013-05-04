@@ -1,5 +1,5 @@
 package pl.edu.agh.io.coordinator.resources;
 
-public class LayerDiff {
+public class Point {
 
 }

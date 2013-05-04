@@ -2,6 +2,8 @@ package pl.edu.agh.io.coordinator;
 
 import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
+import pl.edu.agh.io.coordinator.utils.net.exceptions.CouldNotLogInException;
+import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -55,7 +57,7 @@ public class LoginPasswordActivity extends Activity {
 		}
 	}
 
-	private class LoginInBackground extends AsyncTask<Intent, Void, Boolean> {
+	private class LoginInBackground extends AsyncTask<Intent, Void, Exception> {
 
 		@Override
 		protected void onPreExecute() {
@@ -63,16 +65,23 @@ public class LoginPasswordActivity extends Activity {
 		}
 
 		@Override
-		protected Boolean doInBackground(Intent... params) {
+		protected Exception doInBackground(Intent... params) {
 			IJSonProxy proxy = JSonProxy.getInstance();
+			Exception result;
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			Boolean result = proxy.login(inputLogin.getText().toString(),
-					inputPassword.getText().toString());
-
+			try {
+				proxy.login(inputLogin.getText().toString(), inputPassword
+						.getText().toString());
+				result = null;
+			} catch (CouldNotLogInException e) {
+				result = e;
+			} catch (NetworkException e) {
+				result = e;
+			}
 			// publishProgress(null);
 			return result;
 		}
@@ -83,27 +92,29 @@ public class LoginPasswordActivity extends Activity {
 		}
 
 		@Override
-		protected void onCancelled(Boolean result) {
+		protected void onCancelled(Exception result) {
 			loginButton.setText(getString(R.string.button_login));
 			loginProgressBar.setVisibility(View.INVISIBLE);
 			loginInProgress = false;
 		}
 
 		@Override
-		protected void onPostExecute(Boolean result) {
+		protected void onPostExecute(Exception result) {
 			Intent intent = new Intent(LoginPasswordActivity.this,
 					MainMapActivity.class);
 			loginButton.setText(getString(R.string.button_login));
 			loginProgressBar.setVisibility(View.INVISIBLE);
 			loginInProgress = false;
-			// TODO: implement better :)
-			if (result) {
+
+			if (result == null) {
 				startActivity(intent);
-			} else {
-				// TODO:
-				// Print login error
+			} else if (result instanceof CouldNotLogInException) {
 				Toast.makeText(getApplicationContext(),
 						R.string.alert_could_not_login, Toast.LENGTH_LONG)
+						.show();
+			} else if (result instanceof NetworkException) {
+				Toast.makeText(getApplicationContext(),
+						R.string.alert_network_problem, Toast.LENGTH_LONG)
 						.show();
 			}
 		}
