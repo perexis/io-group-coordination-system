@@ -1,5 +1,6 @@
 package pl.edu.agh.io.coordinator;
 
+import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
 import android.app.Activity;
 import android.content.Intent;
@@ -10,10 +11,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 public class LoginPasswordActivity extends Activity {
-
-	public final static String SESSION_ID = "pl.edu.agh.io.coordinator.sessionID";
 
 	private Button loginButton;
 	private EditText inputLogin;
@@ -55,7 +55,7 @@ public class LoginPasswordActivity extends Activity {
 		}
 	}
 
-	private class LoginInBackground extends AsyncTask<Intent, Void, Long> {
+	private class LoginInBackground extends AsyncTask<Intent, Void, Boolean> {
 
 		@Override
 		protected void onPreExecute() {
@@ -63,18 +63,18 @@ public class LoginPasswordActivity extends Activity {
 		}
 
 		@Override
-		protected Long doInBackground(Intent... params) {
-			JSonProxy proxy = JSonProxy.getInstance();
-			Long sessionID;
+		protected Boolean doInBackground(Intent... params) {
+			IJSonProxy proxy = JSonProxy.getInstance();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			sessionID = Long.valueOf(proxy.login(inputLogin.getText()
-					.toString(), inputPassword.getText().toString()));
-			return sessionID;
+			Boolean result = proxy.login(inputLogin.getText().toString(),
+					inputPassword.getText().toString());
+
 			// publishProgress(null);
+			return result;
 		}
 
 		@Override
@@ -83,26 +83,28 @@ public class LoginPasswordActivity extends Activity {
 		}
 
 		@Override
-		protected void onCancelled(Long result) {
+		protected void onCancelled(Boolean result) {
 			loginButton.setText(getString(R.string.button_login));
 			loginProgressBar.setVisibility(View.INVISIBLE);
 			loginInProgress = false;
 		}
 
 		@Override
-		protected void onPostExecute(Long result) {
+		protected void onPostExecute(Boolean result) {
 			Intent intent = new Intent(LoginPasswordActivity.this,
 					MainMapActivity.class);
 			loginButton.setText(getString(R.string.button_login));
 			loginProgressBar.setVisibility(View.INVISIBLE);
 			loginInProgress = false;
-			//TODO: implement better :)
-			if(result!=-1){
-				intent.putExtra(SESSION_ID, result);
+			// TODO: implement better :)
+			if (result) {
 				startActivity(intent);
-			}else{
-				//TODO:
-				//Print login error
+			} else {
+				// TODO:
+				// Print login error
+				Toast.makeText(getApplicationContext(),
+						R.string.alert_could_not_login, Toast.LENGTH_LONG)
+						.show();
 			}
 		}
 

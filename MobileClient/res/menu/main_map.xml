@@ -1,9 +1,64 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
+        android:id="@+id/actionChat"
+        android:checkable="true"
+        android:checked="false"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/action_chat"
+        android:visible="true">
+    </item>
+    <item
+        android:id="@+id/actionLayers"
+        android:checkable="true"
+        android:checked="false"
+        android:enabled="true"
+        android:icon="@drawable/ic_launcher"
+        android:showAsAction="always|withText"
+        android:title="@string/action_layers"
+        android:visible="true">
+    </item>
+    <item
+        android:id="@+id/actionCreateGroup"
+        android:checkable="false"
+        android:checked="false"
+        android:enabled="true"
+        android:showAsAction="never"
+        android:title="@string/action_create_group"
+        android:visible="true">
+    </item>
+    <item
+        android:id="@+id/actionRemoveGroup"
+        android:checkable="false"
+        android:checked="false"
+        android:enabled="true"
+        android:showAsAction="never"
+        android:title="@string/action_remove_group"
+        android:visible="true">
+    </item>
+    <item
+        android:id="@+id/actionCreateItem"
+        android:checkable="false"
+        android:checked="false"
+        android:enabled="true"
+        android:showAsAction="never"
+        android:title="@string/action_create_item"
+        android:visible="true">
+    </item>
+    <item
+        android:id="@+id/actionSettings"
         android:showAsAction="never"
         android:title="@string/action_settings"/>
+    <item
+        android:id="@+id/actionLogout"
+        android:checkable="false"
+        android:checked="false"
+        android:enabled="true"
+        android:showAsAction="never"
+        android:title="@string/action_logout"
+        android:visible="true">
+    </item>
 
 </menu>

@@ -24,6 +24,13 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
+        public static final int actionChat=0x7f08000d;
+        public static final int actionCreateGroup=0x7f08000f;
+        public static final int actionCreateItem=0x7f080011;
+        public static final int actionLayers=0x7f08000e;
+        public static final int actionLogout=0x7f080013;
+        public static final int actionRemoveGroup=0x7f080010;
+        public static final int actionSettings=0x7f080012;
         public static final int action_settings=0x7f08000c;
         public static final int button1=0x7f080005;
         public static final int buttonLogin=0x7f080009;
@@ -51,9 +58,18 @@ public final class R {
         public static final int not_implemented_yet=0x7f070003;
     }
     public static final class string {
+        /**  MainMapActivity Actions 
+         */
+        public static final int action_chat=0x7f050011;
+        public static final int action_create_group=0x7f050013;
+        public static final int action_create_item=0x7f050015;
+        public static final int action_layers=0x7f050012;
+        public static final int action_logout=0x7f050016;
+        public static final int action_remove_group=0x7f050014;
         /**  Global 
          */
         public static final int action_settings=0x7f050000;
+        public static final int alert_could_not_login=0x7f050010;
         /**  LoginMethodActivity 
          */
         public static final int app_name=0x7f050003;

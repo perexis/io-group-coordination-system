@@ -26,5 +26,14 @@
     
     <!-- MainMapActivity -->
     <string name="title_activity_main_map">Map</string>
+    <string name="alert_could_not_login">Could not login</string>
+    
+    <!-- MainMapActivity Actions -->
+    <string name="action_chat">Chat</string>
+    <string name="action_layers">Layers</string>
+    <string name="action_create_group">Create group</string>
+    <string name="action_remove_group">Remove group</string>
+    <string name="action_create_item">Create item</string>
+    <string name="action_logout">Logout</string>
 
 </resources>
