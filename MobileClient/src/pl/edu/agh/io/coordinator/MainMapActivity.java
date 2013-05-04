@@ -11,7 +11,6 @@ import android.widget.TextView;
 public class MainMapActivity extends Activity {
 
 	private TextView debugInfo;
-	private long sessionID;
 	private MenuItem actionChat;
 	private MenuItem actionLayers;
 

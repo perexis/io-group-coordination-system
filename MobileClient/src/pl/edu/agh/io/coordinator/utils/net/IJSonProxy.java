@@ -2,8 +2,6 @@ package pl.edu.agh.io.coordinator.utils.net;
 
 import java.util.Set;
 
-import android.text.LoginFilter.UsernameFilterGeneric;
-
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.MapItem;
