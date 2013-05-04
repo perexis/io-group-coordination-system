@@ -86,10 +86,15 @@ public class JSonProxy implements IJSonProxy {
 				"http://io.wojtasskorcz.eu.cloudbees.net/" + methodName);
 
 		try {
-			StringEntity stringEntity = new StringEntity("data="
-					+ URLEncoder.encode(params.toString(), "UTF-8"));
+			/*
+			 * StringEntity stringEntity = new StringEntity("data=" +
+			 * URLEncoder.encode(params.toString(), "UTF-8"));
+			 * stringEntity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
+			 * "application/x-www-form-urlencoded"));
+			 */
+			StringEntity stringEntity = new StringEntity(params.toString());
 			stringEntity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-					"application/x-www-form-urlencoded"));
+					"application/json"));
 			httpPost.setEntity(stringEntity);
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
