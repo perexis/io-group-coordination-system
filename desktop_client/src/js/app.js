@@ -3,13 +3,36 @@ goog.provide('io');
 goog.provide('io.start');
 
 goog.require('goog.dom');
-goog.require('io.soy');
+goog.require('goog.events');
+goog.require('io.api.ApiConnector');
+goog.require('io.log');
+goog.require('io.logger.init');
+goog.require('io.soy.login');
+goog.require('io.soy.main');
 
 io.start = function() {
-  soy.renderElement(document.body, io.soy.base);
-  io.initMap();
-  io.putSampleData();
+  io.logger.init();
+  io.api_ = new io.api.ApiConnector();
+  io.initLoginPage_();
+  //io.initMap();
+  //io.putSampleData();
 };
+
+
+/**
+ * @private
+ */
+io.initLoginPage_ = function() {
+  soy.renderElement(document.body, io.soy.login.page);
+  var callback = function(e) {
+    var login = goog.dom.getElement('loginInput').value;
+    io.log().info('Submitted login form, login: ' + login);
+    e.preventDefault();
+  };
+  goog.events.listen(goog.dom.getElement('loginForm'),
+      goog.events.EventType.SUBMIT, callback);
+};
+
 
 var W = -34.397;
 var E = 150.644;
@@ -37,6 +60,5 @@ io.initMap = function() {
   io.map = new google.maps.Map(mapDiv, mapOptions);
 };
 
-goog.exportSymbol('io', io);
 goog.exportSymbol('io.start', io.start);
 

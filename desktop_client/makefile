@@ -19,7 +19,7 @@ fixjs:
 	fixjsstyle `find src/js -maxdepth 0 -name '*.js'`
 
 gendeps:
-	./lib/closure/bin/calcdeps.py -p . -i src/js/app.js -o deps > src/js/gen/deps.js
+	./lib/closure/bin/calcdeps.py -p . -o deps > src/js/gen/deps.js
 
 soy:
 	mkdir -p src/js/gen
@@ -42,7 +42,7 @@ compile: soy gendeps
 	  --compiler_flags="--externs=$(LIBDIR)/maps/google_maps_api_v3.js" \
 	  --compiler_flags="--compilation_level=$(COMPILATION_LEVEL)" \
 	  --compiler_flags="--warning_level=VERBOSE" \
-		--compiler_flags="--js=$(CLOSUREDIR)/goog/deps.js"	\
+		--compiler_flags="--js=$(JSDIR)/gen/deps.js"	\
 		> $(BUILDDIR)/js/app.js
 
 copyres:
