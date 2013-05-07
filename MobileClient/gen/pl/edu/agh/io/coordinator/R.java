@@ -60,40 +60,42 @@ public final class R {
     public static final class string {
         /**  MainMapActivity Actions 
          */
-        public static final int action_chat=0x7f050012;
-        public static final int action_create_group=0x7f050014;
-        public static final int action_create_item=0x7f050016;
-        public static final int action_layers=0x7f050013;
-        public static final int action_logout=0x7f050017;
-        public static final int action_remove_group=0x7f050015;
+        public static final int action_chat=0x7f050014;
+        public static final int action_create_group=0x7f050016;
+        public static final int action_create_item=0x7f050018;
+        public static final int action_layers=0x7f050015;
+        public static final int action_logout=0x7f050019;
+        public static final int action_remove_group=0x7f050017;
         /**  Global 
          */
         public static final int action_settings=0x7f050000;
-        public static final int alert_could_not_login=0x7f050011;
+        public static final int alert_could_not_login=0x7f050012;
+        public static final int alert_invalid_session_id=0x7f050004;
+        public static final int alert_logged_out=0x7f050013;
         public static final int alert_network_problem=0x7f050003;
         /**  LoginMethodActivity 
          */
-        public static final int app_name=0x7f050004;
-        public static final int button_accept=0x7f050006;
+        public static final int app_name=0x7f050005;
+        public static final int button_accept=0x7f050007;
         public static final int button_cancel=0x7f050002;
-        public static final int button_login=0x7f05000f;
+        public static final int button_login=0x7f050010;
         public static final int hello_world=0x7f050001;
-        public static final int label_login=0x7f05000d;
-        public static final int label_login_method=0x7f050005;
-        public static final int label_password=0x7f05000e;
-        public static final int label_we_are_sorry=0x7f05000b;
-        public static final int radio_fingerprint=0x7f050009;
-        public static final int radio_login_password=0x7f050007;
-        public static final int radio_nfc=0x7f050008;
+        public static final int label_login=0x7f05000e;
+        public static final int label_login_method=0x7f050006;
+        public static final int label_password=0x7f05000f;
+        public static final int label_we_are_sorry=0x7f05000c;
+        public static final int radio_fingerprint=0x7f05000a;
+        public static final int radio_login_password=0x7f050008;
+        public static final int radio_nfc=0x7f050009;
         /**  LoginPasswordActivity 
          */
-        public static final int title_activity_login_password=0x7f05000c;
+        public static final int title_activity_login_password=0x7f05000d;
         /**  MainMapActivity 
          */
-        public static final int title_activity_main_map=0x7f050010;
+        public static final int title_activity_main_map=0x7f050011;
         /**  NotImplementedYetActivity 
          */
-        public static final int title_activity_not_implemented_yet=0x7f05000a;
+        public static final int title_activity_not_implemented_yet=0x7f05000b;
     }
     public static final class style {
         /** 

@@ -24,7 +24,7 @@ import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 public interface IJSonProxy {
 
 	// Creates session and sets sessionID
-	public void login(String userName, String password)
+	public void login(String userID, String password)
 			throws CouldNotLogInException, NetworkException;
 
 	// Ends session, (sets sessionID to -1 even if InvalidSessionIDException

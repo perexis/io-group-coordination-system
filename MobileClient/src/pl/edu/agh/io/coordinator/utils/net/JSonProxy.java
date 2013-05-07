@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -61,9 +63,11 @@ public class JSonProxy implements IJSonProxy {
 		HttpPost httpPost = new HttpPost(serverName + "/" + methodName);
 
 		try {
-			StringEntity stringEntity = new StringEntity(params.toString());
+			StringEntity stringEntity = new StringEntity(params.toString(),
+					HTTP.UTF_8);
 			stringEntity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
 					"application/json"));
+
 			httpPost.setEntity(stringEntity);
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
@@ -95,7 +99,7 @@ public class JSonProxy implements IJSonProxy {
 	public synchronized void login(String userName, String password)
 			throws CouldNotLogInException, NetworkException {
 		Map<String, String> paramsInString = new HashMap<String, String>();
-		paramsInString.put("login", userName);
+		paramsInString.put("id", userName);
 		paramsInString.put("password", password);
 		JSONObject params = new JSONObject(paramsInString);
 
@@ -160,14 +164,14 @@ public class JSonProxy implements IJSonProxy {
 	public void removeMapItem(MapItem item) throws InvalidSessionIDException,
 			InvalidMapItemException, NetworkException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void updateSelfState(UserState newState)
 			throws InvalidSessionIDException, NetworkException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -182,7 +186,7 @@ public class JSonProxy implements IJSonProxy {
 			throws InvalidSessionIDException, InvalidUserException,
 			InvalidUserItemException, NetworkException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -190,14 +194,40 @@ public class JSonProxy implements IJSonProxy {
 			throws InvalidSessionIDException, InvalidUserException,
 			InvalidUserItemException, CouldNotRemoveException, NetworkException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public Set<User> getUsers() throws InvalidSessionIDException,
 			NetworkException {
-		// TODO Auto-generated method stub
-		return null;
+		Set<User> ret = new HashSet<User>();
+		Map<String, Long> paramsInString = new HashMap<String, Long>();
+		paramsInString.put("sessionID", sessionID);
+		JSONObject params = new JSONObject(paramsInString);
+
+		try {
+			String jsonString = getJSonString("getUsers", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+
+			String exception = jsonObject.getString("exception");
+
+			if (exception.equals("InvalidSessionID"))
+				throw new InvalidSessionIDException();
+			else {
+				JSONArray retArray = jsonObject.getJSONArray("retval");
+				int max = retArray.length();
+				for (int i = 0; i < max; i++) {
+					JSONObject jsonUser = retArray.getJSONObject(i);
+					User user = new User(jsonUser);
+					ret.add(user);
+				}
+			}
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		return ret;
 	}
 
 	@Override
@@ -219,7 +249,7 @@ public class JSonProxy implements IJSonProxy {
 	public void createGroup(String groupName) throws InvalidSessionIDException,
 			CouldNotCreateGroupException, NetworkException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -227,7 +257,7 @@ public class JSonProxy implements IJSonProxy {
 			throws InvalidSessionIDException, InvalidUserException,
 			InvalidGroupException, NetworkException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -235,7 +265,7 @@ public class JSonProxy implements IJSonProxy {
 			throws InvalidSessionIDException, InvalidUserException,
 			InvalidGroupException, CouldNotRemoveException, NetworkException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -250,7 +280,7 @@ public class JSonProxy implements IJSonProxy {
 	public void sendMessage(String message) throws InvalidSessionIDException,
 			NetworkException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override

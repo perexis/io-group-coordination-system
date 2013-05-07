@@ -6,6 +6,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="button_cancel">Cancel</string>
     <string name="alert_network_problem">Network problem occurred</string>
+    <string name="alert_invalid_session_id">Invalid Session ID</string>
 
     <!-- LoginMethodActivity -->
     <string name="app_name">Operations Coordinator</string>
@@ -28,6 +29,7 @@
     <!-- MainMapActivity -->
     <string name="title_activity_main_map">Map</string>
     <string name="alert_could_not_login">Could not login</string>
+    <string name="alert_logged_out">Logged out</string>
     
     <!-- MainMapActivity Actions -->
     <string name="action_chat">Chat</string>

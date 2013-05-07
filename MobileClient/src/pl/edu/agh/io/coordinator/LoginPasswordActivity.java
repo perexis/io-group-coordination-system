@@ -67,7 +67,6 @@ public class LoginPasswordActivity extends Activity {
 		@Override
 		protected Exception doInBackground(Intent... params) {
 			IJSonProxy proxy = JSonProxy.getInstance();
-			Exception result;
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -76,14 +75,13 @@ public class LoginPasswordActivity extends Activity {
 			try {
 				proxy.login(inputLogin.getText().toString(), inputPassword
 						.getText().toString());
-				result = null;
 			} catch (CouldNotLogInException e) {
-				result = e;
+				return e;
 			} catch (NetworkException e) {
-				result = e;
+				return e;
 			}
 			// publishProgress(null);
-			return result;
+			return null;
 		}
 
 		@Override
