@@ -5,7 +5,7 @@
         android:checkable="true"
         android:checked="false"
         android:enabled="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/social_chat"
         android:showAsAction="ifRoom|withText"
         android:title="@string/action_chat"
         android:visible="true">
@@ -15,7 +15,7 @@
         android:checkable="true"
         android:checked="false"
         android:enabled="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/location_web_site"
         android:showAsAction="always|withText"
         android:title="@string/action_layers"
         android:visible="true">
