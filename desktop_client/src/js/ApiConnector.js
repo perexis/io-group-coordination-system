@@ -18,24 +18,49 @@ io.api.ApiConnector = function() {
   io.log().info('Initialized API pointing to: ' + this.url);
 };
 
+
+/**
+ * @param {!{id: string, password: string}} data to be sent.
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
 io.api.ApiConnector.prototype.login = function(data, callback,
     opt_errcallback) {
   this.request_('login', data, callback, opt_errcallback);
 };
 
+
+/**
+ * @param {!{sessionID: (string|number)}} data to be sent.
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.logout = function(data, callback,
+    opt_errcallback) {
+  this.request_('logout', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!string} resource - resource to be accessed i.e. 'login'.
+ * @param {!Object} data - data to be sent.
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
 io.api.ApiConnector.prototype.request_ = function(resource, data, callback,
     opt_errcallback) {
   var url = this.url + resource;
-
   var xhr = new goog.net.XhrIo();
-
   var headers = {'Content-Type': 'application/json'};
 
   var onError = function(e) {
     io.log().warning('Error accessing url: ' + url + '\n' +
         e.target.getResponseText());
     var reason = null;
-    if (e.getStatus() != 0) {
+    if (e.getStatus && e.getStatus() != 0) {
       reason = e.getStatus() + ' ' + e.getStatusText();
     }
 
@@ -70,7 +95,6 @@ io.api.ApiConnector.prototype.request_ = function(resource, data, callback,
 
   goog.events.listen(xhr, goog.net.EventType.ERROR, onError);
 
-  data = goog.json.serialize(data);
-  xhr.send(url, 'POST', data, headers);
+  xhr.send(url, 'POST', goog.json.serialize(data), headers);
 };
 

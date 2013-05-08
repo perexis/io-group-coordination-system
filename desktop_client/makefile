@@ -7,7 +7,7 @@ HTMLDIR=$(SRCDIR)/html
 CSSDIR=$(SRCDIR)/css
 BUILDERPATH=$(CLOSUREDIR)/bin/build/closurebuilder.py
 COMPILERPATH=$(LIBDIR)/closure-compiler/compiler.jar
-ROOTNAMESPACE="io"
+ROOTNAMESPACE="io.start"
 COMPILATION_LEVEL=ADVANCED_OPTIMIZATIONS
 
 all: lint compile copyres
@@ -28,6 +28,9 @@ soy:
 		--shouldGenerateJsdoc \
 		--outputPathFormat 'src/js/gen/{INPUT_FILE_NAME_NO_EXT}_soy.js' src/soy/*.soy
 
+quick-compile: COMPILATION_LEVEL=SIMPLE_OPTIMIZATIONS
+quick-compile: compile
+
 compile: soy gendeps
 	mkdir -p $(BUILDDIR)/js
 	$(BUILDERPATH) \
@@ -42,6 +45,7 @@ compile: soy gendeps
 	  --compiler_flags="--externs=$(LIBDIR)/maps/google_maps_api_v3.js" \
 	  --compiler_flags="--compilation_level=$(COMPILATION_LEVEL)" \
 	  --compiler_flags="--warning_level=VERBOSE" \
+	  --compiler_flags="--generate_exports" \
 		--compiler_flags="--js=$(JSDIR)/gen/deps.js"	\
 		> $(BUILDDIR)/js/app.js
 
