@@ -14,8 +14,6 @@ io.start = function() {
   io.logger.init();
   io.api_ = new io.api.ApiConnector();
   io.initLoginPage_();
-  //io.initMap();
-  //io.putSampleData();
 };
 
 
@@ -25,9 +23,26 @@ io.start = function() {
 io.initLoginPage_ = function() {
   soy.renderElement(document.body, io.soy.login.page);
   var callback = function(e) {
+    soy.renderElement(goog.dom.getElement('loginError'), io.soy.main.empty);
     var login = goog.dom.getElement('loginInput').value;
+    var password = goog.dom.getElement('passwordInput').value;
     io.log().info('Submitted login form, login: ' + login);
     e.preventDefault();
+
+    var onSuccess = function(json) {
+      io.log().info('Successfully logged in, sid:' + json);
+      io.initMap();
+      io.putSampleData();
+    };
+
+    var onError = function(reason) {
+      if (reason == 'CouldNotLogin') {
+        reason = 'Wrong login or password';
+      }
+      soy.renderElement(goog.dom.getElement('loginError'), io.soy.login.error,
+          {'reason': reason});
+    };
+    io.api_.login({'id': login, 'password': password}, onSuccess, onError);
   };
   goog.events.listen(goog.dom.getElement('loginForm'),
       goog.events.EventType.SUBMIT, callback);
@@ -51,6 +66,7 @@ io.putSampleData = function() {
 };
 
 io.initMap = function() {
+  soy.renderElement(document.body, io.soy.main.page);
   var mapDiv = goog.dom.getElement('map');
   var mapOptions = {
     center: new google.maps.LatLng(-34.397, 150.644),

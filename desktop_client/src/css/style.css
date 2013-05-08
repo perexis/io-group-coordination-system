@@ -1,42 +1,26 @@
-.map_canvas img {
+.map-canvas img {
   max-width: none;
 }
 
-.map_canvas label {
+.map-canvas label {
   display: inline;
 }
 
-.map_canvas {
+.map-canvas {
   min-height: 400px;
   height: 550px;
 }
 
 body {
   margin-top: 60px;
-  background-color: #f5f5f5;
 }
 
 html {
   height: 100%;
 }
 
-.form-signin {
-  max-width: 300px;
-  padding: 19px 29px 29px;
-  margin: 0 auto 20px;
-  background-color: #fff;
-  border: 1px solid #e5e5e5;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
-  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-  -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
-  box-shadow: 0 1px 2px rgba(0,0,0,.05);
-}
-
-.form-signin .form-signin-heading,
-.form-signin .checkbox {
-  margin-bottom: 10px;
+.form-signin-container {
+  max-width: 400px;
 }
 
 .form-signin input[type="text"],
@@ -47,4 +31,11 @@ html {
   padding: 7px 9px;
 }
 
+.form-signin-container .alert-error {
+  margin: 15px 0 0 0;
+}
+
+.form-signin {
+  margin: 0;
+}
 

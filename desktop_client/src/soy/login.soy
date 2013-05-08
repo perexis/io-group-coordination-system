@@ -4,13 +4,30 @@
  * The login page 
  */
 {template .page}
-<div class="container">
+<div class="container well form-signin-container">
   <form class="form-signin" id="loginForm">
     <h2 class="form-signin-heading">Please sign in</h2>
     <input id="loginInput" type="text" class="input-block-level" placeholder="Login">
     <input id="passwordInput" type="password" class="input-block-level" placeholder="Password">
     <button id="signButton" class="btn btn-large btn-primary" type="submit">Sign in</button>
+    <div id="loginError"></div>
   </form>
 </div>
+{/template}
+
+
+/**
+ * Error marker
+ * @param reason the reason, human readable
+ */
+{template .error}
+<div class="alert alert-error">  
+  <strong>Could not log in</strong><br>
+  {if $reason}
+    {$reason}
+  {else}
+    Unknown reason :(
+  {/if}
+</div> 
 {/template}
 
