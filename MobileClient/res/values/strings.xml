@@ -4,9 +4,13 @@
     <!-- Global -->
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="button_ok">OK</string>
     <string name="button_cancel">Cancel</string>
     <string name="alert_network_problem">Network problem occurred</string>
-    <string name="alert_invalid_session_id">Invalid Session ID</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_create_group">Create Group</string>
+    <string name="title_activity_remove_group">Remove Group</string>
+    <string name="title_activity_create_user_item">Create User Item</string>
 
     <!-- LoginMethodActivity -->
     <string name="app_name">Operations Coordinator</string>
@@ -25,12 +29,14 @@
     <string name="label_login">Login</string>
     <string name="label_password">Password</string>
     <string name="button_login">Login</string>
-    
+
     <!-- MainMapActivity -->
     <string name="title_activity_main_map">Map</string>
     <string name="alert_could_not_login">Could not login</string>
     <string name="alert_logged_out">Logged out</string>
-    
+    <string name="alert_invalid_session_id">Invalid session ID</string>
+    <string name="alert_invalid_session_id_logout">Invalid sessionID. Maybe you have logged in on another device? Closing map.</string>
+
     <!-- MainMapActivity Actions -->
     <string name="action_chat">Chat</string>
     <string name="action_layers">Layers</string>
