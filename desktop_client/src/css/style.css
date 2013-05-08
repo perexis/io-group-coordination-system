@@ -1,12 +1,12 @@
-.map_canvas img {
+.map-canvas img {
   max-width: none;
 }
 
-.map_canvas label {
+.map-canvas label {
   display: inline;
 }
 
-.map_canvas {
+.map-canvas {
   min-height: 400px;
   height: 550px;
 }
@@ -17,5 +17,25 @@ body {
 
 html {
   height: 100%;
+}
+
+.form-signin-container {
+  max-width: 400px;
+}
+
+.form-signin input[type="text"],
+.form-signin input[type="password"] {
+  font-size: 16px;
+  height: auto;
+  margin-bottom: 15px;
+  padding: 7px 9px;
+}
+
+.form-signin-container .alert-error {
+  margin: 15px 0 0 0;
+}
+
+.form-signin {
+  margin: 0;
 }
 
