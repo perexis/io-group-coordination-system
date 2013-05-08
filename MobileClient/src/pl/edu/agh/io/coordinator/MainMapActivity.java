@@ -3,6 +3,7 @@ package pl.edu.agh.io.coordinator;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.LayersMenuFragment.OnFragmentInteractionListener;
+import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
@@ -21,8 +22,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainMapActivity extends Activity implements
-		OnFragmentInteractionListener {
+public class MainMapActivity extends Activity implements OnFragmentInteractionListener {
 
 	private TextView debugInfo;
 	private boolean loggingOut = false;
@@ -31,27 +31,20 @@ public class MainMapActivity extends Activity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-				WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main_map);
 
 		debugInfo = (TextView) findViewById(R.id.debugInfo);
 		debugInfo.setText("Debug");
 
-		/*new Thread() {
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						Thread.sleep(1000);
-						new GetUsersInBackground().execute(new Intent());
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		}.start();*/
+		/*
+		 * new Thread() {
+		 * 
+		 * @Override public void run() { while (true) { try {
+		 * Thread.sleep(1000); new GetUsersInBackground().execute(new Intent());
+		 * } catch (InterruptedException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); } } } }.start();
+		 */
 
 	}
 
@@ -72,25 +65,22 @@ public class MainMapActivity extends Activity implements
 		case R.id.actionLayers:
 			debugInfo.append("\n" + item.getTitle() + "()");
 			new GetUsersInBackground().execute(new Intent());
+			new GetLayersInBackground().execute(new Intent());
 			return true;
 		case R.id.actionCreateGroup:
-			Intent intentCreateGroup = new Intent(MainMapActivity.this,
-					CreateGroupActivity.class);
+			Intent intentCreateGroup = new Intent(MainMapActivity.this, CreateGroupActivity.class);
 			startActivity(intentCreateGroup);
 			return true;
 		case R.id.actionRemoveGroup:
-			Intent intentRemoveGroup = new Intent(MainMapActivity.this,
-					RemoveGroupActivity.class);
+			Intent intentRemoveGroup = new Intent(MainMapActivity.this, RemoveGroupActivity.class);
 			startActivity(intentRemoveGroup);
 			return true;
 		case R.id.actionCreateItem:
-			Intent intentCreateItem = new Intent(MainMapActivity.this,
-					CreateUserItemActivity.class);
+			Intent intentCreateItem = new Intent(MainMapActivity.this, CreateUserItemActivity.class);
 			startActivity(intentCreateItem);
 			return true;
 		case R.id.actionSettings:
-			Intent intentSettings = new Intent(MainMapActivity.this,
-					NotImplementedYetActivity.class);
+			Intent intentSettings = new Intent(MainMapActivity.this, NotImplementedYetActivity.class);
 			startActivity(intentSettings);
 			return true;
 		case R.id.actionLogout:
@@ -108,25 +98,19 @@ public class MainMapActivity extends Activity implements
 
 	// alerts about invalid sessionID and finishes activity
 	private void invalidSessionId() {
-		new AlertDialog.Builder(MainMapActivity.this)
-				.setMessage(R.string.alert_invalid_session_id_logout)
-				.setTitle(R.string.alert_invalid_session_id)
-				.setCancelable(false)
-				.setIcon(R.drawable.alerts_and_states_warning)
-				.setPositiveButton(R.string.button_ok,
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								MainMapActivity.this.finish();
-							}
-						}).create().show();
+		new AlertDialog.Builder(MainMapActivity.this).setMessage(R.string.alert_invalid_session_id_logout)
+				.setTitle(R.string.alert_invalid_session_id).setCancelable(false).setIcon(R.drawable.alerts_and_states_warning)
+				.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						MainMapActivity.this.finish();
+					}
+				}).create().show();
 	}
 
 	// shows network problem alert
 	private void networkProblem() {
-		Toast.makeText(getApplicationContext(), R.string.alert_network_problem,
-				Toast.LENGTH_LONG).show();
+		Toast.makeText(getApplicationContext(), R.string.alert_network_problem, Toast.LENGTH_LONG).show();
 	}
 
 	private class LogoutInBackground extends AsyncTask<Intent, Void, Exception> {
@@ -166,8 +150,7 @@ public class MainMapActivity extends Activity implements
 
 	}
 
-	private class GetUsersInBackground extends
-			AsyncTask<Intent, Void, Exception> {
+	private class GetUsersInBackground extends AsyncTask<Intent, Void, Exception> {
 
 		private Set<User> users;
 
@@ -191,8 +174,41 @@ public class MainMapActivity extends Activity implements
 
 			if (result == null) {
 				for (User user : users)
-					debugInfo.append("\n" + user.getName() + " "
-							+ user.getSurname());
+					debugInfo.append("\n" + user.getName() + " " + user.getSurname());
+			} else if (result instanceof NetworkException) {
+				networkProblem();
+			} else if (result instanceof InvalidSessionIDException) {
+				invalidSessionId();
+			}
+		}
+
+	}
+
+	private class GetLayersInBackground extends AsyncTask<Intent, Void, Exception> {
+
+		private Set<Layer> layers;
+
+		@Override
+		protected Exception doInBackground(Intent... params) {
+			IJSonProxy proxy = JSonProxy.getInstance();
+
+			try {
+				layers = proxy.getLayers();
+			} catch (InvalidSessionIDException e) {
+				return e;
+			} catch (NetworkException e) {
+				return e;
+			}
+
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Exception result) {
+
+			if (result == null) {
+				for (Layer layer : layers)
+					debugInfo.append("\n" + layer.getName());
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
