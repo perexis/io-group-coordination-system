@@ -21,7 +21,6 @@ import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 
 import android.app.ExpandableListActivity;
 
@@ -210,10 +209,23 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public void removeMapItem(MapItem item) throws InvalidSessionIDException,
-			InvalidMapItemException, NetworkException {
-		// TODO Auto-generated method stub
-
+	public void removeMapItem(MapItem item) throws InvalidSessionIDException, InvalidMapItemException, NetworkException {
+		Map<String, Long> paramsInString = new HashMap<String, Long>();
+		paramsInString.put("sessionID", sessionID);
+		paramsInString.put("item", item.getId());
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("removeMapItem", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidMapItem")) {
+				throw new InvalidMapItemException();
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -250,9 +262,7 @@ public class JSonProxy implements IJSonProxy {
 	public Set<User> getUsers() throws InvalidSessionIDException,
 			NetworkException {
 		Set<User> ret = new HashSet<User>();
-		Map<String, Long> paramsInString = new HashMap<String, Long>();
-		paramsInString.put("sessionID", sessionID);
-		JSONObject params = new JSONObject(paramsInString);
+		JSONObject params = createSessionOnlyParams();
 
 		try {
 			String jsonString = getJSonString("getUsers", params);
