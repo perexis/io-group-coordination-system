@@ -1,11 +1,14 @@
 'use strict';
 goog.provide('io.main.Page');
 
+goog.require('goog.array');
 goog.require('goog.debug');
 goog.require('goog.dom');
 goog.require('goog.events');
 goog.require('io.api.ApiConnector');
 goog.require('io.log');
+goog.require('io.map.Page');
+goog.require('io.settings.Page');
 goog.require('io.soy.main');
 
 
@@ -15,18 +18,23 @@ goog.require('io.soy.main');
  * @param {!string} login
  * @param {!string|number} sid
  * @param {!io.api.ApiConnector} api
- * @param {!function()} logout on logout callback.
+ * @param {!function(string=)} logout function to be called after logout.
  */
 io.main.Page = function(login, sid, api, logout) {
   this.sid = sid;
   this.login = login;
   this.api = api;
   this.logout = logout;
+  api.setExceptionHandler('InvalidSessionID', function(e) {
+    io.log().warning('Session has expired, logging out');
+    logout('Session has expired');
+  });
 };
 
 io.main.Page.prototype.render = function() {
-  soy.renderElement(document.body, io.soy.main.page, {login: this.login});
-  io.initMap();
+  soy.renderElement(document.body, io.soy.main.pageHeader, {login: this.login});
+  this.pageDiv = goog.dom.getElement('page');
+  (new io.map.Page(this, this.pageDiv)).render();
 
   var self = this;
   var onLogoutBtn = function() {
@@ -36,34 +44,33 @@ io.main.Page.prototype.render = function() {
     });
   };
 
+  var onMapBtn = function() {
+    (new io.map.Page(self, self.pageDiv)).render();
+  };
+
+  var onSettingsBtn = function() {
+    (new io.settings.Page(self, self.pageDiv)).render();
+  };
+
+  goog.events.listen(goog.dom.getElement('settingsButton'),
+      goog.events.EventType.CLICK, onSettingsBtn);
+  goog.events.listen(goog.dom.getElement('mapButton'),
+      goog.events.EventType.CLICK, onMapBtn);
+  goog.events.listen(goog.dom.getElement('logoButton'),
+      goog.events.EventType.CLICK, onMapBtn);
   goog.events.listen(goog.dom.getElement('logoutButton'),
       goog.events.EventType.CLICK, onLogoutBtn);
-  io.putSampleData();
 };
 
-var W = -34.397;
-var E = 150.644;
 
-io.putSampleData = function() {
-  var location = new google.maps.LatLng(W, E);
-  var marker = new google.maps.Marker({
-    position: location, map: io.map
+/**
+ * @param {!string} id - DOM id.
+ */
+io.main.Page.prototype.setMenuLinkActive = function(id) {
+  var elems = ['mapButton', 'settingsButton'];
+  goog.array.map(elems, function(elid) {
+    goog.dom.getElement(elid).className = '';
   });
-  var infowindow = new google.maps.InfoWindow({
-    content: 'hiho', size: new google.maps.Size(50, 50)
-  });
-  google.maps.event.addListener(marker, 'click', function() {
-    infowindow.open(io.map, marker);
-  });
-};
-
-io.initMap = function() {
-  var mapDiv = goog.dom.getElement('map');
-  var mapOptions = {
-    center: new google.maps.LatLng(-34.397, 150.644),
-    zoom: 8,
-    mapTypeId: google.maps.MapTypeId.ROADMAP
-  };
-  io.map = new google.maps.Map(mapDiv, mapOptions);
+  goog.dom.getElement(id).className = 'active';
 };
 

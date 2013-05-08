@@ -15,7 +15,17 @@ goog.require('io.log');
  */
 io.api.ApiConnector = function() {
   this.url = 'http://io.wojtasskorcz.eu.cloudbees.net/';
+  this.exHandlers = {};
   io.log().info('Initialized API pointing to: ' + this.url);
+};
+
+
+/**
+ * @param {!string} name - the name of ex to handle.
+ * @param {!function(string)} callback - the function which will be called.
+ */
+io.api.ApiConnector.prototype.setExceptionHandler = function(name, callback) {
+  this.exHandlers[name] = callback;
 };
 
 
@@ -55,6 +65,7 @@ io.api.ApiConnector.prototype.request_ = function(resource, data, callback,
   var url = this.url + resource;
   var xhr = new goog.net.XhrIo();
   var headers = {'Content-Type': 'application/json'};
+  var self = this;
 
   var onError = function(e) {
     io.log().warning('Error accessing url: ' + url + '\n' +
@@ -71,7 +82,9 @@ io.api.ApiConnector.prototype.request_ = function(resource, data, callback,
 
   var onException = function(e) {
     io.log().info('Exception accessing url: ' + url + '\n' + e);
-    if (opt_errcallback) {
+    if (self.exHandlers[e]) {
+      self.exHandlers[e](e);
+    } else if (opt_errcallback) {
       opt_errcallback(e);
     }
   };

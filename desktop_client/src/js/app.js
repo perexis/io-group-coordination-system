@@ -23,12 +23,18 @@ io.start = function() {
 
 /**
  * @private
+ * @param {string=} opt_errormessage
  */
-io.initLoginPage_ = function() {
+io.initLoginPage_ = function(opt_errormessage) {
   soy.renderElement(document.body, io.soy.login.page);
+  if (opt_errormessage) {
+    soy.renderElement(goog.dom.getElement('loginError'), io.soy.login.appError,
+        {reason: opt_errormessage});
+  }
   var loginElem = goog.dom.getElement('loginInput');
   loginElem.focus();
   var callback = function(e) {
+    var api = new io.api.ApiConnector();
     soy.renderElement(goog.dom.getElement('loginError'), io.soy.main.empty);
     var login = loginElem.value;
     var password = goog.dom.getElement('passwordInput').value;
@@ -37,7 +43,7 @@ io.initLoginPage_ = function() {
 
     var onSuccess = function(json) {
       io.log().info('Successfully logged in, sid:' + json);
-      var main = new io.main.Page(login, json, io.api_, io.initLoginPage_);
+      var main = new io.main.Page(login, json, api, io.initLoginPage_);
       main.render();
     };
 
@@ -48,7 +54,7 @@ io.initLoginPage_ = function() {
       soy.renderElement(goog.dom.getElement('loginError'), io.soy.login.error,
           {reason: reason});
     };
-    io.api_.login({'id': login, 'password': password}, onSuccess, onError);
+    api.login({'id': login, 'password': password}, onSuccess, onError);
   };
   goog.events.listen(goog.dom.getElement('loginForm'),
       goog.events.EventType.SUBMIT, callback);

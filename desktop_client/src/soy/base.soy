@@ -4,7 +4,7 @@
  * Says hello to the world.
  * @param login the login name
  */
-{template .page}
+{template .pageHeader}
 <div class="navbar navbar-inverse navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container-fluid">
@@ -13,42 +13,38 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="brand">Coordination system</a>
+      <a href="#" id="logoButton" class="brand">Group coordination system</a>
       <div class="nav-collapse collapse">
         <p class="navbar-text pull-right">
-        Logged in as {$login}
+          Logged in as {$login}
         </p>
         <ul class="nav">
-          <li class="active"><a href="#">Home</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a id="logoutButton" href="#">Logout</a></li>
+          <li id="mapButton"><a href="#">Map screen</a></li>
+          <li id="groupsButton"><a href="#">Groups management</a></li>
+          <li id="settingsButton"><a href="#">Settings</a></li>
+          <li id="logoutButton"><a href="#">Logout</a></li>
         </ul>
       </div>
     </div>
   </div>
 </div>
+<div id="page"></div>
+{/template}
 
+/**
+ * Map container.
+ */
+{template .map}
 <div class="container-fluid">
   <div class="row-fluid">
     <div class="span3">
       <div class="well sidebar-nav">
         <ul class="nav nav-list">
-          <li class="nav-header">Sidebar</li>
-          <li class="active"><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li class="nav-header">Sidebar</li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li class="nav-header">Sidebar</li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
-          <li><a href="#">Link</a></li>
+          <li class="nav-header">Layers</li>
+          <li class="active"><a href="#">People</a></li>
+          <li><a href="#">Images</a></li>
+          <li><a href="#">Markers</a></li>
+          <li><a href="#">Other</a></li>
         </ul>
       </div>
     </div>

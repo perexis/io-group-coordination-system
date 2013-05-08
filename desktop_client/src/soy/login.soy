@@ -17,7 +17,7 @@
 
 
 /**
- * Error marker
+ * Login error marker
  * @param reason the reason, human readable
  */
 {template .error}
@@ -27,6 +27,20 @@
     {$reason}
   {else}
     Unknown reason :(
+  {/if}
+</div> 
+{/template}
+
+/**
+ * Application error marker
+ * @param reason the reason, human readable
+ */
+{template .appError}
+<div class="alert alert-error">  
+  {if $reason}
+    <strong>{$reason}</strong>
+  {else}
+    There was a fatal error, that's all we know
   {/if}
 </div> 
 {/template}
