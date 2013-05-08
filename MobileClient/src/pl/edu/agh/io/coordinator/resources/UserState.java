@@ -1,5 +1,8 @@
 package pl.edu.agh.io.coordinator.resources;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,6 +27,11 @@ public class UserState {
 		return speed;
 	}
 	
-	
+	public JSONObject toJsonObject() {
+		Map<String, Object> elements = new HashMap<String, Object>();
+		elements.put("position", this.position.toJsonObject());
+		elements.put("speed", this.speed);
+		return new JSONObject(elements);
+	}
 	
 }

@@ -22,8 +22,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.ExpandableListActivity;
-
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.MapItem;
@@ -229,10 +227,21 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public void updateSelfState(UserState newState)
-			throws InvalidSessionIDException, NetworkException {
-		// TODO Auto-generated method stub
-
+	public void updateSelfState(UserState newState) throws InvalidSessionIDException, NetworkException {
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", sessionID);
+		paramsInString.put("newState", newState.toJsonObject());
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("updateSelfState", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
