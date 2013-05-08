@@ -54,6 +54,7 @@ copyres:
 	mkdir -p $(BUILDDIR)/css
 	cp -R $(CSSDIR)/*.css $(BUILDDIR)/css
 	cp -R $(LIBDIR)/bootstrap $(BUILDDIR)
+	cp -R $(LIBDIR)/jquery $(BUILDDIR)
 
 clean:
 		rm -rf `find $(BUILDDIR) | tail -n +2`

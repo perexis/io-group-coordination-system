@@ -19,12 +19,14 @@ goog.require('io.soy.main');
  * @param {!string|number} sid
  * @param {!io.api.ApiConnector} api
  * @param {!function(string=)} logout function to be called after logout.
+ * @param {?Element} root
  */
-io.main.Page = function(login, sid, api, logout) {
+io.main.Page = function(login, sid, api, logout, root) {
   this.sid = sid;
   this.login = login;
   this.api = api;
   this.logout = logout;
+  this.root = root;
   api.setExceptionHandler('InvalidSessionID', function(e) {
     io.log().warning('Session has expired, logging out');
     logout('Session has expired');
@@ -32,7 +34,8 @@ io.main.Page = function(login, sid, api, logout) {
 };
 
 io.main.Page.prototype.render = function() {
-  soy.renderElement(document.body, io.soy.main.pageHeader, {login: this.login});
+  soy.renderElement(this.root, io.soy.main.pageHeader,
+      {login: this.login});
   this.pageDiv = goog.dom.getElement('page');
   (new io.map.Page(this, this.pageDiv)).render();
 

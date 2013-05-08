@@ -26,7 +26,8 @@ io.start = function() {
  * @param {string=} opt_errormessage
  */
 io.initLoginPage_ = function(opt_errormessage) {
-  soy.renderElement(document.body, io.soy.login.page);
+  var root = goog.dom.getElement('root');
+  soy.renderElement(root, io.soy.login.page);
   if (opt_errormessage) {
     soy.renderElement(goog.dom.getElement('loginError'), io.soy.login.appError,
         {reason: opt_errormessage});
@@ -43,7 +44,7 @@ io.initLoginPage_ = function(opt_errormessage) {
 
     var onSuccess = function(json) {
       io.log().info('Successfully logged in, sid:' + json);
-      var main = new io.main.Page(login, json, api, io.initLoginPage_);
+      var main = new io.main.Page(login, json, api, io.initLoginPage_, root);
       main.render();
     };
 
