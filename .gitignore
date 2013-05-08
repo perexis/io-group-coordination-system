@@ -22,5 +22,5 @@ target/
 desktop_client/src/js/gen/
 
 # private database credentials
-database.properties
+jdbc.properties
 
