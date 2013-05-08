@@ -22,6 +22,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ExpandableListActivity;
+
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.MapItem;
@@ -42,6 +44,7 @@ import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidUserItemException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 
 public class JSonProxy implements IJSonProxy {
+	
 	private static JSonProxy instance;
 	private static long sessionID = -1;
 	// without ending slash
@@ -56,6 +59,13 @@ public class JSonProxy implements IJSonProxy {
 		return instance;
 	}
 
+	private JSONObject createSessionOnlyParams() {
+		Map<String, Long> paramsInString = new HashMap<String, Long>();
+		paramsInString.put("sessionID", sessionID);
+		JSONObject params = new JSONObject(paramsInString);
+		return params;
+	}
+	
 	private String getJSonString(String methodName, JSONObject params)
 			throws NetworkException {
 		StringBuilder builder = new StringBuilder();
@@ -121,9 +131,7 @@ public class JSonProxy implements IJSonProxy {
 	@Override
 	public synchronized void logout() throws InvalidSessionIDException,
 			NetworkException {
-		Map<String, Long> paramsInString = new HashMap<String, Long>();
-		paramsInString.put("sessionID", sessionID);
-		JSONObject params = new JSONObject(paramsInString);
+		JSONObject params = createSessionOnlyParams();
 
 		try {
 			String jsonString = getJSonString("logout", params);
@@ -138,18 +146,58 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public Set<MapItem> getMapItems(Layer layer)
-			throws InvalidSessionIDException, InvalidLayerException,
-			NetworkException {
-		// TODO Auto-generated method stub
-		return null;
+	public Set<MapItem> getMapItems(Layer layer) throws InvalidSessionIDException, InvalidLayerException, NetworkException {
+		Set<MapItem> toReturn = new HashSet<MapItem>();
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", sessionID);
+		paramsInString.put("layer", layer.getName());
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("getMapItems", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidLayer")) {
+				throw new InvalidLayerException();
+			} else {
+				JSONArray array = jsonObject.getJSONArray("retval");
+				int limit = array.length();
+				for (int i = 0; i < limit; ++i) {
+					JSONObject jsonMapItem = array.getJSONObject(i);
+					MapItem mapItem = new MapItem(jsonMapItem);
+					toReturn.add(mapItem);
+				}
+			}			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return toReturn;
 	}
 
 	@Override
 	public Set<Layer> getLayers() throws InvalidSessionIDException,
 			NetworkException {
-		// TODO Auto-generated method stub
-		return null;
+		Set<Layer> toReturn = new HashSet<Layer>();
+		JSONObject params = createSessionOnlyParams();
+		try {
+			String jsonString = getJSonString("getLayers", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else {
+				JSONArray array = jsonObject.getJSONArray("retval");
+				int limit = array.length();
+				for (int i = 0; i < limit; ++i) {
+					String layer = array.getString(i);
+					toReturn.add(new Layer(layer));
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return toReturn;
 	}
 
 	@Override
@@ -161,10 +209,23 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public void removeMapItem(MapItem item) throws InvalidSessionIDException,
-			InvalidMapItemException, NetworkException {
-		// TODO Auto-generated method stub
-
+	public void removeMapItem(MapItem item) throws InvalidSessionIDException, InvalidMapItemException, NetworkException {
+		Map<String, Long> paramsInString = new HashMap<String, Long>();
+		paramsInString.put("sessionID", sessionID);
+		paramsInString.put("item", item.getId());
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("removeMapItem", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidMapItem")) {
+				throw new InvalidMapItemException();
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -201,9 +262,7 @@ public class JSonProxy implements IJSonProxy {
 	public Set<User> getUsers() throws InvalidSessionIDException,
 			NetworkException {
 		Set<User> ret = new HashSet<User>();
-		Map<String, Long> paramsInString = new HashMap<String, Long>();
-		paramsInString.put("sessionID", sessionID);
-		JSONObject params = new JSONObject(paramsInString);
+		JSONObject params = createSessionOnlyParams();
 
 		try {
 			String jsonString = getJSonString("getUsers", params);
