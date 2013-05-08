@@ -199,11 +199,31 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public MapItem addItemToLayer(Layer layer, Point point, String data)
-			throws InvalidSessionIDException, InvalidLayerException,
+	public MapItem addItemToLayer(Layer layer, Point point, String data) throws InvalidSessionIDException, InvalidLayerException,
 			NetworkException {
-		// TODO Auto-generated method stub
-		return null;
+		MapItem toReturn = null;
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", sessionID);
+		paramsInString.put("layer", layer.getName());
+		paramsInString.put("point", point.toJsonObject());
+		paramsInString.put("data", data);
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("addItemToLayer", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidLayer")) {
+				throw new InvalidLayerException();
+			} else {
+				Long retval = jsonObject.getLong("retval");
+				toReturn = new MapItem(retval, point, data);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return toReturn;
 	}
 
 	@Override

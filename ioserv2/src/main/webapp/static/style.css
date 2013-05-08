@@ -1,0 +1,39 @@
+#result {
+	border: 1px solid;
+	margin: 10px 0px;
+	padding:10px 10px 10px 10px;
+	color: #781351;
+	background-color: #fee3ad;
+	font-family: monospace;
+}
+
+label {
+	width: 6em;
+	float: left;
+	text-align: right;
+	margin-right: 0.5em;
+	display: block
+}
+
+.submit input {
+	margin-left: 8em;
+	color: #000;
+	background: #ffa20f;
+	border: 2px outset #d7b9c9
+}
+
+.field input {
+	color: #781351;
+	background: #fee3ad;
+	border: 1px solid #781351;
+	size: 35;
+}
+
+fieldset {
+	border: 1px solid;
+	width: 18em;
+}
+
+td {
+	vertical-align: bottom;
+}
