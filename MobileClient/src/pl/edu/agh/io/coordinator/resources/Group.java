@@ -1,9 +1,13 @@
 package pl.edu.agh.io.coordinator.resources;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Group {
+
 	private String id;
 	private String description;
 
@@ -22,6 +26,13 @@ public class Group {
 
 	public String getDescription() {
 		return description;
+	}
+
+	public JSONObject toJsonObject() {
+		Map<String, String> elements = new HashMap<String, String>();
+		elements.put("id", this.id);
+		elements.put("description", this.description);
+		return new JSONObject(elements);
 	}
 
 }

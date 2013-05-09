@@ -7,33 +7,32 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class Point {
+
 	private double latitude;
 	private double longitude;
-	
+
 	public Point(double latitude, double longitude) {
 		this.latitude = latitude;
 		this.longitude = longitude;
 	}
-	
-	public Point(JSONObject point) throws JSONException{
+
+	public Point(JSONObject point) throws JSONException {
 		this(point.getDouble("latitude"), point.getDouble("longitude"));
 	}
-	
-	public double getLatitude() {
 
+	public double getLatitude() {
 		return latitude;
 	}
 
 	public double getLongitude() {
 		return longitude;
 	}
-	
+
 	public JSONObject toJsonObject() {
-		Map<String, Object> elements = new HashMap<String, Object>();
+		Map<String, Double> elements = new HashMap<String, Double>();
 		elements.put("latitude", this.latitude);
 		elements.put("longitude", this.longitude);
 		return new JSONObject(elements);
 	}
-	
-	
+
 }

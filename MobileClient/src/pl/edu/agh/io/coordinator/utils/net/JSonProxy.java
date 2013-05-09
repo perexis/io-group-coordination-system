@@ -51,8 +51,9 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	public static synchronized JSonProxy getInstance() {
-		if (INSTANCE == null)
+		if (INSTANCE == null) {
 			INSTANCE = new JSonProxy();
+		}
 		return INSTANCE;
 	}
 
@@ -86,8 +87,9 @@ public class JSonProxy implements IJSonProxy {
 				while ((line = reader.readLine()) != null) {
 					builder.append(line);
 				}
-			} else
+			} else {
 				throw new NetworkException();
+			}
 		} catch (Exception e) {
 			throw new NetworkException();
 		}
@@ -104,9 +106,9 @@ public class JSonProxy implements IJSonProxy {
 			String jsonString = getJSonString("login", params);
 			JSONObject jsonObject = new JSONObject(jsonString);
 			String exception = jsonObject.getString("exception");
-			if (exception.equals("null"))
+			if (exception.equals("null")) {
 				SESSION_ID = jsonObject.getLong("retval");
-			else {
+			} else {
 				SESSION_ID = -1;
 				throw new CouldNotLogInException();
 			}
@@ -123,8 +125,9 @@ public class JSonProxy implements IJSonProxy {
 			JSONObject jsonObject = new JSONObject(jsonString);
 			String exception = jsonObject.getString("exception");
 			SESSION_ID = -1;
-			if (exception.equals("InvalidSessionID"))
+			if (exception.equals("InvalidSessionID")) {
 				throw new InvalidSessionIDException();
+			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -329,13 +332,10 @@ public class JSonProxy implements IJSonProxy {
 	public Set<User> getUsers() throws InvalidSessionIDException, NetworkException {
 		Set<User> ret = new HashSet<User>();
 		JSONObject params = createSessionOnlyParams();
-
 		try {
 			String jsonString = getJSonString("getUsers", params);
 			JSONObject jsonObject = new JSONObject(jsonString);
-
 			String exception = jsonObject.getString("exception");
-
 			if (exception.equals("InvalidSessionID"))
 				throw new InvalidSessionIDException();
 			else {
@@ -347,71 +347,56 @@ public class JSonProxy implements IJSonProxy {
 					ret.add(user);
 				}
 			}
-
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-
 		return ret;
 	}
 
 	@Override
-	public Set<UserItem> getUserItems(User user)
-			throws InvalidSessionIDException, InvalidUserException,
-			NetworkException {
+	public Set<UserItem> getUserItems(User user) throws InvalidSessionIDException, InvalidUserException, NetworkException {
+		// TODO
+		return null;
+	}
+
+	@Override
+	public Set<Group> getGroups() throws InvalidSessionIDException, NetworkException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Set<Group> getGroups() throws InvalidSessionIDException,
+	public void createGroup(String groupName) throws InvalidSessionIDException, CouldNotCreateGroupException, NetworkException {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void addToGroup(User user, Group group) throws InvalidSessionIDException, InvalidUserException, InvalidGroupException,
 			NetworkException {
 		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
-	public void createGroup(String groupName) throws InvalidSessionIDException,
-			CouldNotCreateGroupException, NetworkException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void addToGroup(User user, Group group)
-			throws InvalidSessionIDException, InvalidUserException,
-			InvalidGroupException, NetworkException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void removeFromGroup(User user, Group group)
-			throws InvalidSessionIDException, InvalidUserException,
+	public void removeFromGroup(User user, Group group) throws InvalidSessionIDException, InvalidUserException,
 			InvalidGroupException, CouldNotRemoveException, NetworkException {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
-	public Set<Group> getGroupUsers(Group group)
-			throws InvalidSessionIDException, InvalidGroupException,
-			NetworkException {
+	public Set<Group> getGroupUsers(Group group) throws InvalidSessionIDException, InvalidGroupException, NetworkException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void sendMessage(String message) throws InvalidSessionIDException,
-			NetworkException {
+	public void sendMessage(String message) throws InvalidSessionIDException, NetworkException {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
-	public Set<Message> getMessages() throws InvalidSessionIDException,
-			NetworkException {
+	public Set<Message> getMessages() throws InvalidSessionIDException, NetworkException {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 }

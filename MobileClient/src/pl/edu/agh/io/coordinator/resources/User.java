@@ -15,8 +15,7 @@ public class User {
 	private String phone;
 	private String email;
 
-	public User(String id, String avatar, String name, String surname,
-			String phone, String email) {
+	public User(String id, String avatar, String name, String surname, String phone, String email) {
 		this.id = id;
 		this.avatar = avatar;
 		this.name = name;
@@ -26,8 +25,7 @@ public class User {
 	}
 
 	public User(JSONObject user) throws JSONException {
-		this(user.getString("id"), user.getString("avatar"), user
-				.getString("name"), user.getString("surname"), user
+		this(user.getString("id"), user.getString("avatar"), user.getString("name"), user.getString("surname"), user
 				.getString("phone"), user.getString("email"));
 	}
 
@@ -57,13 +55,13 @@ public class User {
 
 	public JSONObject toJsonObject() {
 		Map<String, String> elements = new HashMap<String, String>();
-		elements.put("id", id);
-		elements.put("avatar", avatar);
-		elements.put("name", name);
-		elements.put("surname", surname);
-		elements.put("phone", phone);
-		elements.put("email", email);
+		elements.put("id", this.id);
+		elements.put("avatar", this.avatar);
+		elements.put("name", this.name);
+		elements.put("surname", this.surname);
+		elements.put("phone", this.phone);
+		elements.put("email", this.email);
 		return new JSONObject(elements);
 	}
-	
+
 }
