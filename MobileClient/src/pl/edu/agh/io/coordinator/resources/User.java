@@ -1,5 +1,8 @@
 package pl.edu.agh.io.coordinator.resources;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,4 +55,15 @@ public class User {
 		return email;
 	}
 
+	public JSONObject toJsonObject() {
+		Map<String, String> elements = new HashMap<String, String>();
+		elements.put("id", id);
+		elements.put("avatar", avatar);
+		elements.put("name", name);
+		elements.put("surname", surname);
+		elements.put("phone", phone);
+		elements.put("email", email);
+		return new JSONObject(elements);
+	}
+	
 }

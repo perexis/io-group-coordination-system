@@ -276,11 +276,27 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public void addItemToUser(User user, UserItem item)
-			throws InvalidSessionIDException, InvalidUserException,
+	public void addItemToUser(User user, UserItem item) throws InvalidSessionIDException, InvalidUserException,
 			InvalidUserItemException, NetworkException {
-		// TODO Auto-generated method stub
-
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", SESSION_ID);
+		paramsInString.put("user", user.toJsonObject());
+		paramsInString.put("item", item.toJsonObject());
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("addItemToUser", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidUser")) {
+				throw new InvalidUserException();
+			} else if (exception.equals("InvalidUserItem")) {
+				throw new InvalidUserItemException();
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -292,8 +308,7 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public Set<User> getUsers() throws InvalidSessionIDException,
-			NetworkException {
+	public Set<User> getUsers() throws InvalidSessionIDException, NetworkException {
 		Set<User> ret = new HashSet<User>();
 		JSONObject params = createSessionOnlyParams();
 

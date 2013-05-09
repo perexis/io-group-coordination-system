@@ -1,5 +1,8 @@
 package pl.edu.agh.io.coordinator.resources;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -8,6 +11,7 @@ public class UserItem {
 	private String id;
 	private String description;
 	private String image;
+	
 	public UserItem(String id, String description, String image) {
 		this.id = id;
 		this.description = description;
@@ -28,8 +32,12 @@ public class UserItem {
 		return image;
 	}
 	
-	
-	
-	
+	public JSONObject toJsonObject() {
+		Map<String, String> elements = new HashMap<String, String>();
+		elements.put("id", id);
+		elements.put("description", description);
+		elements.put("image", image);
+		return new JSONObject(elements);
+	}
 	
 }
