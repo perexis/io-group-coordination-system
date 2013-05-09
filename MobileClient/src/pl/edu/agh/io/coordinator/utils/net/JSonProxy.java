@@ -280,8 +280,8 @@ public class JSonProxy implements IJSonProxy {
 			InvalidUserItemException, NetworkException {
 		Map<String, Object> paramsInString = new HashMap<String, Object>();
 		paramsInString.put("sessionID", SESSION_ID);
-		paramsInString.put("user", user.toJsonObject());
-		paramsInString.put("item", item.toJsonObject());
+		paramsInString.put("user", user.getId());
+		paramsInString.put("item", item.getId());
 		JSONObject params = new JSONObject(paramsInString);
 		try {
 			String jsonString = getJSonString("addItemToUser", params);
@@ -300,11 +300,29 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public void removeItemFromUser(User user, UserItem item)
-			throws InvalidSessionIDException, InvalidUserException,
+	public void removeItemFromUser(User user, UserItem item) throws InvalidSessionIDException, InvalidUserException,
 			InvalidUserItemException, CouldNotRemoveException, NetworkException {
-		// TODO Auto-generated method stub
-
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", SESSION_ID);
+		paramsInString.put("user", user.getId());
+		paramsInString.put("item", item.getId());
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("removeItemFromUser", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidUser")) {
+				throw new InvalidUserException();
+			} else if (exception.equals("InvalidUserItem")) {
+				throw new InvalidUserItemException();
+			} else if (exception.equals("CouldNotRemove")) {
+				throw new CouldNotRemoveException();
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}	
 	}
 
 	@Override
