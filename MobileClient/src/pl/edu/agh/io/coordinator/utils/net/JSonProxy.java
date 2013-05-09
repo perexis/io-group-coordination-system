@@ -43,44 +43,37 @@ import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 
 public class JSonProxy implements IJSonProxy {
 	
-	private static JSonProxy instance;
-	private static long sessionID = -1;
-	// without ending slash
-	private static String serverName = "http://io.wojtasskorcz.eu.cloudbees.net";
+	private static JSonProxy INSTANCE;
+	private static long SESSION_ID = -1;	
+	private static String SERVER_NAME = "http://io.wojtasskorcz.eu.cloudbees.net"; // without ending slash
 
 	private JSonProxy() {
 	}
 
 	public static synchronized JSonProxy getInstance() {
-		if (instance == null)
-			instance = new JSonProxy();
-		return instance;
+		if (INSTANCE == null)
+			INSTANCE = new JSonProxy();
+		return INSTANCE;
 	}
 
 	private JSONObject createSessionOnlyParams() {
 		Map<String, Long> paramsInString = new HashMap<String, Long>();
-		paramsInString.put("sessionID", sessionID);
+		paramsInString.put("sessionID", SESSION_ID);
 		JSONObject params = new JSONObject(paramsInString);
 		return params;
 	}
 	
-	private String getJSonString(String methodName, JSONObject params)
-			throws NetworkException {
+	private String getJSonString(String methodName, JSONObject params) throws NetworkException {
 		StringBuilder builder = new StringBuilder();
 		HttpClient client = new DefaultHttpClient();
-		HttpPost httpPost = new HttpPost(serverName + "/" + methodName);
-
+		HttpPost httpPost = new HttpPost(SERVER_NAME + "/" + methodName);
 		try {
-			StringEntity stringEntity = new StringEntity(params.toString(),
-					HTTP.UTF_8);
-			stringEntity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
-					"application/json"));
-
+			StringEntity stringEntity = new StringEntity(params.toString(), HTTP.UTF_8);
+			stringEntity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
 			httpPost.setEntity(stringEntity);
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
 		}
-
 		try {
 			HttpResponse response = client.execute(httpPost);
 			StatusLine statusLine = response.getStatusLine();
@@ -88,8 +81,7 @@ public class JSonProxy implements IJSonProxy {
 			if (statusCode == 200) {
 				HttpEntity entity = response.getEntity();
 				InputStream content = entity.getContent();
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(content));
+				BufferedReader reader = new BufferedReader(new InputStreamReader(content));
 				String line;
 				while ((line = reader.readLine()) != null) {
 					builder.append(line);
@@ -99,26 +91,23 @@ public class JSonProxy implements IJSonProxy {
 		} catch (Exception e) {
 			throw new NetworkException();
 		}
-
 		return builder.toString();
 	}
 
 	@Override
-	public synchronized void login(String userName, String password)
-			throws CouldNotLogInException, NetworkException {
+	public synchronized void login(String userName, String password) throws CouldNotLogInException, NetworkException {
 		Map<String, String> paramsInString = new HashMap<String, String>();
 		paramsInString.put("id", userName);
 		paramsInString.put("password", password);
 		JSONObject params = new JSONObject(paramsInString);
-
 		try {
 			String jsonString = getJSonString("login", params);
 			JSONObject jsonObject = new JSONObject(jsonString);
 			String exception = jsonObject.getString("exception");
 			if (exception.equals("null"))
-				sessionID = jsonObject.getLong("retval");
+				SESSION_ID = jsonObject.getLong("retval");
 			else {
-				sessionID = -1;
+				SESSION_ID = -1;
 				throw new CouldNotLogInException();
 			}
 		} catch (JSONException e) {
@@ -127,15 +116,13 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public synchronized void logout() throws InvalidSessionIDException,
-			NetworkException {
+	public synchronized void logout() throws InvalidSessionIDException, NetworkException {
 		JSONObject params = createSessionOnlyParams();
-
 		try {
 			String jsonString = getJSonString("logout", params);
 			JSONObject jsonObject = new JSONObject(jsonString);
 			String exception = jsonObject.getString("exception");
-			sessionID = -1;
+			SESSION_ID = -1;
 			if (exception.equals("InvalidSessionID"))
 				throw new InvalidSessionIDException();
 		} catch (JSONException e) {
@@ -147,7 +134,7 @@ public class JSonProxy implements IJSonProxy {
 	public Set<MapItem> getMapItems(Layer layer) throws InvalidSessionIDException, InvalidLayerException, NetworkException {
 		Set<MapItem> toReturn = new HashSet<MapItem>();
 		Map<String, Object> paramsInString = new HashMap<String, Object>();
-		paramsInString.put("sessionID", sessionID);
+		paramsInString.put("sessionID", SESSION_ID);
 		paramsInString.put("layer", layer.getName());
 		JSONObject params = new JSONObject(paramsInString);
 		try {
@@ -174,8 +161,7 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public Set<Layer> getLayers() throws InvalidSessionIDException,
-			NetworkException {
+	public Set<Layer> getLayers() throws InvalidSessionIDException, NetworkException {
 		Set<Layer> toReturn = new HashSet<Layer>();
 		JSONObject params = createSessionOnlyParams();
 		try {
@@ -203,7 +189,7 @@ public class JSonProxy implements IJSonProxy {
 			NetworkException {
 		MapItem toReturn = null;
 		Map<String, Object> paramsInString = new HashMap<String, Object>();
-		paramsInString.put("sessionID", sessionID);
+		paramsInString.put("sessionID", SESSION_ID);
 		paramsInString.put("layer", layer.getName());
 		paramsInString.put("point", point.toJsonObject());
 		paramsInString.put("data", data);
@@ -229,7 +215,7 @@ public class JSonProxy implements IJSonProxy {
 	@Override
 	public void removeMapItem(MapItem item) throws InvalidSessionIDException, InvalidMapItemException, NetworkException {
 		Map<String, Long> paramsInString = new HashMap<String, Long>();
-		paramsInString.put("sessionID", sessionID);
+		paramsInString.put("sessionID", SESSION_ID);
 		paramsInString.put("item", item.getId());
 		JSONObject params = new JSONObject(paramsInString);
 		try {
@@ -249,7 +235,7 @@ public class JSonProxy implements IJSonProxy {
 	@Override
 	public void updateSelfState(UserState newState) throws InvalidSessionIDException, NetworkException {
 		Map<String, Object> paramsInString = new HashMap<String, Object>();
-		paramsInString.put("sessionID", sessionID);
+		paramsInString.put("sessionID", SESSION_ID);
 		paramsInString.put("newState", newState.toJsonObject());
 		JSONObject params = new JSONObject(paramsInString);
 		try {
@@ -265,10 +251,28 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public Set<UserItem> getPossibleUserItems()
-			throws InvalidSessionIDException, NetworkException {
-		// TODO Auto-generated method stub
-		return null;
+	public Set<UserItem> getPossibleUserItems() throws InvalidSessionIDException, NetworkException {
+		Set<UserItem> toReturn = new HashSet<UserItem>();
+		JSONObject params = createSessionOnlyParams();
+		try {
+			String jsonString = getJSonString("getPossibleUserItems", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else {
+				JSONArray array = jsonObject.getJSONArray("retval");
+				int limit = array.length();
+				for (int i = 0; i < limit; ++i) {
+					JSONObject jsonUserItem = array.getJSONObject(i);
+					UserItem userItem = new UserItem(jsonUserItem);
+					toReturn.add(userItem);
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return toReturn;
 	}
 
 	@Override
