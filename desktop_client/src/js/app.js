@@ -44,6 +44,7 @@ io.initLoginPage_ = function(opt_errormessage) {
 
     var onSuccess = function(json) {
       io.log().info('Successfully logged in, sid:' + json);
+      api.setSessionId(json);
       var main = new io.main.Page(login, json, api, io.initLoginPage_, root);
       main.render();
     };

@@ -42,7 +42,7 @@ io.main.Page.prototype.render = function() {
   var self = this;
   var onLogoutBtn = function() {
     io.log().info('Logging out');
-    self.api.logout({'sessionID': self.sid}, function() {
+    self.api.logout(function() {
       self.logout();
     });
   };

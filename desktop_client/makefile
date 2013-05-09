@@ -5,12 +5,14 @@ BUILDDIR=build
 JSDIR=$(SRCDIR)/js
 HTMLDIR=$(SRCDIR)/html
 CSSDIR=$(SRCDIR)/css
+CSSES=$(CSSDIR)/style.css lib/bootstrap/bootstrap.min.css lib/bootstrap/bootstrap-responsive.min.css
+LIBS=$(LIBDIR)/jquery/jquery.min.js $(LIBDIR)/bootstrap/js/bootstrap.min.js 
 BUILDERPATH=$(CLOSUREDIR)/bin/build/closurebuilder.py
 COMPILERPATH=$(LIBDIR)/closure-compiler/compiler.jar
 ROOTNAMESPACE="io.start"
 COMPILATION_LEVEL=ADVANCED_OPTIMIZATIONS
 
-all: lint compile copyres
+all: compile copyres
 
 lint:
 	gjslint --nojsdoc --strict `find src/js -maxdepth 0 -name '*.js'`
@@ -32,7 +34,6 @@ quick-compile: COMPILATION_LEVEL=SIMPLE_OPTIMIZATIONS
 quick-compile: compile
 
 compile: soy gendeps
-	mkdir -p $(BUILDDIR)/js
 	$(BUILDERPATH) \
 		--root=$(CLOSUREDIR) \
 		--root=$(JSDIR) \
@@ -47,14 +48,12 @@ compile: soy gendeps
 	  --compiler_flags="--warning_level=VERBOSE" \
 	  --compiler_flags="--generate_exports" \
 		--compiler_flags="--js=$(JSDIR)/gen/deps.js"	\
-		> $(BUILDDIR)/js/app.js
+		> $(BUILDDIR)/app.js
 
 copyres:
+	cat $(CSSES) | ./lib/node_modules/csso/bin/csso /dev/stdin > $(BUILDDIR)/style.css
+	cat $(LIBS) > $(BUILDDIR)/libs.js
 	cp -R $(HTMLDIR)/App.html $(BUILDDIR)
-	mkdir -p $(BUILDDIR)/css
-	cp -R $(CSSDIR)/*.css $(BUILDDIR)/css
-	cp -R $(LIBDIR)/bootstrap $(BUILDDIR)
-	cp -R $(LIBDIR)/jquery $(BUILDDIR)
 
 clean:
 		rm -rf `find $(BUILDDIR) | tail -n +2`

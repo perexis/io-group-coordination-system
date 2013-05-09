@@ -1,6 +1,7 @@
 'use strict';
 goog.provide('io.api');
 goog.provide('io.api.ApiConnector');
+goog.provide('io.api.Point');
 
 goog.require('goog.debug');
 goog.require('goog.events');
@@ -12,11 +13,31 @@ goog.require('io.log');
 
 /**
  * @constructor
+ * @param {!string|number} longitude
+ * @param {!string|number} latitude
+ */
+io.api.Point = function(longitude, latitude) {
+  this['latitude'] = latitude;
+  this['longitude'] = longitude;
+};
+
+
+
+/**
+ * @constructor
  */
 io.api.ApiConnector = function() {
   this.url = 'http://io.wojtasskorcz.eu.cloudbees.net/';
   this.exHandlers = {};
   io.log().info('Initialized API pointing to: ' + this.url);
+};
+
+
+/**
+ * @param {!string} sid
+ */
+io.api.ApiConnector.prototype.setSessionId = function(sid) {
+  this.sid = sid;
 };
 
 
@@ -37,19 +58,61 @@ io.api.ApiConnector.prototype.setExceptionHandler = function(name, callback) {
  */
 io.api.ApiConnector.prototype.login = function(data, callback,
     opt_errcallback) {
-  this.request_('login', data, callback, opt_errcallback);
+  this.request_('login', data, callback, opt_errcallback, true);
 };
 
 
 /**
- * @param {!{sessionID: (string|number)}} data to be sent.
  * @param {function(string, goog.net.XhrIo=)} callback - on success call.
  * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
  *   optional on error call.
  */
-io.api.ApiConnector.prototype.logout = function(data, callback,
+io.api.ApiConnector.prototype.getLayers = function(callback, opt_errcallback) {
+  this.request_('getLayers', {}, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!{point: {io.api.Point}, layer: {string}, data: {string}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.addItemToLayer = function(data, callback,
     opt_errcallback) {
-  this.request_('logout', data, callback, opt_errcallback);
+  this.request_('addItemToLayer', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!{layer: {string}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.getMapItems = function(data, callback,
+    opt_errcallback) {
+  this.request_('getMapItems', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.getUsers = function(callback, opt_errcallback) {
+  this.request_('getUsers', {}, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.logout = function(callback, opt_errcallback) {
+  this.request_('logout', {}, callback, opt_errcallback);
 };
 
 
@@ -59,13 +122,18 @@ io.api.ApiConnector.prototype.logout = function(data, callback,
  * @param {function(string, goog.net.XhrIo=)} callback - on success call.
  * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
  *   optional on error call.
+ * @param {boolean=} opt_notincludesession
  */
 io.api.ApiConnector.prototype.request_ = function(resource, data, callback,
-    opt_errcallback) {
+    opt_errcallback, opt_notincludesession) {
   var url = this.url + resource;
   var xhr = new goog.net.XhrIo();
   var headers = {'Content-Type': 'application/json'};
   var self = this;
+
+  if (!opt_notincludesession) {
+    data['sessionID'] = this.sid;
+  }
 
   var onError = function(e) {
     io.log().warning('Error accessing url: ' + url + '\n' +
@@ -93,7 +161,7 @@ io.api.ApiConnector.prototype.request_ = function(resource, data, callback,
     try {
       var json = this.getResponseJson();
       io.log().info('Got response from: ' + url + '\n' +
-          goog.debug.expose(json));
+          goog.debug.deepExpose(json));
     } catch (err) {
       io.log().warning('Internal exception: ' + err);
       onError(e);
@@ -101,7 +169,7 @@ io.api.ApiConnector.prototype.request_ = function(resource, data, callback,
     }
     if (json['exception']) {
       onException(json['exception']);
-    } else {
+    } else if (callback) {
       callback(json['retval']);
     }
   });
