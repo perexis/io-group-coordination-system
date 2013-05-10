@@ -67,7 +67,7 @@ public interface IJSonProxy {
 			NetworkException;
 
 	// Updates user information (ex. it's items)
-	public Set<UserItem> getUserItems(User user)
+	public Set<String> getUserItems(User user)
 			throws InvalidSessionIDException, InvalidUserException,
 			NetworkException;
 
