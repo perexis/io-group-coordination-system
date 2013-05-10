@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -27,6 +29,7 @@ import app.model.local.MapItem;
 import app.model.local.Point;
 import app.model.local.User;
 import app.model.local.UserItem;
+import app.model.local.UserState;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -88,11 +91,13 @@ public class MainController {
 			produces="application/json; charset=utf-8")
 	@ResponseBody	
 	public synchronized String logout(@RequestBody String json, HttpServletResponse response) throws Exception {
-		Long sessionID = JsonPath.with(json).getLong("sessionID");
-		if (!sessions.containsKey(sessionID)) {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		if (!sessions.containsKey(sessionId)) {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
-		sessions.remove(sessionID);
+		String userId = sessions.get(sessionId).getId();
+		users.get(userId).setSessionId(null);
+		sessions.remove(sessionId);
 		return "{\"exception\": null}";
 	}
 	
@@ -101,8 +106,8 @@ public class MainController {
 			produces="application/json; charset=utf-8")
 	@ResponseBody	
 	public synchronized String getUsers(@RequestBody String json, HttpServletResponse response) throws Exception {
-		Long sessionID = JsonPath.with(json).getLong("sessionID");
-		if (!sessions.containsKey(sessionID)) {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		if (!sessions.containsKey(sessionId)) {
 			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
 		}
 		String res = mapper.writeValueAsString(sessions.values());
@@ -114,9 +119,9 @@ public class MainController {
 			produces="application/json; charset=utf-8")
 	@ResponseBody	
 	public synchronized String getMapItems(@RequestBody String json, HttpServletResponse response) throws Exception {
-		Long sessionID = JsonPath.with(json).getLong("sessionID");
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
 		String layer = JsonPath.with(json).getString("layer");
-		if (!sessions.containsKey(sessionID)) {
+		if (!sessions.containsKey(sessionId)) {
 			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
 		}
 		if (!layers.containsKey(layer)) {
@@ -131,8 +136,8 @@ public class MainController {
 			produces="application/json; charset=utf-8")
 	@ResponseBody	
 	public synchronized String getLayers(@RequestBody String json, HttpServletResponse response) throws Exception {
-		Long sessionID = JsonPath.with(json).getLong("sessionID");
-		if (!sessions.containsKey(sessionID)) {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		if (!sessions.containsKey(sessionId)) {
 			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
 		}
 		String res = mapper.writeValueAsString(layers.keySet());
@@ -144,11 +149,11 @@ public class MainController {
 			produces="application/json; charset=utf-8")
 	@ResponseBody	
 	public synchronized String addItemToLayer(@RequestBody String json, HttpServletResponse response) throws Exception {
-		Long sessionID = JsonPath.with(json).getLong("sessionID");
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
 		String layer = JsonPath.with(json).getString("layer");
 		Point point = JsonPath.with(json).getObject("point", Point.class);
 		String data = JsonPath.with(json).getString("data");
-		if (!sessions.containsKey(sessionID)) {
+		if (!sessions.containsKey(sessionId)) {
 			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
 		}
 		if (!layers.containsKey(layer)) {
@@ -164,17 +169,114 @@ public class MainController {
 			produces="application/json; charset=utf-8")
 	@ResponseBody	
 	public synchronized String removeMapItem(@RequestBody String json, HttpServletResponse response) throws Exception {
-		Long sessionID = JsonPath.with(json).getLong("sessionID");
-		Long itemID = JsonPath.with(json).getLong("item");
-		if (!sessions.containsKey(sessionID)) {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		Long itemId = JsonPath.with(json).getLong("item");
+		if (!sessions.containsKey(sessionId)) {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
 		for (Map<Long, MapItem> l : layers.values()) {
-			if (l.containsKey(itemID)) {
-				return String.format("{\"exception\": null}");
+			if (l.containsKey(itemId)) {
+				return "{\"exception\": null}";
 			}
 		}
 		return "{\"exception\": \"InvalidMapItem\"}";
+	}
+	
+	@RequestMapping(value = "/updateSelfState", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody	
+	public synchronized String updateSelfState(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		UserState newState = JsonPath.with(json).getObject("newState", UserState.class);
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"exception\": \"InvalidSessionID\"}";
+		}
+		sessions.get(sessionId).setState(newState);
+		return "{\"exception\": null}";
+	}
+	
+	@RequestMapping(value = "/getPossibleUserItems", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody	
+	public synchronized String getPossibleUserItems(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
+		}
+		String res = mapper.writeValueAsString(userItems.values());
+		return String.format("{\"retval\": %s, \"exception\": null}", res);
+	}
+	
+	@RequestMapping(value = "/addItemToUser", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody	
+	public synchronized String addItemToUser(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		String userId = JsonPath.with(json).getString("user");
+		String itemId = JsonPath.with(json).getString("item");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"exception\": \"InvalidSessionID\"}";
+		}
+		Long targetSessionId = null;
+		if (!users.containsKey(userId) || 
+				(targetSessionId = users.get(userId).getSessionId()) == null) {
+			return "{\"exception\": \"InvalidUser\"}";
+		}
+		if (!userItems.containsKey(itemId) || 
+				sessions.get(targetSessionId).getItems().containsKey(itemId)) {
+			return "{\"exception\": \"InvalidUserItem\"}";
+		}
+		sessions.get(targetSessionId).getItems().put(itemId, userItems.get(itemId));
+		return "{\"exception\": null}";
+	}
+	
+	@RequestMapping(value = "/removeItemFromUser", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody	
+	public synchronized String removeItemFromUser(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		String userId = JsonPath.with(json).getString("user");
+		String itemId = JsonPath.with(json).getString("item");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"exception\": \"InvalidSessionID\"}";
+		}
+		Long targetSessionId = null;
+		if (!users.containsKey(userId) || 
+				(targetSessionId = users.get(userId).getSessionId()) == null) {
+			return "{\"exception\": \"InvalidUser\"}";
+		}
+		if (!userItems.containsKey(itemId)) {
+			return "{\"exception\": \"InvalidUserItem\"}";
+		}
+		if (!sessions.get(targetSessionId).getItems().containsKey(itemId)) {
+			return "{\"exception\": \"CouldNotRemove\"}";
+		}
+		sessions.get(targetSessionId).getItems().remove(itemId);
+		return "{\"exception\": null}";
+	}
+	
+	@RequestMapping(value = "/getUserItems", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody	
+	public synchronized String getUserItems(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		String userId = JsonPath.with(json).getString("user");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
+		}
+		Long targetSessionId = null;
+		if (!users.containsKey(userId) || 
+				(targetSessionId = users.get(userId).getSessionId()) == null) {
+			return "{\"retval\": null, \"exception\": \"InvalidUser\"}";
+		}
+		Set<String> items = sessions.get(targetSessionId).getItems().keySet();
+		String res = mapper.writeValueAsString(items);
+		return String.format("{\"retval\": %s, \"exception\": null}", res);
 	}
 	
 	public BiMap<Long, User> getSessions() {
@@ -198,55 +300,18 @@ public class MainController {
 			Long currentSession = sessions.inverse().get(user);
 			sessions.remove(currentSession);
 		}
-		Long sessionID = generateUniqueSessionID();
-		sessions.put(sessionID, user);
-		return sessionID;
+		Long sessionId = generateUniqueSessionId();
+		sessions.put(sessionId, user);
+		users.get(user.getId()).setSessionId(sessionId);
+		return sessionId;
 	}
 	
-	private Long generateUniqueSessionID() {
+	private Long generateUniqueSessionId() {
 		Long id = (long) random.nextInt(Integer.MAX_VALUE);
 		while (sessions.containsKey(id)) {
 			id = (long) random.nextInt(Integer.MAX_VALUE);
 		}
 		return id;
 	}
-
-	// @RequestMapping("/create")
-	// public String create(HttpServletRequest request, HttpServletResponse
-	// response) {
-	// userDao.save(new RegisteredUser("student", "student"));
-	// return "redirect:/";
-	// }
-	//
-	// @RequestMapping("/clear")
-	// public String clear(HttpServletRequest request, HttpServletResponse
-	// response) {
-	// List<RegisteredUser> users = userDao.getAll();
-	// for (RegisteredUser u : users) {
-	// userDao.delete(u);
-	// }
-	// return "redirect:/";
-	// }
-	//
-//	@RequestMapping("/list")
-//	@ResponseBody
-//	public void list(HttpServletRequest request, HttpServletResponse
-//			response) {
-//		List<RegisteredUser> users = userDao.getAll();
-//		response.setContentType("application/json");
-//		JSONArray jsonArray = new JSONArray();
-//		for (RegisteredUser u : users) {
-//			jsonArray.put(new JSONObject(u));
-//		}
-//		String json = jsonArray.toString();
-//		String json = "{}";
-//		PrintWriter out = null;
-//		try {
-//			out = response.getWriter();
-//			out.write(json);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
 
 }

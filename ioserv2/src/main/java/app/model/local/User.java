@@ -20,12 +20,19 @@ public class User {
 	private String email;	
 	@JsonIgnore
 	private Map<String, UserItem> items; // no new object; only references to userItems from MainController
+	@JsonIgnore
+	private UserState state;
+	@JsonIgnore
+	private Long sessionId;
 	
 	public User() {
 		this.items = new HashMap<>();
+		this.state = new UserState();
+		this.sessionId = null;
 	}
 	
 	public User(RegisteredUser u) {
+		this();
 		this.id = u.getId();
 		this.password = u.getPassword();
 		this.avatar = u.getAvatar();
@@ -33,10 +40,10 @@ public class User {
 		this.surname = u.getSurname();
 		this.phone = u.getPhone();
 		this.email = u.getEmail();
-		this.items = new HashMap<>();
 	}
 	
 	public User(FormUser u) {
+		this();
 		this.id = u.getId();
 		this.password = u.getPassword();
 		this.avatar = u.getAvatar();
@@ -44,7 +51,6 @@ public class User {
 		this.surname = u.getSurname();
 		this.phone = u.getPhone();
 		this.email = u.getEmail();
-		this.items = new HashMap<>();
 	}
 	
 	public void update(RegisteredUser u) {
@@ -129,6 +135,22 @@ public class User {
 		return items;
 	}
 	
+	public UserState getState() {
+		return state;
+	}
+
+	public void setState(UserState state) {
+		this.state = state;
+	}
+
+	public Long getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(Long sessionId) {
+		this.sessionId = sessionId;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof User 

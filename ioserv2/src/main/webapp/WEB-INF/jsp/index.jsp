@@ -100,6 +100,33 @@ Log in as admin (login: admin, pass: admin (or just leave blank)):
 	<form:input path="value" size="100"/>
 </form:form>
 
+<hr/>
+
+<form:form class="testForm" action="/updateSelfState" modelAttribute="formString" method="post">
+	<input type="submit" value="/updateSelfState">
+	<form:input path="value" size="100"/>
+</form:form>
+
+<form:form class="testForm" action="/getPossibleUserItems" modelAttribute="formString" method="post">
+	<input type="submit" value="/getPossibleUserItems">
+	<form:input path="value" size="100"/>
+</form:form>
+
+<form:form class="testForm" action="/addItemToUser" modelAttribute="formString" method="post">
+	<input type="submit" value="/addItemToUser">
+	<form:input path="value" size="100"/>
+</form:form>
+
+<form:form class="testForm" action="/removeItemFromUser" modelAttribute="formString" method="post">
+	<input type="submit" value="/removeItemFromUser">
+	<form:input path="value" size="100"/>
+</form:form>
+
+<form:form class="testForm" action="/getUserItems" modelAttribute="formString" method="post">
+	<input type="submit" value="/getUserItems">
+	<form:input path="value" size="100"/>
+</form:form>
+
 </body>
 
 </html>
