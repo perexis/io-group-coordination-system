@@ -24,77 +24,56 @@ import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 public interface IJSonProxy {
 
 	// Creates session and sets sessionID
-	public void login(String userID, String password)
-			throws CouldNotLogInException, NetworkException;
+	public void login(String userID, String password) throws CouldNotLogInException, NetworkException;
 
 	// Ends session, (sets sessionID to -1 even if InvalidSessionIDException
 	// occured)
 	public void logout() throws InvalidSessionIDException, NetworkException;
 
 	// Returns set of MapItems from given layer
-	public Set<MapItem> getMapItems(Layer layer)
-			throws InvalidSessionIDException, InvalidLayerException,
-			NetworkException;
+	public Set<MapItem> getMapItems(Layer layer) throws InvalidSessionIDException, InvalidLayerException, NetworkException;
 
 	// Returns all possible layers
-	public Set<Layer> getLayers() throws InvalidSessionIDException,
-			NetworkException;
+	public Set<Layer> getLayers() throws InvalidSessionIDException, NetworkException;
 
 	// Returns generated MapItem (with it's id)
-	public MapItem addItemToLayer(Layer layer, Point point, String data)
-			throws InvalidSessionIDException, InvalidLayerException,
+	public MapItem addItemToLayer(Layer layer, Point point, String data) throws InvalidSessionIDException, InvalidLayerException,
 			NetworkException;
 
-	public void removeMapItem(MapItem item) throws InvalidSessionIDException,
-			InvalidMapItemException, NetworkException;
+	public void removeMapItem(MapItem item) throws InvalidSessionIDException, InvalidMapItemException, NetworkException;
 
-	public void updateSelfState(UserState newState)
-			throws InvalidSessionIDException, NetworkException;
+	public void updateSelfState(UserState newState) throws InvalidSessionIDException, NetworkException;
 
 	// Returns all possible UserItems
-	public Set<UserItem> getPossibleUserItems()
-			throws InvalidSessionIDException, NetworkException;
+	public Set<UserItem> getPossibleUserItems() throws InvalidSessionIDException, NetworkException;
 
-	public void addItemToUser(User user, UserItem item)
-			throws InvalidSessionIDException, InvalidUserException,
+	public void addItemToUser(User user, UserItem item) throws InvalidSessionIDException, InvalidUserException,
 			InvalidUserItemException, NetworkException;
 
-	public void removeItemFromUser(User user, UserItem item)
-			throws InvalidSessionIDException, InvalidUserException,
+	public void removeItemFromUser(User user, UserItem item) throws InvalidSessionIDException, InvalidUserException,
 			InvalidUserItemException, CouldNotRemoveException, NetworkException;
 
-	public Set<User> getUsers() throws InvalidSessionIDException,
-			NetworkException;
+	public Set<User> getUsers() throws InvalidSessionIDException, NetworkException;
 
 	// Updates user information (ex. it's items)
-	public Set<String> getUserItems(User user)
-			throws InvalidSessionIDException, InvalidUserException,
+	public Set<String> getUserItems(User user) throws InvalidSessionIDException, InvalidUserException, NetworkException;
+
+	public Set<Group> getGroups() throws InvalidSessionIDException, NetworkException;
+
+	public void createGroup(Group group) throws InvalidSessionIDException, CouldNotCreateGroupException, NetworkException;
+
+	public void addToGroup(User user, Group group) throws InvalidSessionIDException, InvalidUserException, InvalidGroupException,
 			NetworkException;
 
-	public Set<Group> getGroups() throws InvalidSessionIDException,
-			NetworkException;
-
-	public void createGroup(Group group) throws InvalidSessionIDException,
-			CouldNotCreateGroupException, NetworkException;
-
-	public void addToGroup(User user, Group group)
-			throws InvalidSessionIDException, InvalidUserException,
-			InvalidGroupException, NetworkException;
-
-	public void removeFromGroup(User user, Group group)
-			throws InvalidSessionIDException, InvalidUserException,
+	public void removeFromGroup(User user, Group group) throws InvalidSessionIDException, InvalidUserException,
 			InvalidGroupException, CouldNotRemoveException, NetworkException;
 
-	public Set<Group> getGroupUsers(Group group)
-			throws InvalidSessionIDException, InvalidGroupException,
-			NetworkException;
+	public Set<String> getGroupUsers(Group group) throws InvalidSessionIDException, InvalidGroupException, NetworkException;
 
 	// Sends new message
-	public void sendMessage(String message) throws InvalidSessionIDException,
-			NetworkException;
+	public void sendMessage(String message) throws InvalidSessionIDException, NetworkException;
 
 	// Receives new messages from server
-	public Set<Message> getMessages() throws InvalidSessionIDException,
-			NetworkException;
+	public Set<Message> getMessages() throws InvalidSessionIDException, NetworkException;
 
 }
