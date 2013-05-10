@@ -408,8 +408,23 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public void createGroup(String groupName) throws InvalidSessionIDException, CouldNotCreateGroupException, NetworkException {
-		// TODO Auto-generated method stub
+	public void createGroup(Group group) throws InvalidSessionIDException, CouldNotCreateGroupException, NetworkException {
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", SESSION_ID);
+		paramsInString.put("group", group.toJsonObject());
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("createGroup", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("CouldNotCreateGroup")) {
+				throw new CouldNotCreateGroupException();
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

@@ -74,7 +74,7 @@ public interface IJSonProxy {
 	public Set<Group> getGroups() throws InvalidSessionIDException,
 			NetworkException;
 
-	public void createGroup(String groupName) throws InvalidSessionIDException,
+	public void createGroup(Group group) throws InvalidSessionIDException,
 			CouldNotCreateGroupException, NetworkException;
 
 	public void addToGroup(User user, Group group)
