@@ -430,7 +430,25 @@ public class JSonProxy implements IJSonProxy {
 	@Override
 	public void addToGroup(User user, Group group) throws InvalidSessionIDException, InvalidUserException, InvalidGroupException,
 			NetworkException {
-		// TODO Auto-generated method stub
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", SESSION_ID);
+		paramsInString.put("user", user.getId());
+		paramsInString.put("group", group.getId());
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("addToGroup", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidUser")) {
+				throw new InvalidUserException();
+			} else if (exception.equals("InvalidGroup")) {
+				throw new InvalidGroupException();
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
