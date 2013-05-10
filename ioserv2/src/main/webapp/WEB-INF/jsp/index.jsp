@@ -31,9 +31,10 @@ $(document).ready(function() {
 				$("#result").html(JSON.stringify(data));
 				$("html, body").animate({ scrollTop: 0 }, "fast");
 			},
-			error : function(errMsg) {
-				$('div#result').hide();
-				alert("Error: " + errMsg.returned_val);
+			error : function(xhr, textStatus, errorThrown) {
+				$('div#result').show();
+				$("#result").html(xhr.responseText);
+				$("html, body").animate({ scrollTop: 0 }, "fast");
 			}
 		});
 	});

@@ -1,9 +1,9 @@
 package app.model.local;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -16,14 +16,12 @@ public class MapItem {
 	private Point position;
 	private String data;
 	
-	public MapItem(Point position, String data, Map<String, List<MapItem>> layers) {
+	public MapItem(Point position, String data, Map<String, Map<Long, MapItem>> layers) {
 		this.position = position;
 		this.data = data;
-		List<Long> currentItemIds = new ArrayList<>();
-		for (List<MapItem> l : layers.values()) {
-			for (MapItem i : l) {
-				currentItemIds.add(i.getId());
-			}
+		Set<Long> currentItemIds = new HashSet<>();
+		for (Map<Long, MapItem> l : layers.values()) {
+			currentItemIds.addAll(l.keySet());
 		}
 		this.id = initializeId(currentItemIds);
 	}
@@ -52,7 +50,7 @@ public class MapItem {
 		this.data = data;
 	}
 
-	private Long initializeId(List<Long> l) {
+	private Long initializeId(Set<Long> l) {
 		Long id = (long) random.nextInt(Integer.MAX_VALUE);
 		while (l.contains(id)) {
 			id = (long) random.nextInt(Integer.MAX_VALUE);

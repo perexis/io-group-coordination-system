@@ -1,8 +1,7 @@
 package app.controller;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -62,60 +61,60 @@ public class AdminController {
 	@RequestMapping(value = "addUser", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String addUser(@ModelAttribute("formUser") FormUser formUser) {
+	public synchronized String addUser(@ModelAttribute("formUser") FormUser formUser) {
 		RegisteredUser registeredUser = new RegisteredUser(formUser);
 		if (registeredUserDao.save(registeredUser) == null) {
 			return "ERROR: User " + registeredUser.getId() + " already exists!";
 		}
-		mainController.getUsers().add(new User(registeredUser));
-		return "User " + registeredUser.getId() + " successfully registered!";
+		User u = new User(registeredUser);
+		mainController.getUsers().put(u.getId(), u);
+		return "User " + u.getId() + " successfully registered!";
 	}
 	
 	@RequestMapping(value = "deleteUser", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String deleteUser(@ModelAttribute("formUser") FormUser formUser) {
-		User user = new User(formUser);
-		if (!mainController.getUsers().contains(user)) {
-			return "ERROR: User " + user.getId() + " doesn't exists!";
+	public synchronized String deleteUser(@ModelAttribute("formUser") FormUser formUser) {
+		User u = new User(formUser);
+		if (!mainController.getUsers().containsKey(u.getId())) {
+			return "ERROR: User " + u.getId() + " doesn't exists!";
 		}
-		registeredUserDao.delete(user.getId());
-		mainController.getUsers().remove(user);
-		System.out.println(mainController.getSessions().inverse().remove(user));
-		return "User " + user.getId() + " successfully deleted!";
+		registeredUserDao.delete(u.getId());
+		mainController.getUsers().remove(u.getId());
+		mainController.getSessions().inverse().remove(u);
+		return "User " + u.getId() + " successfully deleted!";
 	}
 	
 	@RequestMapping(value = "updateUser", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String updateUser(@ModelAttribute("formUser") FormUser formUser) {
+	public synchronized String updateUser(@ModelAttribute("formUser") FormUser formUser) {
 		RegisteredUser registeredUser = new RegisteredUser(formUser);
 		if (registeredUserDao.update(registeredUser) == null) {
 			return "ERROR: User " + registeredUser.getId() + " doesn't exists!";
 		}
-		List<User> users = mainController.getUsers();
-		users.get(users.indexOf(new User(registeredUser))).update(registeredUser);
+		Map<String, User> users = mainController.getUsers();
+		users.get(registeredUser.getId()).update(registeredUser);
 		return "User " + registeredUser.getId() + " successfully updated!";
 	}
 	
 	@RequestMapping(value = "findUser", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String findUser(@ModelAttribute("formUser") FormUser formUser) {
-		User user = new User(formUser);
-		List<User> users = mainController.getUsers();
-		int index;
-		if ((index = users.indexOf(user)) == -1) {
-			return "ERROR: User " + user.getId() + " doesn't exists!";
+	public synchronized String findUser(@ModelAttribute("formUser") FormUser formUser) {
+		User u = new User(formUser);
+		Map<String, User> users = mainController.getUsers();
+		if (!users.containsKey(u.getId())) {
+			return "ERROR: User " + u.getId() + " doesn't exists!";
 		}
-		return users.get(index).toString();
+		return users.get(u.getId()).toString();
 	}
 	
 	@RequestMapping(value = "listAllUsers", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String listAllUsers() {
-		List<User> users = mainController.getUsers();
+	public synchronized String listAllUsers() {
+		Collection<User> users = mainController.getUsers().values();
 		if (users.isEmpty()) {
 			return "There are no Users in the database!";
 		}
@@ -129,7 +128,7 @@ public class AdminController {
 	@RequestMapping(value = "deleteAllUsers", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String deleteAllUsers() {
+	public synchronized String deleteAllUsers() {
 		registeredUserDao.deleteAll();
 		mainController.getUsers().clear();
 		mainController.getSessions().clear();
@@ -139,67 +138,62 @@ public class AdminController {
 	@RequestMapping(value = "addUserItem", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String addUserItem(@ModelAttribute("formUserItem") FormUserItem formUserItem) {
+	public synchronized String addUserItem(@ModelAttribute("formUserItem") FormUserItem formUserItem) {
 		RegisteredUserItem registeredUserItem = new RegisteredUserItem(formUserItem);
 		if (registeredUserItemDao.save(registeredUserItem) == null) {
 			return "ERROR: UserItem " + registeredUserItem.getId() + " already exists!";
 		}
-		mainController.getUserItems().add(new UserItem(registeredUserItem));
-		return "UserItem " + registeredUserItem.getId() + " successfully registered!";
+		UserItem i = new UserItem(registeredUserItem);
+		mainController.getUserItems().put(i.getId(), i);
+		return "UserItem " + i.getId() + " successfully registered!";
 	}
 	
 	@RequestMapping(value = "deleteUserItem", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String deleteUserItem(@ModelAttribute("formUserItem") FormUserItem formUserItem) {
-		UserItem userItem = new UserItem(formUserItem);
-		if (!mainController.getUserItems().contains(userItem)) {
-			return "ERROR: UserItem " + userItem.getId() + " doesn't exists!";
+	public synchronized String deleteUserItem(@ModelAttribute("formUserItem") FormUserItem formUserItem) {
+		UserItem i = new UserItem(formUserItem);
+		if (!mainController.getUserItems().containsKey(i.getId())) {
+			return "ERROR: UserItem " + i.getId() + " doesn't exists!";
 		}
-		registeredUserItemDao.delete(userItem.getId());
-		mainController.getUserItems().remove(userItem);
+		registeredUserItemDao.delete(i.getId());
+		mainController.getUserItems().remove(i.getId());
 		for (User u : mainController.getSessions().values()) {
-			Iterator<UserItem> iter = u.getItems().iterator();
-			while(iter.hasNext()) {
-				if (iter.next().equals(userItem)) {
-					iter.remove();
-				}
-			}
+			u.getItems().remove(i.getId());
 		}
-		return "UserItem " + userItem.getId() + " successfully deleted!";
+		return "UserItem " + i.getId() + " successfully deleted!";
 	}
 	
 	@RequestMapping(value = "updateUserItem", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String updateUserItem(@ModelAttribute("formUserItem") FormUserItem formUserItem) {
+	public synchronized String updateUserItem(@ModelAttribute("formUserItem") FormUserItem formUserItem) {
 		RegisteredUserItem registeredUserItem = new RegisteredUserItem(formUserItem);
 		if (registeredUserItemDao.update(registeredUserItem) == null) {
 			return "ERROR: UserItem " + registeredUserItem.getId() + " doesn't exists!";
 		}
-		List<UserItem> userItems = mainController.getUserItems();
-		userItems.get(userItems.indexOf(new UserItem(registeredUserItem))).update(registeredUserItem);
+		Map<String, UserItem> userItems = mainController.getUserItems();
+		userItems.get(registeredUserItem.getId()).update(registeredUserItem);
 		return "UserItem " + registeredUserItem.getId() + " successfully updated!";
 	}
 	
 	@RequestMapping(value = "findUserItem", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String findUserItem(@ModelAttribute("formUserItem") FormUserItem formUserItem) {
-		UserItem userItem = new UserItem(formUserItem);
-		List<UserItem> userItems = mainController.getUserItems();
-		int index;
-		if ((index = userItems.indexOf(userItem)) == -1) {
-			return "ERROR: UserItem " + userItem.getId() + " doesn't exists!";
+	public synchronized String findUserItem(@ModelAttribute("formUserItem") FormUserItem formUserItem) {
+		UserItem i = new UserItem(formUserItem);
+		Map<String, UserItem> items = mainController.getUserItems();
+		if (!items.containsKey(i.getId())) {
+			return "ERROR: UserItem " + i.getId() + " doesn't exists!";
 		}
-		return userItems.get(index).toString();
+		return items.get(i.getId()).toString();
 	}
 	
 	@RequestMapping(value = "listAllUserItems", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String listAllUserItems() {
-		List<UserItem> userItems = mainController.getUserItems();
+	public synchronized String listAllUserItems() {
+		Collection<UserItem> userItems = mainController.getUserItems().values();
 		if (userItems.isEmpty()) {
 			return "There are no UserItems in the database!";
 		}
@@ -213,7 +207,7 @@ public class AdminController {
 	@RequestMapping(value = "deleteAllUserItems", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String deleteAllUserItems() {
+	public synchronized String deleteAllUserItems() {
 		registeredUserItemDao.deleteAll();
 		mainController.getUserItems().clear();
 		for (User u : mainController.getSessions().values()) {
@@ -225,22 +219,22 @@ public class AdminController {
 	@RequestMapping(value = "addLayer", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String addLayer(@ModelAttribute("formString") FormString formString) {
+	public synchronized String addLayer(@ModelAttribute("formString") FormString formString) {
 		RegisteredLayer registeredLayer = new RegisteredLayer(formString.getValue());
 		if (registeredLayerDao.save(registeredLayer) == null) {
 			return "ERROR: Layer " + registeredLayer.getId() + " already exists!";
 		}
 		String layer = registeredLayer.getId();
-		mainController.getLayers().put(layer, new ArrayList<MapItem>());
+		mainController.getLayers().put(layer, new HashMap<Long, MapItem>());
 		return "Layer " + layer + " successfully registered!";
 	}
 	
 	@RequestMapping(value = "deleteLayer", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String deleteLayer(@ModelAttribute("formString") FormString formString) {
+	public synchronized String deleteLayer(@ModelAttribute("formString") FormString formString) {
 		String layer = formString.getValue();
-		if (!mainController.getLayers().keySet().contains(layer)) {
+		if (!mainController.getLayers().containsKey(layer)) {
 			return "ERROR: Layer " + layer + " doesn't exists!";
 		}
 		registeredLayerDao.delete(layer);
@@ -251,9 +245,9 @@ public class AdminController {
 	@RequestMapping(value = "findLayer", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String findLayer(@ModelAttribute("formString") FormString formString) {
+	public synchronized String findLayer(@ModelAttribute("formString") FormString formString) {
 		String layer = formString.getValue();
-		if (!mainController.getLayers().keySet().contains(layer)) {
+		if (!mainController.getLayers().containsKey(layer)) {
 			return "ERROR: Layer " + layer + " doesn't exists!";
 		}
 		return layer;
@@ -262,7 +256,7 @@ public class AdminController {
 	@RequestMapping(value = "listAllLayers", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String listAllLayers() {
+	public synchronized String listAllLayers() {
 		Set<String> layers = mainController.getLayers().keySet();
 		if (layers.isEmpty()) {
 			return "There are no Layers in the database!";
@@ -277,7 +271,7 @@ public class AdminController {
 	@RequestMapping(value = "deleteAllLayers", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String deleteAllLayers() {
+	public synchronized String deleteAllLayers() {
 		registeredLayerDao.deleteAll();
 		mainController.getLayers().clear();
 		return "All Layers have been deleted!";
@@ -286,7 +280,7 @@ public class AdminController {
 	@RequestMapping(value = "listSessions", method = RequestMethod.POST,
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
-	public String listSessions() {
+	public synchronized String listSessions() {
 		BiMap<Long, User> sessions = mainController.getSessions();
 		if (sessions.isEmpty()) {
 			return "There are no current sessions!";

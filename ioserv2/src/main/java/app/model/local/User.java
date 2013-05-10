@@ -1,7 +1,7 @@
 package app.model.local;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -19,10 +19,10 @@ public class User {
 	private String phone;
 	private String email;	
 	@JsonIgnore
-	private List<UserItem> items; // no new object; only references to userItems from MainController
+	private Map<String, UserItem> items; // no new object; only references to userItems from MainController
 	
 	public User() {
-		this.items = new ArrayList<>();
+		this.items = new HashMap<>();
 	}
 	
 	public User(RegisteredUser u) {
@@ -33,7 +33,7 @@ public class User {
 		this.surname = u.getSurname();
 		this.phone = u.getPhone();
 		this.email = u.getEmail();
-		this.items = new ArrayList<>();
+		this.items = new HashMap<>();
 	}
 	
 	public User(FormUser u) {
@@ -44,7 +44,7 @@ public class User {
 		this.surname = u.getSurname();
 		this.phone = u.getPhone();
 		this.email = u.getEmail();
-		this.items = new ArrayList<>();
+		this.items = new HashMap<>();
 	}
 	
 	public void update(RegisteredUser u) {
@@ -125,7 +125,7 @@ public class User {
 		this.email = email;
 	}
 
-	public List<UserItem> getItems() {
+	public Map<String, UserItem> getItems() {
 		return items;
 	}
 	

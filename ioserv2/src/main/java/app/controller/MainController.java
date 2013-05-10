@@ -1,11 +1,9 @@
 package app.controller;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -38,10 +36,10 @@ import com.jayway.restassured.path.json.JsonPath;
 public class MainController {
 	
 	private BiMap<Long, User> sessions = HashBiMap.create();
-	private Map<String, List<MapItem>> layers = new HashMap<>();
+	private Map<String, Map<Long, MapItem>> layers = new HashMap<>();
 	
-	private List<User> users = new ArrayList<User>();
-	private List<UserItem> userItems = new ArrayList<UserItem>();
+	private Map<String, User> users = new HashMap<>();
+	private Map<String, UserItem> userItems = new HashMap<>();
 	
 	private Random random = new Random();
 	private ObjectMapper mapper = new ObjectMapper();
@@ -51,15 +49,15 @@ public class MainController {
 			RegisteredLayerDao registeredLayerDao, RegisteredUserItemDao registeredUserItemDao) {
 		List<RegisteredUser> rUsers = registeredUserDao.getAll();
 		for (RegisteredUser u : rUsers) {
-			users.add(new User(u));
+			users.put(u.getId(), new User(u));
 		}
 		List<RegisteredUserItem> rUserItems = registeredUserItemDao.getAll();
 		for (RegisteredUserItem i : rUserItems) {
-			userItems.add(new UserItem(i));
+			userItems.put(i.getId(), new UserItem(i));
 		}
 		List<RegisteredLayer> rLayers = registeredLayerDao.getAll();
 		for (RegisteredLayer l : rLayers) {
-			layers.put(new String(l.getId()), new ArrayList<MapItem>());
+			layers.put(l.getId(), new HashMap<Long, MapItem>());
 		}
 	}
 
@@ -76,11 +74,7 @@ public class MainController {
 	@ResponseBody	
 	public synchronized String login(@RequestBody String json, HttpServletResponse response) throws Exception {
 		User jsonUser = mapper.readValue(json, User.class);
-		User user = null;
-		int index;
-		if ((index = users.indexOf(jsonUser)) >= 0) {
-			user = users.get(index);
-		}
+		User user = users.get(jsonUser.getId());
 		if (user == null || jsonUser.getPassword() == null ||
 				!jsonUser.getPassword().equals(user.getPassword())) {
 			return "{\"retval\": null, \"exception\": \"CouldNotLogin\"}";
@@ -161,7 +155,7 @@ public class MainController {
 			return "{\"retval\": null, \"exception\": \"InvalidLayer\"}";
 		}
 		MapItem item = new MapItem(point, data, layers);
-		layers.get(layer).add(item);
+		layers.get(layer).put(item.getId(), item);
 		return String.format("{\"retval\": %s, \"exception\": null}", item.getId());
 	}
 	
@@ -175,40 +169,27 @@ public class MainController {
 		if (!sessions.containsKey(sessionID)) {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
-		int resIndex = -1;
-		for (List<MapItem> l : layers.values()) {
-			int index = 0;
-			for (MapItem i : l) {
-				if (i.getId().equals(itemID)) {
-					resIndex = index;
-					break;
-				}
-				++index;
-			}
-			if (resIndex >= 0) {
-				l.remove(resIndex);
-				break;
+		for (Map<Long, MapItem> l : layers.values()) {
+			if (l.containsKey(itemID)) {
+				return String.format("{\"exception\": null}");
 			}
 		}
-		if (resIndex == -1) {
-			return "{\"exception\": \"InvalidMapItem\"}";
-		}
-		return String.format("{\"exception\": null}");
+		return "{\"exception\": \"InvalidMapItem\"}";
 	}
 	
 	public BiMap<Long, User> getSessions() {
 		return sessions;
 	}
 	
-	public Map<String, List<MapItem>> getLayers() {
+	public Map<String, Map<Long, MapItem>> getLayers() {
 		return layers;
 	}
 	
-	public List<User> getUsers() {
+	public Map<String, User> getUsers() {
 		return users;
 	}
 	
-	public List<UserItem> getUserItems() {
+	public Map<String, UserItem> getUserItems() {
 		return userItems;
 	}
 	
