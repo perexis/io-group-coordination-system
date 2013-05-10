@@ -24,6 +24,8 @@ public class User {
 	private UserState state;
 	@JsonIgnore
 	private Long sessionId;
+	@JsonIgnore
+	private Long lastMessageCheck;
 	
 	public User() {
 		this.items = new HashMap<>();
@@ -149,6 +151,14 @@ public class User {
 
 	public void setSessionId(Long sessionId) {
 		this.sessionId = sessionId;
+	}
+
+	public Long getLastMessageCheck() {
+		return lastMessageCheck;
+	}
+
+	public void setLastMessageCheck(Long lastMessageCheck) {
+		this.lastMessageCheck = lastMessageCheck;
 	}
 
 	@Override

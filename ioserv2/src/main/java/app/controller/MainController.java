@@ -1,5 +1,6 @@
 package app.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import app.model.db.RegisteredUserItem;
 import app.model.form.FormSimpleUser;
 import app.model.form.FormString;
 import app.model.local.MapItem;
+import app.model.local.Message;
 import app.model.local.Point;
 import app.model.local.User;
 import app.model.local.UserItem;
@@ -40,6 +42,7 @@ public class MainController {
 	
 	private BiMap<Long, User> sessions = HashBiMap.create();
 	private Map<String, Map<Long, MapItem>> layers = new HashMap<>();
+	private List<Message> messages = new ArrayList<>();
 	
 	private Map<String, User> users = new HashMap<>();
 	private Map<String, UserItem> userItems = new HashMap<>();
@@ -225,8 +228,7 @@ public class MainController {
 				(targetSessionId = users.get(userId).getSessionId()) == null) {
 			return "{\"exception\": \"InvalidUser\"}";
 		}
-		if (!userItems.containsKey(itemId) || 
-				sessions.get(targetSessionId).getItems().containsKey(itemId)) {
+		if (!userItems.containsKey(itemId)) {
 			return "{\"exception\": \"InvalidUserItem\"}";
 		}
 		sessions.get(targetSessionId).getItems().put(itemId, userItems.get(itemId));
@@ -279,6 +281,49 @@ public class MainController {
 		return String.format("{\"retval\": %s, \"exception\": null}", res);
 	}
 	
+	@RequestMapping(value = "/sendMessage", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody	
+	public synchronized String sendMessage(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		String text = JsonPath.with(json).getString("message");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"exception\": \"InvalidSessionID\"}";
+		}
+		Long timestamp = System.currentTimeMillis();
+		Message m = new Message(timestamp, sessions.get(sessionId).getId(), text);
+		messages.add(m);
+		return "{\"exception\": null}";
+	}
+	
+	@RequestMapping(value = "/getMessages", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody	
+	public synchronized String getMessages(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
+		}
+		User u = sessions.get(sessionId);
+		Long timestamp = u.getLastMessageCheck();
+		u.setLastMessageCheck(System.currentTimeMillis());
+		if (messages.isEmpty()) {
+			return "{\"retval\": [], \"exception\": \"null\"}";
+		}
+		int index = 0;
+		for (Message m : messages) {
+			if (m.getSentTime() > timestamp) {
+				break;
+			}
+			++index;
+		}
+		List<Message> newMessages = messages.subList(index, messages.size());
+		String res = mapper.writeValueAsString(newMessages);
+		return String.format("{\"retval\": %s, \"exception\": null}", res);
+	}
+	
 	public BiMap<Long, User> getSessions() {
 		return sessions;
 	}
@@ -302,7 +347,8 @@ public class MainController {
 		}
 		Long sessionId = generateUniqueSessionId();
 		sessions.put(sessionId, user);
-		users.get(user.getId()).setSessionId(sessionId);
+		user.setSessionId(sessionId);
+		user.setLastMessageCheck(0L);
 		return sessionId;
 	}
 	

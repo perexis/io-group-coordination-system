@@ -127,6 +127,18 @@ Log in as admin (login: admin, pass: admin (or just leave blank)):
 	<form:input path="value" size="100"/>
 </form:form>
 
+<hr/>
+
+<form:form class="testForm" action="/sendMessage" modelAttribute="formString" method="post">
+	<input type="submit" value="/sendMessage">
+	<form:input path="value" size="100"/>
+</form:form>
+
+<form:form class="testForm" action="/getMessages" modelAttribute="formString" method="post">
+	<input type="submit" value="/getMessages">
+	<form:input path="value" size="100"/>
+</form:form>
+
 </body>
 
 </html>
