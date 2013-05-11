@@ -23,14 +23,15 @@ public class User {
 	@JsonIgnore
 	private UserState state;
 	@JsonIgnore
-	private Long sessionId;
-	@JsonIgnore
 	private Long lastMessageCheck;
 	
 	public User() {
 		this.items = new HashMap<>();
 		this.state = new UserState();
-		this.sessionId = null;
+	}
+	
+	public User(String id) {
+		this.id = id;
 	}
 	
 	public User(RegisteredUser u) {
@@ -143,14 +144,6 @@ public class User {
 
 	public void setState(UserState state) {
 		this.state = state;
-	}
-
-	public Long getSessionId() {
-		return sessionId;
-	}
-
-	public void setSessionId(Long sessionId) {
-		this.sessionId = sessionId;
 	}
 
 	public Long getLastMessageCheck() {

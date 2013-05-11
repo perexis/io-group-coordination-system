@@ -2,6 +2,7 @@ package app.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -26,6 +27,7 @@ import app.model.db.RegisteredUser;
 import app.model.db.RegisteredUserItem;
 import app.model.form.FormSimpleUser;
 import app.model.form.FormString;
+import app.model.local.Group;
 import app.model.local.MapItem;
 import app.model.local.Message;
 import app.model.local.Point;
@@ -40,9 +42,10 @@ import com.jayway.restassured.path.json.JsonPath;
 @Controller
 public class MainController {
 	
-	private BiMap<Long, User> sessions = HashBiMap.create();
+	private BiMap<Long, String> sessions = HashBiMap.create();
 	private Map<String, Map<Long, MapItem>> layers = new HashMap<>();
 	private List<Message> messages = new ArrayList<>();
+	private Map<String, Group> groups = new HashMap<>();
 	
 	private Map<String, User> users = new HashMap<>();
 	private Map<String, UserItem> userItems = new HashMap<>();
@@ -85,7 +88,7 @@ public class MainController {
 				!jsonUser.getPassword().equals(user.getPassword())) {
 			return "{\"retval\": null, \"exception\": \"CouldNotLogin\"}";
 		}
-		Long sessionID = this.initializeSession(user);
+		Long sessionID = this.initializeSession(user.getId());
 		return String.format("{\"retval\": %s, \"exception\": null}", sessionID);
 	}
 	
@@ -98,9 +101,7 @@ public class MainController {
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
-		String userId = sessions.get(sessionId).getId();
-		users.get(userId).setSessionId(null);
-		sessions.remove(sessionId);
+		cleanUp(sessions.get(sessionId));
 		return "{\"exception\": null}";
 	}
 	
@@ -195,7 +196,7 @@ public class MainController {
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
-		sessions.get(sessionId).setState(newState);
+		users.get(sessions.get(sessionId)).setState(newState);
 		return "{\"exception\": null}";
 	}
 	
@@ -223,15 +224,13 @@ public class MainController {
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
-		Long targetSessionId = null;
-		if (!users.containsKey(userId) || 
-				(targetSessionId = users.get(userId).getSessionId()) == null) {
+		if (!sessions.containsValue(userId)) {
 			return "{\"exception\": \"InvalidUser\"}";
 		}
 		if (!userItems.containsKey(itemId)) {
 			return "{\"exception\": \"InvalidUserItem\"}";
 		}
-		sessions.get(targetSessionId).getItems().put(itemId, userItems.get(itemId));
+		users.get(userId).getItems().put(itemId, userItems.get(itemId));
 		return "{\"exception\": null}";
 	}
 	
@@ -246,18 +245,16 @@ public class MainController {
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
-		Long targetSessionId = null;
-		if (!users.containsKey(userId) || 
-				(targetSessionId = users.get(userId).getSessionId()) == null) {
+		if (!sessions.containsValue(userId)) {
 			return "{\"exception\": \"InvalidUser\"}";
 		}
 		if (!userItems.containsKey(itemId)) {
 			return "{\"exception\": \"InvalidUserItem\"}";
 		}
-		if (!sessions.get(targetSessionId).getItems().containsKey(itemId)) {
+		if (!users.get(userId).getItems().containsKey(itemId)) {
 			return "{\"exception\": \"CouldNotRemove\"}";
 		}
-		sessions.get(targetSessionId).getItems().remove(itemId);
+		users.get(userId).getItems().remove(itemId);
 		return "{\"exception\": null}";
 	}
 	
@@ -271,12 +268,10 @@ public class MainController {
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
 		}
-		Long targetSessionId = null;
-		if (!users.containsKey(userId) || 
-				(targetSessionId = users.get(userId).getSessionId()) == null) {
+		if (!sessions.containsValue(userId)) {
 			return "{\"retval\": null, \"exception\": \"InvalidUser\"}";
 		}
-		Set<String> items = sessions.get(targetSessionId).getItems().keySet();
+		Set<String> items = users.get(userId).getItems().keySet();
 		String res = mapper.writeValueAsString(items);
 		return String.format("{\"retval\": %s, \"exception\": null}", res);
 	}
@@ -292,7 +287,7 @@ public class MainController {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
 		Long timestamp = System.currentTimeMillis();
-		Message m = new Message(timestamp, sessions.get(sessionId).getId(), text);
+		Message m = new Message(timestamp, sessions.get(sessionId), text);
 		messages.add(m);
 		return "{\"exception\": null}";
 	}
@@ -306,7 +301,7 @@ public class MainController {
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
 		}
-		User u = sessions.get(sessionId);
+		User u = users.get(sessions.get(sessionId));
 		Long timestamp = u.getLastMessageCheck();
 		u.setLastMessageCheck(System.currentTimeMillis());
 		if (messages.isEmpty()) {
@@ -324,7 +319,99 @@ public class MainController {
 		return String.format("{\"retval\": %s, \"exception\": null}", res);
 	}
 	
-	public BiMap<Long, User> getSessions() {
+	@RequestMapping(value = "/getGroups", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody	
+	public synchronized String getGroups(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
+		}
+		String res = mapper.writeValueAsString(groups.values());
+		return String.format("{\"retval\": %s, \"exception\": null}", res);
+	}
+	
+	@RequestMapping(value = "/createGroup", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody
+	public synchronized String createGroup(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		Group group = JsonPath.with(json).getObject("group", Group.class);
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"exception\": \"InvalidSessionID\"}";
+		}
+		if (groups.containsKey(group.getId())) {
+			return "{\"exception\": \"CouldNotCreateGroup\"}";
+		}
+		groups.put(group.getId(), group);
+		return "{\"exception\": null}";
+	}
+	
+	@RequestMapping(value = "/addToGroup", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody
+	public synchronized String addToGroup(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		String userId = JsonPath.with(json).getString("user");
+		String groupId = JsonPath.with(json).getString("group");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"exception\": \"InvalidSessionID\"}";
+		}
+		if (!sessions.containsValue(userId)) {
+			return "{\"exception\": \"InvalidUser\"}";
+		}
+		if (!groups.containsKey(groupId)) {
+			return "{\"exception\": \"InvalidGroup\"}";
+		}
+		groups.get(groupId).getUsers().put(userId, users.get(userId));
+		return "{\"exception\": null}";
+	}
+	
+	@RequestMapping(value = "/removeFromGroup", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody
+	public synchronized String removeFromGroup(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		String userId = JsonPath.with(json).getString("user");
+		String groupId = JsonPath.with(json).getString("group");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"exception\": \"InvalidSessionID\"}";
+		}
+		if (!sessions.containsValue(userId)) {
+			return "{\"exception\": \"InvalidUser\"}";
+		}
+		if (!groups.containsKey(groupId)) {
+			return "{\"exception\": \"InvalidGroup\"}";
+		}
+		if (!groups.get(groupId).getUsers().containsKey(userId)) {
+			return "{\"exception\": \"CouldNotRemove\"}";
+		}
+		groups.get(groupId).getUsers().remove(userId);
+		return "{\"exception\": null}";
+	}
+	
+	@RequestMapping(value = "/getGroupUsers", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody	
+	public synchronized String getGroupUsers(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		String groupId = JsonPath.with(json).getString("group");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
+		}
+		if(!groups.containsKey(groupId)) {
+			return "{\"retval\": null, \"exception\": \"InvalidGroup\"}";
+		}
+		String res = mapper.writeValueAsString(groups.get(groupId).getUsers().keySet());
+		return String.format("{\"retval\": %s, \"exception\": null}", res);
+	}
+	
+	public BiMap<Long, String> getSessions() {
 		return sessions;
 	}
 	
@@ -340,15 +427,11 @@ public class MainController {
 		return userItems;
 	}
 	
-	private Long initializeSession(User user) {
-		if (sessions.containsValue(user)) {
-			Long currentSession = sessions.inverse().get(user);
-			sessions.remove(currentSession);
-		}
+	private Long initializeSession(String userId) {
+		cleanUp(userId);
 		Long sessionId = generateUniqueSessionId();
-		sessions.put(sessionId, user);
-		user.setSessionId(sessionId);
-		user.setLastMessageCheck(0L);
+		sessions.put(sessionId, userId);
+		users.get(userId).setLastMessageCheck(0L);
 		return sessionId;
 	}
 	
@@ -358,6 +441,20 @@ public class MainController {
 			id = (long) random.nextInt(Integer.MAX_VALUE);
 		}
 		return id;
+	}
+	
+	private void cleanUp(String userId) {
+		sessions.inverse().remove(userId);
+		Iterator<Message> iter = messages.iterator();
+		while(iter.hasNext()) {
+			Message m = iter.next();
+			if (m.getId().equals(userId)) {
+				iter.remove();
+			}
+		}
+		for (Group g : groups.values()) {
+			g.getUsers().remove(userId);
+		}
 	}
 
 }

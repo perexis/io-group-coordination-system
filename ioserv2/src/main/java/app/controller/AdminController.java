@@ -158,8 +158,9 @@ public class AdminController {
 		}
 		registeredUserItemDao.delete(i.getId());
 		mainController.getUserItems().remove(i.getId());
-		for (User u : mainController.getSessions().values()) {
-			u.getItems().remove(i.getId());
+		Map<String, User> users = mainController.getUsers();
+		for (String userId : mainController.getSessions().values()) {
+			users.get(userId).getItems().remove(i.getId());
 		}
 		return "UserItem " + i.getId() + " successfully deleted!";
 	}
@@ -210,8 +211,9 @@ public class AdminController {
 	public synchronized String deleteAllUserItems() {
 		registeredUserItemDao.deleteAll();
 		mainController.getUserItems().clear();
-		for (User u : mainController.getSessions().values()) {
-			u.getItems().clear();
+		Map<String, User> users = mainController.getUsers();
+		for (String userId : mainController.getSessions().values()) {
+			users.get(userId).getItems().clear();
 		}
 		return "All UserItems have been deleted!";
 	}
@@ -281,13 +283,13 @@ public class AdminController {
 			produces = "text/plain; charset=utf-8")
 	@ResponseBody
 	public synchronized String listSessions() {
-		BiMap<Long, User> sessions = mainController.getSessions();
+		BiMap<Long, String> sessions = mainController.getSessions();
 		if (sessions.isEmpty()) {
 			return "There are no current sessions!";
 		}
 		StringBuilder res = new StringBuilder();
-		for (Map.Entry<Long, User> entry : sessions.entrySet()) {
-			res.append(entry.getKey() + " " + entry.getValue().getId() + "<br/>");
+		for (Map.Entry<Long, String> entry : sessions.entrySet()) {
+			res.append(entry.getKey() + " " + entry.getValue() + "<br/>");
 		}
 		return res.toString();
 	}

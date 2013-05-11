@@ -37,3 +37,7 @@ fieldset {
 td {
 	vertical-align: bottom;
 }
+
+.testSubmit {
+	width: 13em;
+}

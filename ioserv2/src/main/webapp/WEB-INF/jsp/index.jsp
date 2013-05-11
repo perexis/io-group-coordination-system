@@ -64,79 +64,104 @@ Log in as admin (login: admin, pass: admin (or just leave blank)):
 <hr/>
 
 <form:form class="testForm" action="/login" modelAttribute="formString" method="post">
-	<input type="submit" value="/login">
-	<form:input path="value" size="100"/>
+	<input class="testSubmit" type="submit" value="/login">
+	<form:input path="value" size="100" value="{\"id\": \"ID\", \"password\": \"PASS\"}"/>
 </form:form>
 
 <form:form class="testForm" action="/logout" modelAttribute="formString" method="post">
-	<input type="submit" value="/logout">
-	<form:input path="value" size="100"/>
-</form:form>
-
-<form:form class="testForm" action="/getUsers" modelAttribute="formString" method="post">
-	<input type="submit" value="/getUsers">
-	<form:input path="value" size="100"/>
+	<input class="testSubmit" type="submit" value="/logout">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION}"/>
 </form:form>
 
 <hr/>
 
 <form:form class="testForm" action="/getMapItems" modelAttribute="formString" method="post">
-	<input type="submit" value="/getMapItems">
-	<form:input path="value" size="100"/>
+	<input class="testSubmit" type="submit" value="/getMapItems">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"layer\": \"LAYER\"}"/>
 </form:form>
 
 <form:form class="testForm" action="/getLayers" modelAttribute="formString" method="post">
-	<input type="submit" value="/getLayers">
-	<form:input path="value" size="100"/>
+	<input class="testSubmit" type="submit" value="/getLayers">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION}"/>
 </form:form>
 
 <form:form class="testForm" action="/addItemToLayer" modelAttribute="formString" method="post">
-	<input type="submit" value="/addItemToLayer">
-	<form:input path="value" size="100"/>
+	<input class="testSubmit" type="submit" value="/addItemToLayer">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"layer\": \"LAYER\", \"point\": {\"longitude\": DOUBLE, \"latitude\": DOUBLE}, \"data\": \"DATA\"}"/>
 </form:form>
 
 <form:form class="testForm" action="/removeMapItem" modelAttribute="formString" method="post">
-	<input type="submit" value="/removeMapItem">
-	<form:input path="value" size="100"/>
+	<input class="testSubmit" type="submit" value="/removeMapItem">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"item\": ID}"/>
+</form:form>
+
+<form:form class="testForm" action="/updateSelfState" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/updateSelfState">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"newState\": {\"position\": {\"longitude\": DOUBLE, \"latitude\": DOUBLE}, \"speed\": DOUBLE}}"/>
+</form:form>
+
+<form:form class="testForm" action="/getPossibleUserItems" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/getPossibleUserItems">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION}"/>
+</form:form>
+
+<form:form class="testForm" action="/addItemToUser" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/addItemToUser">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"user\": \"ID\", \"item\" :\"ID\"}"/>
+</form:form>
+
+<form:form class="testForm" action="/removeItemFromUser" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/removeItemFromUser">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"user\": \"ID\", \"item\" :\"ID\"}"/>
+</form:form>
+
+<form:form class="testForm" action="/getUsers" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/getUsers">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION}"/>
+</form:form>
+
+<form:form class="testForm" action="/getUserItems" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/getUserItems">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"user\": \"ID\""/>
 </form:form>
 
 <hr/>
 
-<form:form class="testForm" action="/updateSelfState" modelAttribute="formString" method="post">
-	<input type="submit" value="/updateSelfState">
-	<form:input path="value" size="100"/>
+<form:form class="testForm" action="/getGroups" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/getGroups">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION}"/>
 </form:form>
 
-<form:form class="testForm" action="/getPossibleUserItems" modelAttribute="formString" method="post">
-	<input type="submit" value="/getPossibleUserItems">
-	<form:input path="value" size="100"/>
+<form:form class="testForm" action="/createGroup" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/createGroup">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"group\": {\"id\": \"ID\", \"description\": \"DESC\"}}"/>
 </form:form>
 
-<form:form class="testForm" action="/addItemToUser" modelAttribute="formString" method="post">
-	<input type="submit" value="/addItemToUser">
-	<form:input path="value" size="100"/>
+<form:form class="testForm" action="/addToGroup" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/addToGroup">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"user\": \"ID\", \"group\": \"ID\"}"/>
 </form:form>
 
-<form:form class="testForm" action="/removeItemFromUser" modelAttribute="formString" method="post">
-	<input type="submit" value="/removeItemFromUser">
-	<form:input path="value" size="100"/>
+<form:form class="testForm" action="/removeFromGroup" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/removeFromGroup">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"user\": \"ID\", \"group\": \"ID\"}"/>
 </form:form>
 
-<form:form class="testForm" action="/getUserItems" modelAttribute="formString" method="post">
-	<input type="submit" value="/getUserItems">
-	<form:input path="value" size="100"/>
+<form:form class="testForm" action="/getGroupUsers" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/getGroupUsers">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"group\": \"ID\"}"/>
 </form:form>
 
 <hr/>
 
 <form:form class="testForm" action="/sendMessage" modelAttribute="formString" method="post">
-	<input type="submit" value="/sendMessage">
-	<form:input path="value" size="100"/>
+	<input class="testSubmit" type="submit" value="/sendMessage">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"message\": \"MESSAGE\"}"/>
 </form:form>
 
 <form:form class="testForm" action="/getMessages" modelAttribute="formString" method="post">
-	<input type="submit" value="/getMessages">
-	<form:input path="value" size="100"/>
+	<input class="testSubmit" type="submit" value="/getMessages">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION}"/>
 </form:form>
 
 </body>
