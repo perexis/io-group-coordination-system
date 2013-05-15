@@ -100,6 +100,11 @@ Log in as admin (login: admin, pass: admin (or just leave blank)):
 	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"newState\": {\"position\": {\"longitude\": DOUBLE, \"latitude\": DOUBLE}, \"speed\": DOUBLE}}"/>
 </form:form>
 
+<form:form class="testForm" action="/getUserState" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/getUserState">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"user\": \"ID\"}"/>
+</form:form>
+
 <form:form class="testForm" action="/getPossibleUserItems" modelAttribute="formString" method="post">
 	<input class="testSubmit" type="submit" value="/getPossibleUserItems">
 	<form:input path="value" size="100" value="{\"sessionID\": SESSION}"/>

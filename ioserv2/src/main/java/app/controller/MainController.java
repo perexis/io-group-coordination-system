@@ -131,7 +131,7 @@ public class MainController {
 		if (!layers.containsKey(layer)) {
 			return "{\"retval\": null, \"exception\": \"InvalidLayer\"}";
 		}
-		String res = mapper.writeValueAsString(layers.get(layer));
+		String res = mapper.writeValueAsString(layers.get(layer).values());
 		return String.format("{\"retval\": %s, \"exception\": null}", res);
 	}
 	
@@ -307,14 +307,13 @@ public class MainController {
 		if (messages.isEmpty()) {
 			return "{\"retval\": [], \"exception\": \"null\"}";
 		}
-		int index = 0;
+		List<Message> newMessages = new ArrayList<>();
 		for (Message m : messages) {
-			if (m.getSentTime() > timestamp) {
-				break;
+			if (m.getSentTime() > timestamp || m.getId().equals(u.getId())) {
+				continue;
 			}
-			++index;
+			newMessages.add(m);
 		}
-		List<Message> newMessages = messages.subList(index, messages.size());
 		String res = mapper.writeValueAsString(newMessages);
 		return String.format("{\"retval\": %s, \"exception\": null}", res);
 	}
@@ -408,6 +407,23 @@ public class MainController {
 			return "{\"retval\": null, \"exception\": \"InvalidGroup\"}";
 		}
 		String res = mapper.writeValueAsString(groups.get(groupId).getUsers().keySet());
+		return String.format("{\"retval\": %s, \"exception\": null}", res);
+	}
+	
+	@RequestMapping(value = "/getUserState", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody	
+	public synchronized String getUserState(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		String userId = JsonPath.with(json).getString("user");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
+		}
+		if(!sessions.containsValue(userId)) {
+			return "{\"retval\": null, \"exception\": \"InvalidUser\"}";
+		}
+		String res = mapper.writeValueAsString(users.get(userId).getState());
 		return String.format("{\"retval\": %s, \"exception\": null}", res);
 	}
 	
