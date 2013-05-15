@@ -189,19 +189,21 @@ public final class R {
         public static final int social_share=0x7f0200a5;
     }
     public static final class id {
-        public static final int GridLayout1=0x7f080011;
-        public static final int actionChat=0x7f080013;
-        public static final int actionCreateGroup=0x7f080015;
-        public static final int actionCreateItem=0x7f080017;
-        public static final int actionLayers=0x7f080014;
-        public static final int actionLogout=0x7f080019;
-        public static final int actionRemoveGroup=0x7f080016;
-        public static final int actionSettings=0x7f080018;
-        public static final int action_settings=0x7f080012;
+        public static final int LinearLayout01=0x7f080011;
+        public static final int RelativeLayout1=0x7f080013;
+        public static final int actionChat=0x7f080017;
+        public static final int actionCreateGroup=0x7f080019;
+        public static final int actionCreateItem=0x7f08001b;
+        public static final int actionLayers=0x7f080018;
+        public static final int actionLogout=0x7f08001d;
+        public static final int actionRemoveGroup=0x7f08001a;
+        public static final int actionSettings=0x7f08001c;
+        public static final int action_settings=0x7f080016;
         public static final int button1=0x7f08000a;
         public static final int buttonCreateGroup=0x7f080003;
         public static final int buttonLogin=0x7f08000e;
         public static final int debugInfo=0x7f080010;
+        public static final int expandableListView1=0x7f080014;
         public static final int inputGroupDescription=0x7f080001;
         public static final int inputGroupName=0x7f080000;
         public static final int inputLogin=0x7f08000c;
@@ -215,6 +217,8 @@ public final class R {
         public static final int radioGroupLoginMethod=0x7f080006;
         public static final int radioLoginPassword=0x7f080007;
         public static final int radioNFC=0x7f080008;
+        public static final int tvChild=0x7f080012;
+        public static final int tvGroup=0x7f080015;
     }
     public static final class layout {
         public static final int activity_create_group=0x7f030000;
@@ -224,7 +228,9 @@ public final class R {
         public static final int activity_main_map=0x7f030004;
         public static final int activity_not_implemented_yet=0x7f030005;
         public static final int activity_remove_group=0x7f030006;
-        public static final int fragment_layers_menu=0x7f030007;
+        public static final int child_layout=0x7f030007;
+        public static final int fragment_layers_menu=0x7f030008;
+        public static final int group_layout=0x7f030009;
     }
     public static final class menu {
         public static final int create_group=0x7f070000;
