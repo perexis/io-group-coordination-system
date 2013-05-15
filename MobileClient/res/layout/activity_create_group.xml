@@ -8,9 +8,52 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".CreateGroupActivity" >
 
-    <TextView
+    <EditText
+        android:id="@+id/inputGroupName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:ems="10"
+        android:hint="@string/hint_group_name" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/inputGroupDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/inputGroupName"
+        android:ems="10"
+        android:hint="@string/hint_description" />
+
+    <TextView
+        android:id="@+id/labelAvailableGroups"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/buttonCreateGroup"
+        android:layout_below="@+id/buttonCreateGroup"
+        android:layout_marginTop="30dp"
+        android:text="@string/label_available_groups"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/buttonCreateGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/inputGroupDescription"
+        android:onClick="createGroup"
+        android:text="@string/button_create" />
+
+    <ListView
+        android:id="@+id/listViewAvailableGroups"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/labelAvailableGroups" >
+    </ListView>
 
 </RelativeLayout>

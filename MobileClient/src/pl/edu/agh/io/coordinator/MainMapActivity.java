@@ -70,8 +70,8 @@ public class MainMapActivity extends Activity implements
 			return true;
 		case R.id.actionLayers:
 			debugInfo.append("\n" + item.getTitle() + "()");
-			// new GetUsersInBackground().execute(new Intent());
-			// new GetLayersInBackground().execute(new Intent());
+			new GetUsersInBackground().execute(new Intent());
+			new GetLayersInBackground().execute(new Intent());
 			new AddItemTolayerInBackground().execute(new Intent());
 			new GetMapItemsInBackground().execute(new Intent());
 			new RemoveMapItemInBackground().execute(new MapItem(1413913689, null,
@@ -304,7 +304,7 @@ public class MainMapActivity extends Activity implements
 
 			try {
 				mapItem = proxy.addItemToLayer(new Layer("notes"), new Point(
-						12.34, 56.78), "Testowa notatka");
+						13.34, 57.78), "Testowa notatka");
 			} catch (InvalidSessionIDException e) {
 				return e;
 			} catch (NetworkException e) {
