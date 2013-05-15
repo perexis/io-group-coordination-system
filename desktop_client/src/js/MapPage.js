@@ -8,6 +8,7 @@ goog.require('goog.events');
 goog.require('goog.net.jsloader');
 goog.require('io.api.ApiConnector');
 goog.require('io.log');
+goog.require('io.soy.map');
 goog.require('io.soy.settings');
 
 
@@ -20,10 +21,7 @@ goog.require('io.soy.settings');
 io.map.Page = function(main, elem) {
   this.main = main;
   this.elem = elem;
-  var dbg = function(x) {
-    io.log().info(goog.debug.deepExpose(x));
-  };
-  var api = this.main.api;
+  this.curClickElem = null;
 };
 
 
@@ -36,58 +34,75 @@ io.map.Page.prototype.render = function() {
   soy.renderElement(self.elem, io.soy.main.map);
   io.map.loadScript(function() {
     self.initMap();
-    self.loadLayers();
+    self.refreshLayers();
   });
 };
 
-var W = 47.369057;
-var E = 8.541671;
-
-io.map.Page.prototype.loadLayers = function() {
+io.map.Page.prototype.refreshLayers = function() {
   var self = this;
   var api = this.main.api;
-  api.getLayers(function(lrs) {
-    goog.array.map(lrs, function(l) {
-      api.getMapItems({'layer': l}, function(items) {
+  api.getLayers(function(layers) {
+    goog.array.map(layers, function(layer) {
+      api.getMapItems({'layer': layer}, function(items) {
         goog.array.map(items, function(item) {
-          io.log().info('mapuje');
-          var pos = item['position'];
-          var location = new google.maps.LatLng(W, E);
-          //var location =
-          //new google.maps.LatLng(p
-          //os['longitude'], pos['latitude']);
-          io.log().info(goog.debug.deepExpose(location));
-          return;
-          var marker = new google.maps.Marker(
-              {position: location, map: self.map});
-          io.log().info(goog.debug.deepExpose(marker));
+          self.putMapItem(item);
         });
       });
     });
   });
 };
 
-io.map.Page.prototype.putSampleData = function() {
-  var location = new google.maps.LatLng(W, E);
-  var marker = new google.maps.Marker(
-      {position: location, map: this.map});
-  var infowindow = new google.maps.InfoWindow({
-    content: 'hiho', size: new google.maps.Size(50, 50)
-  });
+io.map.Page.prototype.putMapItem = function(item) {
   var self = this;
+  var pos = item['position'];
+  var loc = new google.maps.LatLng(pos['longitude'], pos['latitude']);
+  var marker = new google.maps.Marker({position: loc, map: self.map});
+  var infowindow = new google.maps.InfoWindow({
+    content: item['data'], size: new google.maps.Size(50, 50)
+  });
   google.maps.event.addListener(marker, 'click', function() {
     infowindow.open(self.map, marker);
   });
 };
 
+io.map.Page.prototype.onMapClick = function(e) {
+  var self = this;
+  var hidePrevious = function() {
+    if (self.curClick != null) {
+      self.curClick['info'].close();
+      self.curClick['marker'].setVisible(false);
+      self.curClick = null;
+    }
+  };
+  hidePrevious();
+
+  var marker = new google.maps.Marker({position: e.latLng, map: this.map});
+  var infowindow = new google.maps.InfoWindow({
+    content: soy.renderAsFragment(io.soy.map.addElement)
+  });
+  infowindow.open(this.map, marker);
+  this.curClick = {'info': infowindow, 'marker': marker};
+  google.maps.event.addListener(infowindow, 'closeclick', function(e) {
+    hidePrevious();
+  });
+
+  this.map.panTo(e.latLng);
+};
+
 io.map.Page.prototype.initMap = function() {
+  var W = 47.369057;
+  var E = 8.541671;
   var mapDiv = goog.dom.getElement('map');
   var mapOptions = {
     center: new google.maps.LatLng(W, E),
-    zoom: 1,
+    zoom: 2,
     mapTypeId: google.maps.MapTypeId.ROADMAP
   };
   this.map = new google.maps.Map(mapDiv, mapOptions);
+  var self = this;
+  google.maps.event.addListener(this.map, 'click', function(e) {
+    self.onMapClick(e);
+  });
 };
 
 

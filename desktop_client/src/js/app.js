@@ -16,7 +16,7 @@ goog.require('io.soy.main');
  */
 io.start = function() {
   io.logger.init();
-  io.api_ = new io.api.ApiConnector();
+  io.log().info('Starting execution');
   io.initLoginPage_();
 };
 
