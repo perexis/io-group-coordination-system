@@ -44,6 +44,8 @@ public interface IJSonProxy {
 
 	public void updateSelfState(UserState newState) throws InvalidSessionIDException, NetworkException;
 
+	public UserState getUserState(String user) throws InvalidSessionIDException, InvalidUserException, NetworkException;
+	
 	// Returns all possible UserItems
 	public Set<UserItem> getPossibleUserItems() throws InvalidSessionIDException, NetworkException;
 

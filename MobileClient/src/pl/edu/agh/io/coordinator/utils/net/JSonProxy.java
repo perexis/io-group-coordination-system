@@ -254,6 +254,31 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
+	public UserState getUserState(String user) throws InvalidSessionIDException, InvalidUserException, NetworkException {
+		UserState toReturn = null;
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", SESSION_ID);
+		paramsInString.put("user", user);
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("getUserState", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidUser")) {
+				throw new InvalidUserException();
+			} else {
+				JSONObject retval = jsonObject.getJSONObject("retval");
+				toReturn = new UserState(retval);
+			}
+		} catch(JSONException e) {
+			e.printStackTrace();
+		}
+		return toReturn;
+	}
+	
+	@Override
 	public Set<UserItem> getPossibleUserItems() throws InvalidSessionIDException, NetworkException {
 		Set<UserItem> toReturn = new HashSet<UserItem>();
 		JSONObject params = createSessionOnlyParams();
@@ -503,7 +528,7 @@ public class JSonProxy implements IJSonProxy {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return toReturn;
 	}
 
 	@Override
