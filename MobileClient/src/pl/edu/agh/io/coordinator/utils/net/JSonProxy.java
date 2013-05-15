@@ -355,7 +355,7 @@ public class JSonProxy implements IJSonProxy {
 
 	@Override
 	public Set<User> getUsers() throws InvalidSessionIDException, NetworkException {
-		Set<User> ret = new HashSet<User>();
+		Set<User> toReturn = new HashSet<User>();
 		JSONObject params = createSessionOnlyParams();
 		try {
 			String jsonString = getJSonString("getUsers", params);
@@ -364,18 +364,18 @@ public class JSonProxy implements IJSonProxy {
 			if (exception.equals("InvalidSessionID"))
 				throw new InvalidSessionIDException();
 			else {
-				JSONArray retArray = jsonObject.getJSONArray("retval");
-				int max = retArray.length();
+				JSONArray array = jsonObject.getJSONArray("retval");
+				int max = array.length();
 				for (int i = 0; i < max; i++) {
-					JSONObject jsonUser = retArray.getJSONObject(i);
+					JSONObject jsonUser = array.getJSONObject(i);
 					User user = new User(jsonUser);
-					ret.add(user);
+					toReturn.add(user);
 				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		return ret;
+		return toReturn;
 	}
 
 	@Override
