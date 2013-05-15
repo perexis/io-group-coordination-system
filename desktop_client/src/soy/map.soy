@@ -4,7 +4,14 @@
  * Onclick info window for adding elemetns.
  */
 {template .addElement}
-<div class="add-element-window"><b>Hello!</b></div>
+<div class="add-element-window">
+  <form id="addItemForm">
+    <h3>Add item to the map</h3>
+    <input id="addItemLayer" type="text" class="input-block-level" placeholder="Layer">
+    <input id="addItemData" type="text" class="input-block-level" placeholder="Data">
+    <button type="submit" class="btn btn-primary" id="addItemBtn">Add</button>
+  </form>
+</div>
 {/template}
 
 

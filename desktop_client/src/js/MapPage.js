@@ -22,6 +22,8 @@ io.map.Page = function(main, elem) {
   this.main = main;
   this.elem = elem;
   this.curClickElem = null;
+  this.pendingRefresh = false;
+  this.markers = {};
 };
 
 
@@ -35,46 +37,77 @@ io.map.Page.prototype.render = function() {
   io.map.loadScript(function() {
     self.initMap();
     self.refreshLayers();
-  });
-};
-
-io.map.Page.prototype.refreshLayers = function() {
-  var self = this;
-  var api = this.main.api;
-  api.getLayers(function(layers) {
-    goog.array.map(layers, function(layer) {
-      api.getMapItems({'layer': layer}, function(items) {
-        goog.array.map(items, function(item) {
-          self.putMapItem(item);
-        });
-      });
+    var timer = new goog.Timer(1000);
+    timer.start();
+    goog.events.listen(timer, goog.Timer.TICK, function() {
+      self.refreshLayers();
     });
   });
 };
 
-io.map.Page.prototype.putMapItem = function(item) {
+io.map.Page.prototype.refreshLayers = function() {
+  if (!this.pendingRefresh) {
+    var self = this;
+    self.pendingRefresh = true;
+    var api = this.main.api;
+    api.getLayers(function(layers) {
+      var done = 0;
+      var finished = function() {
+        done++;
+        if (done == layers.length) {
+          self.pendingRefresh = false;
+        }
+      };
+      goog.array.forEach(layers, function(layer) {
+        api.getMapItems({'layer': layer}, function(items) {
+          var newMarkers = {};
+          goog.array.forEach(items, function(item) {
+            self.putMapItem(item, newMarkers, self.markers[layer]);
+          });
+          for (var key in self.markers[layer]) {
+            var obj = self.markers[layer][key];
+            obj['marker'].setVisible(false);
+            obj['info'].close();
+          }
+          self.markers[layer] = newMarkers;
+          finished();
+        }, finished);
+      });
+    });
+  }
+};
+
+io.map.Page.prototype.putMapItem = function(item, newMarkers, markers) {
   var self = this;
   var pos = item['position'];
   var loc = new google.maps.LatLng(pos['longitude'], pos['latitude']);
-  var marker = new google.maps.Marker({position: loc, map: self.map});
-  var infowindow = new google.maps.InfoWindow({
-    content: item['data'], size: new google.maps.Size(50, 50)
-  });
-  google.maps.event.addListener(marker, 'click', function() {
-    infowindow.open(self.map, marker);
-  });
+  var id = item['id'];
+  if (markers != undefined && markers[id]) {
+    newMarkers[id] = markers[id];
+    newMarkers[id]['marker'].setPosition(loc);
+    delete markers[id];
+  } else {
+    var marker = new google.maps.Marker({position: loc, map: self.map});
+    var infowindow = new google.maps.InfoWindow({
+      content: item['data'], size: new google.maps.Size(50, 50)
+    });
+    google.maps.event.addListener(marker, 'click', function() {
+      infowindow.open(self.map, marker);
+    });
+    newMarkers[id] = {'marker': marker, 'info:': infowindow};
+  }
 };
 
 io.map.Page.prototype.onMapClick = function(e) {
   var self = this;
-  var hidePrevious = function() {
+  var hideCurrentMarker = function() {
     if (self.curClick != null) {
       self.curClick['info'].close();
       self.curClick['marker'].setVisible(false);
       self.curClick = null;
     }
   };
-  hidePrevious();
+  hideCurrentMarker();
 
   var marker = new google.maps.Marker({position: e.latLng, map: this.map});
   var infowindow = new google.maps.InfoWindow({
@@ -83,8 +116,30 @@ io.map.Page.prototype.onMapClick = function(e) {
   infowindow.open(this.map, marker);
   this.curClick = {'info': infowindow, 'marker': marker};
   google.maps.event.addListener(infowindow, 'closeclick', function(e) {
-    hidePrevious();
+    hideCurrentMarker();
   });
+
+  var onItemAdded = function(json) {
+    io.log().info('Successfully added item');
+    hideCurrentMarker();
+    self.refreshLayers();
+  };
+
+  var onItemAddError = function(err) {
+    io.log().warning('Could not add item: ' + err);
+  };
+
+  var clickPoint = new io.api.Point(e.latLng['kb'], e.latLng['lb']);
+  var addCallback = function(e) {
+    e.preventDefault();
+    var layer = goog.dom.getElement('addItemLayer').value;
+    var data = goog.dom.getElement('addItemData').value;
+    io.log().info('Adding item, layer:' + layer + ' data:' + data);
+    self.main.api.addItemToLayer({'point': clickPoint, 'data': data,
+      'layer': layer}, onItemAdded, onItemAddError);
+  };
+  goog.events.listen(goog.dom.getElement('addItemForm'),
+      goog.events.EventType.SUBMIT, addCallback);
 
   this.map.panTo(e.latLng);
 };
@@ -95,7 +150,7 @@ io.map.Page.prototype.initMap = function() {
   var mapDiv = goog.dom.getElement('map');
   var mapOptions = {
     center: new google.maps.LatLng(W, E),
-    zoom: 2,
+    zoom: 3,
     mapTypeId: google.maps.MapTypeId.ROADMAP
   };
   this.map = new google.maps.Map(mapDiv, mapOptions);

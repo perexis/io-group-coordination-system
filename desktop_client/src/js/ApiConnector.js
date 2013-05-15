@@ -160,8 +160,8 @@ io.api.ApiConnector.prototype.request_ = function(resource, data, callback,
   goog.events.listen(xhr, goog.net.EventType.SUCCESS, function(e) {
     try {
       var json = this.getResponseJson();
-      io.log().info('Got response from: ' + url + '\n' +
-          goog.debug.deepExpose(json));
+      //io.log().info('Got response from: ' + url + '\n' +
+      //    goog.debug.deepExpose(json));
     } catch (err) {
       io.log().warning('Internal exception: ' + err);
       onError(e);
