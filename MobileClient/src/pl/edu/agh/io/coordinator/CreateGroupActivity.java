@@ -1,5 +1,8 @@
 package pl.edu.agh.io.coordinator;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
@@ -29,21 +32,24 @@ public class CreateGroupActivity extends Activity {
 	private Button createButton;
 	private EditText inputGroupName;
 	private EditText inputGroupDescription;
+	private List<String> groups;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_group);
 
+		groups = new ArrayList<String>();
 		listArrayAdapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1);
+				android.R.layout.simple_list_item_1, groups);
 		ListView availableGroups = (ListView) findViewById(R.id.listViewAvailableGroups);
 		availableGroups.setAdapter(listArrayAdapter);
 		new GetGroupsInBackground().execute(new Intent());
-		creatingGroupInProgress=false;
-		createButton=(Button)findViewById(R.id.buttonCreateGroup);
-		inputGroupName=(EditText) findViewById(R.id.inputGroupName);
-		inputGroupDescription=(EditText) findViewById(R.id.inputGroupDescription);
+		creatingGroupInProgress = false;
+		createButton = (Button) findViewById(R.id.buttonCreateGroup);
+		inputGroupName = (EditText) findViewById(R.id.inputGroupName);
+		inputGroupDescription = (EditText) findViewById(R.id.inputGroupDescription);
+
 	}
 
 	@Override
@@ -51,7 +57,6 @@ public class CreateGroupActivity extends Activity {
 		return false;
 	}
 
-	
 	public void createGroup(View view) {
 
 		if (creatingGroupInProgress == false)
@@ -65,7 +70,14 @@ public class CreateGroupActivity extends Activity {
 			createGroupInBackground = null;
 		}
 	}
-	
+
+	private void groupCreated() {
+		new AlertDialog.Builder(CreateGroupActivity.this)
+				.setMessage(R.string.alert_group_created)
+				.setIcon(R.drawable.alerts_and_states_warning)
+				.setPositiveButton(R.string.button_ok, null).create().show();
+	}
+
 	// alerts about invalid sessionID and finishes activity
 	private void invalidSessionId() {
 		new AlertDialog.Builder(CreateGroupActivity.this)
@@ -92,14 +104,14 @@ public class CreateGroupActivity extends Activity {
 	private class GetGroupsInBackground extends
 			AsyncTask<Intent, Void, Exception> {
 
-		private Set<Group> groups;
+		private Set<Group> retSet;
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
 			IJSonProxy proxy = JSonProxy.getInstance();
 
 			try {
-				groups = proxy.getGroups();
+				retSet = proxy.getGroups();
 			} catch (InvalidSessionIDException e) {
 				return e;
 			} catch (NetworkException e) {
@@ -113,9 +125,10 @@ public class CreateGroupActivity extends Activity {
 		protected void onPostExecute(Exception result) {
 
 			if (result == null) {
-				for (Group group : groups)
-					listArrayAdapter.add(group.getId() + ": "
-							+ group.getDescription());
+				groups.clear();
+				for (Group group : retSet)
+					groups.add(group.toString());
+				listArrayAdapter.notifyDataSetChanged();
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
@@ -132,8 +145,9 @@ public class CreateGroupActivity extends Activity {
 		protected Exception doInBackground(Intent... params) {
 			IJSonProxy proxy = JSonProxy.getInstance();
 
-			Group group= new Group(inputGroupName.getText().toString(), inputGroupDescription.getText().toString());
-			
+			Group group = new Group(inputGroupName.getText().toString(),
+					inputGroupDescription.getText().toString());
+
 			try {
 				proxy.createGroup(group);
 			} catch (InvalidSessionIDException e) {
@@ -145,28 +159,31 @@ public class CreateGroupActivity extends Activity {
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected void onCancelled(Exception result) {
 			createButton.setText(getString(R.string.button_create));
-			creatingGroupInProgress= false;
+			creatingGroupInProgress = false;
 		}
 
 		@Override
 		protected void onPostExecute(Exception result) {
-			creatingGroupInProgress=false;
+			creatingGroupInProgress = false;
 			createButton.setText(R.string.button_create);
 			if (result == null) {
-				//TODO: dorobić
-				CreateGroupActivity.this.finish();
+				groupCreated();
+				inputGroupName.setText("");
+				inputGroupDescription.setText("");
+				// refresh group list
+				new GetGroupsInBackground().execute(new Intent());
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
 				invalidSessionId();
-			} else if(result instanceof CouldNotCreateGroupException){
+			} else if (result instanceof CouldNotCreateGroupException) {
 				Toast.makeText(getApplicationContext(),
-						R.string.alert_could_not_create_group, Toast.LENGTH_LONG)
-						.show();
+						R.string.alert_could_not_create_group,
+						Toast.LENGTH_LONG).show();
 			}
 		}
 

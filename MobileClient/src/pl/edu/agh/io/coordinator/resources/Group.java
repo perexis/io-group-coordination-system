@@ -27,6 +27,19 @@ public class Group {
 	public String getDescription() {
 		return description;
 	}
+	
+	@Override
+	public String toString(){
+		return id + ": " + description;
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(o instanceof Group)
+			return this.id.equals(((Group)o).getId());
+		else
+			return false;
+	}
 
 	public JSONObject toJsonObject() {
 		Map<String, String> elements = new HashMap<String, String>();

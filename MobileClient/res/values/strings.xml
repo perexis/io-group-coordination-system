@@ -51,5 +51,6 @@
     <string name="hint_group_name">Group name</string>
     <string name="hint_description">Description</string>
     <string name="alert_could_not_create_group">Could not create group</string>
+    <string name="alert_group_created">Group successfully created</string>
 
 </resources>

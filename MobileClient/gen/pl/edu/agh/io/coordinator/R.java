@@ -249,6 +249,7 @@ public final class R {
         public static final int action_settings=0x7f050000;
         public static final int alert_could_not_create_group=0x7f050024;
         public static final int alert_could_not_login=0x7f050017;
+        public static final int alert_group_created=0x7f050025;
         public static final int alert_invalid_session_id=0x7f050019;
         public static final int alert_invalid_session_id_logout=0x7f05001a;
         public static final int alert_logged_out=0x7f050018;
