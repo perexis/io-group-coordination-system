@@ -8,7 +8,6 @@ import org.json.JSONObject;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 public class Group implements Parcelable {
 
@@ -35,14 +34,6 @@ public class Group implements Parcelable {
 	@Override
 	public String toString(){
 		return id + ": " + description;
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		if(o instanceof Group)
-			return this.id.equals(((Group)o).getId());
-		else
-			return false;
 	}
 
 	public JSONObject toJsonObject() {
@@ -74,6 +65,23 @@ public class Group implements Parcelable {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.id);
 		dest.writeString(this.description);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		} else if (obj instanceof Group) {
+			Group group = (Group) obj;
+			return this.id.equals(group.id);
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return id.hashCode();
 	}
 	
 }

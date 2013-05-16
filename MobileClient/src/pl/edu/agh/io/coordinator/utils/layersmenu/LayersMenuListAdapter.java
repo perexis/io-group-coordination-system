@@ -3,7 +3,9 @@ package pl.edu.agh.io.coordinator.utils.layersmenu;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.LayersMenuFragment;
@@ -21,11 +23,23 @@ import android.widget.TextView;
 
 public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 
+	private class UserItemComparator implements Comparator<UserItem> {
+		
+		@Override
+		public int compare(UserItem lhs, UserItem rhs) {
+			return lhs.getId().compareTo(rhs.getId());
+		}
+		
+	}
+	
 	private Context context;
 	private List<String> menuGroups;
 	private List<UserItem> items;
 	private List<User> people;
 	private List<Group> groups;
+	private Map<String, Boolean> itemsChecks;
+	private Map<String, Boolean> peopleChecks;
+	private Map<String, Boolean> groupsChecks;
 
 	public LayersMenuListAdapter(Context context) {
 		this.context = context;
@@ -36,6 +50,9 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		this.items = new ArrayList<UserItem>();
 		this.people = new ArrayList<User>();
 		this.groups = new ArrayList<Group>();
+		this.itemsChecks = new HashMap<String, Boolean>();
+		this.peopleChecks = new HashMap<String, Boolean>();
+		this.groupsChecks = new HashMap<String, Boolean>();
 	}
 
 	public List<UserItem> getItems() {
@@ -50,13 +67,51 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		return this.groups;
 	}
 	
-	private class UserItemComparator implements Comparator<UserItem>{
+	public Map<String, Boolean> getItemsChecks() {
+		return itemsChecks;
+	}
 
-		@Override
-		public int compare(UserItem lhs, UserItem rhs) {
-			return lhs.getId().compareTo(rhs.getId());
+	public Map<String, Boolean> getPeopleChecks() {
+		return peopleChecks;
+	}
+
+	public Map<String, Boolean> getGroupsChecks() {
+		return groupsChecks;
+	}
+	
+	public void setAllChecks(Map<String, Boolean> items, Map<String, Boolean> people, Map<String, Boolean> groups) {
+		this.itemsChecks = items;
+		this.peopleChecks = people;
+		this.groupsChecks = groups;
+		notifyDataSetChanged();
+	}
+
+	public void setCheck(int group, String child, boolean check) {
+		Map<String, Boolean> map = null;
+		if (group == LayersMenuFragment.ITEM_POSITION) {
+			map = itemsChecks;
+		} else if (group == LayersMenuFragment.USER_POSITION) {
+			map = peopleChecks;
+		} else if (group == LayersMenuFragment.GROUP_POSITION) {
+			map = groupsChecks;
+		} else {
+			return;
 		}
-		
+		map.put(child, check);
+	}
+	
+	public Boolean getCheck(int group, String child) {
+		Map<String, Boolean> map = null;
+		if (group == LayersMenuFragment.ITEM_POSITION) {
+			map = itemsChecks;
+		} else if (group == LayersMenuFragment.USER_POSITION) {
+			map = peopleChecks;
+		} else if (group == LayersMenuFragment.GROUP_POSITION) {
+			map = groupsChecks;
+		} else {
+			return null;
+		}
+		return map.get(child);
 	}
 	
 	public void setItems(Set<UserItem> items) {
@@ -108,15 +163,37 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		}
 		TextView tv = (TextView) convertView.findViewById(R.id.tvChild);
 		String text = null;
+		boolean isChecked = false;
 		if (groupPosition == LayersMenuFragment.ITEM_POSITION) {
 			text = ((UserItem) object).getId();
+			if (itemsChecks.containsKey(text)) {
+				isChecked = itemsChecks.get(text);
+			} else {
+				itemsChecks.put(text, false);
+			}
 		} else if (groupPosition == LayersMenuFragment.USER_POSITION) {
 			text = ((User) object).getId();
+			if (peopleChecks.containsKey(text)) {
+				isChecked = peopleChecks.get(text);
+			} else {
+				peopleChecks.put(text, false);
+			}
 		} else if (groupPosition == LayersMenuFragment.GROUP_POSITION) {
 			text = ((Group) object).getId();
+			if (groupsChecks.containsKey(text)) {
+				isChecked = groupsChecks.get(text);
+			} else {
+				groupsChecks.put(text, false);
+			}
 		}
-		tv.setText("   " + text);
-		tv.setTextColor(Color.BLACK);
+		tv.setText(text);
+		if (isChecked) {
+			tv.setTextColor(Color.WHITE);
+			tv.setBackgroundColor(Color.BLACK);
+		} else {
+			tv.setTextColor(Color.BLACK);
+			tv.setBackgroundColor(Color.WHITE);
+		}
 		return convertView;
 	}
 

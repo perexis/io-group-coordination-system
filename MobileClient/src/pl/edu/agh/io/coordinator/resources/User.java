@@ -8,7 +8,6 @@ import org.json.JSONObject;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 
 public class User implements Parcelable {
 
@@ -100,4 +99,21 @@ public class User implements Parcelable {
 		dest.writeString(this.email);
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		} else if (obj instanceof User) {
+			User user = (User) obj;
+			return this.id.equals(user.id);
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+
 }

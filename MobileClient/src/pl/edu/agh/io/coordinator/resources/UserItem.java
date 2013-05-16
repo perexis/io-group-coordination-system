@@ -71,4 +71,21 @@ public class UserItem implements Parcelable {
 		dest.writeString(this.image);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		} else if (obj instanceof UserItem) {
+			UserItem userItem = (UserItem) obj;
+			return this.id.equals(userItem.id);
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
+	
 }
