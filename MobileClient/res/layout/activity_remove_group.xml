@@ -25,8 +25,9 @@
         android:layout_above="@+id/buttonRemoveGroup"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/labelSelectGroup"
-        android:choiceMode="singleChoice"
         android:layout_marginTop="20dp"
+        android:choiceMode="singleChoice"
+        android:drawSelectorOnTop="true"
         tools:listitem="@android:layout/simple_list_item_1" >
 
     </ListView>

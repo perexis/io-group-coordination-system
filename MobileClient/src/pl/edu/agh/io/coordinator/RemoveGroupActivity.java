@@ -18,6 +18,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -31,6 +33,8 @@ public class RemoveGroupActivity extends Activity {
 	private Button removeButton;
 	private List<String> groups;
 
+	private String selectedItem = "";
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -41,10 +45,25 @@ public class RemoveGroupActivity extends Activity {
 				android.R.layout.simple_list_item_1, groups);
 		ListView availableGroups = (ListView) findViewById(R.id.listViewAvailableGroups);
 		availableGroups.setAdapter(listArrayAdapter);
+
+		availableGroups.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				selectedItem = (String) parent.getItemAtPosition(position);
+				/*((ListView) findViewById(R.id.listViewAvailableGroups))
+						.setSelection(position);
+				view.getFocusables(position);
+				view.setSelected(true);
+				listArrayAdapter.notifyDataSetChanged();*/
+			}
+
+		});
+
 		new GetGroupsInBackground().execute(new Intent());
 		removingGroupInProgress = false;
 		removeButton = (Button) findViewById(R.id.buttonRemoveGroup);
-
 	}
 
 	@Override
@@ -122,7 +141,7 @@ public class RemoveGroupActivity extends Activity {
 			if (result == null) {
 				groups.clear();
 				for (Group group : retSet)
-					groups.add(group.toString());
+					groups.add(group.getId());
 				listArrayAdapter.notifyDataSetChanged();
 			} else if (result instanceof NetworkException) {
 				networkProblem();
@@ -140,10 +159,8 @@ public class RemoveGroupActivity extends Activity {
 		protected Exception doInBackground(Intent... params) {
 			IJSonProxy proxy = JSonProxy.getInstance();
 
-			
-			//TODO: pobrać właściwą grupę
-			Group group = new Group("aa", "abb");
-			
+			Group group = new Group(selectedItem, "");
+
 			try {
 				proxy.removeGroup(group);
 			} catch (InvalidSessionIDException e) {
