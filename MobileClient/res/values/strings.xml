@@ -12,6 +12,7 @@
     <string name="title_activity_create_group">Create Group</string>
     <string name="title_activity_remove_group">Remove Group</string>
     <string name="title_activity_create_user_item">Create User Item</string>
+    <string name="button_remove">Remove</string>
 
     <!-- LoginMethodActivity -->
     <string name="app_name">Operations Coordinator</string>
@@ -57,5 +58,10 @@
     <string name="menu_item_items">Items</string>
     <string name="menu_item_people">People</string>
     <string name="menu_item_groups">Groups</string>
-
+    
+    <!-- RemoveGroupActivity -->
+    <string name="alert_group_removed">Group removed</string>
+    <string name="label_select_group_to_remove">Select group to remove:</string>
+	<string name="alert_could_not_remove_group">Could not remove group</string>
+	
 </resources>

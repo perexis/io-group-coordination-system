@@ -22,11 +22,12 @@
         android:id="@+id/listViewAvailableGroups"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/buttonRemoveGroup"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/labelSelectGroup"
-        android:choiceMode="singleChoice"
         android:layout_marginTop="20dp"
+        android:layout_toLeftOf="@+id/buttonRemoveGroup"
+        android:choiceMode="singleChoice"
         tools:listitem="@android:layout/simple_list_item_1" >
 
     </ListView>
@@ -36,7 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
         android:onClick="removeGroup"
         android:text="@string/button_remove" />
 
