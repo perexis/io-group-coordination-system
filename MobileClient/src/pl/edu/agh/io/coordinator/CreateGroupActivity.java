@@ -1,9 +1,9 @@
 package pl.edu.agh.io.coordinator;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
