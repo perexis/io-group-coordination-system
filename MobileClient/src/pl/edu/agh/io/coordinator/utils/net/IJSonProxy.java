@@ -1,5 +1,6 @@
 package pl.edu.agh.io.coordinator.utils.net;
 
+import java.util.List;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.resources.Group;
@@ -78,6 +79,6 @@ public interface IJSonProxy {
 	public void sendMessage(String message) throws InvalidSessionIDException, NetworkException;
 
 	// Receives new messages from server
-	public Set<Message> getMessages() throws InvalidSessionIDException, NetworkException;
+	public List<Message> getMessages() throws InvalidSessionIDException, NetworkException;
 
 }

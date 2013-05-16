@@ -4,8 +4,13 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -570,8 +575,8 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public Set<Message> getMessages() throws InvalidSessionIDException, NetworkException {
-		Set<Message> toReturn = new HashSet<Message>();
+	public List<Message> getMessages() throws InvalidSessionIDException, NetworkException {
+		List<Message> toReturn = new LinkedList<Message>();
 		JSONObject params = createSessionOnlyParams();
 		try {
 			String jsonString = getJSonString("getMessages", params);
@@ -591,6 +596,21 @@ public class JSonProxy implements IJSonProxy {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		Comparator<Message> comparator = new Comparator<Message>() {
+			@Override
+			public int compare(Message lhs, Message rhs) {
+				long ltime = lhs.getSentTime();
+				long rtime = rhs.getSentTime();
+				if (ltime < rtime) {
+					return -1;
+				} else if (ltime > rtime) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+		};
+		Collections.sort(toReturn, comparator);
 		return toReturn;
 	}
 	
