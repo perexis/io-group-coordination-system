@@ -6,7 +6,11 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Group {
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.Parcelable.Creator;
+
+public class Group implements Parcelable {
 
 	private String id;
 	private String description;
@@ -48,4 +52,28 @@ public class Group {
 		return new JSONObject(elements);
 	}
 
+	public static final Creator<Group> CREATOR = new Creator<Group>() {
+		@Override
+		public Group createFromParcel(Parcel source) {
+			String id = source.readString();
+			String description = source.readString();
+			return new Group(id, description);
+		}
+		@Override
+		public Group[] newArray(int size) {
+			return new Group[size];
+		}
+	}; 
+	
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.id);
+		dest.writeString(this.description);
+	}
+	
 }
