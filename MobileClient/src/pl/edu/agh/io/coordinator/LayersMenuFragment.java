@@ -2,7 +2,6 @@ package pl.edu.agh.io.coordinator;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,10 +9,9 @@ import java.util.Set;
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
-import pl.edu.agh.io.coordinator.utils.layersmenu.ExpandableListPosition;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListAdapter;
+import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuState;
 import android.app.Fragment;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,13 +19,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.ExpandableListView.OnGroupClickListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class LayersMenuFragment extends Fragment {
 
 	private LayersMenuListAdapter adapter;
-	private ExpandableListView listView; 
+	private ExpandableListView listView;
 
 	public static final int ITEM_POSITION = 0;
 	public static final int USER_POSITION = 1;
@@ -60,12 +59,13 @@ public class LayersMenuFragment extends Fragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d("LayersMenuFragment", "starting onCreate");
-		adapter = new LayersMenuListAdapter(getActivity());
 		super.onCreate(savedInstanceState);
+		adapter = new LayersMenuListAdapter(getActivity());
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
 		Log.d("LayersMenuFragment", "starting onCreateView");
 		View toReturn = inflater.inflate(R.layout.fragment_layers_menu, container, false);
 		listView = (ExpandableListView) toReturn.findViewById(R.id.expandableListView);
@@ -81,6 +81,31 @@ public class LayersMenuFragment extends Fragment {
 				return true;
 			}
 		});
+		listView.setOnGroupClickListener(new OnGroupClickListener() {
+			@Override
+			public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+				if (listView.isGroupExpanded(groupPosition)) {
+					listView.collapseGroup(groupPosition);			    
+				} else {
+					for (int i = 0; i < 3; ++i) {
+						if (i == groupPosition) {
+							listView.expandGroup(i, true);
+						} else {
+							listView.collapseGroup(i);
+						}
+					}
+				}
+				return true;
+			}
+		});
+		MainMapActivity activity = (MainMapActivity) getActivity();
+		LayersMenuState state = activity.getSavedState();
+		if (state != null) {
+			adapter.setItems(state.items);
+			adapter.setPeople(state.people);
+			adapter.setGroups(state.groups);
+			adapter.setAllChecks(state.itemsChecks, state.peopleChecks, state.groupsChecks);
+		}
 		return toReturn;
 	}
 
@@ -137,11 +162,10 @@ public class LayersMenuFragment extends Fragment {
 			++i3;
 		}
 	}
-
+	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		Log.d("LayersMenuFragment", "starting onActivityCreated");
-		super.onActivityCreated(savedInstanceState);
 		if (savedInstanceState != null) {
 			Set<UserItem> items = new HashSet<UserItem>();
 			int itemsLimit = savedInstanceState.getInt("itemsCount");
@@ -181,6 +205,34 @@ public class LayersMenuFragment extends Fragment {
 			adapter.setGroups(groups);
 			adapter.setAllChecks(itemsChecks, peopleChecks, groupsChecks);
 		}
+		super.onActivityCreated(savedInstanceState);
 	}
 
+	@Override
+	public void onDestroyView() {
+		Log.d("LayersMenuFragment", "starting onDestroyView");
+		super.onDestroyView();
+		LayersMenuState state = new LayersMenuState();
+		state.items = new HashSet<UserItem>(adapter.getItems());
+		state.people = new HashSet<User>(adapter.getPeople());
+		state.groups = new HashSet<Group>(adapter.getGroups());
+		state.itemsChecks = adapter.getItemsChecks();
+		state.peopleChecks = adapter.getPeopleChecks();
+		state.groupsChecks = adapter.getGroupsChecks();
+		MainMapActivity activity = (MainMapActivity) getActivity();
+		activity.setSavedState(state);
+	}
+	
+	@Override
+	public void onDestroy() {
+		Log.d("LayersMenuFragment", "starting onDestroy");
+		super.onDestroy();
+	}
+	
+	@Override
+	public void onDetach() {
+		Log.d("LayersMenuFragment", "starting onDetach");
+		super.onDetach();
+	}
+	
 }

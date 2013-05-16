@@ -15,6 +15,7 @@ import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -187,6 +188,9 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 			}
 		}
 		tv.setText(text);
+		Log.d("LayersMenuListAdapter", "values: text = " + text + ", isChecked = " + isChecked);
+		Log.d("LayersMenuListAdapter", "values: sizes are " + itemsChecks.size() + ", " + peopleChecks.size() + ", "
+				+ groupsChecks.size());
 		if (isChecked) {
 			tv.setTextColor(Color.WHITE);
 			tv.setBackgroundColor(Color.BLACK);

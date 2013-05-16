@@ -8,6 +8,7 @@ import pl.edu.agh.io.coordinator.resources.MapItem;
 import pl.edu.agh.io.coordinator.resources.Point;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
+import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuState;
 import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidLayerException;
@@ -33,6 +34,7 @@ public class MainMapActivity extends Activity {
 	private TextView debugInfo;
 	private boolean loggingOut = false;
 	private LayersMenuFragment fragment = new LayersMenuFragment();
+	private LayersMenuState savedState = null;
 
 	private Set<UserItem> userItems;
 	private Set<User> users;
@@ -41,6 +43,14 @@ public class MainMapActivity extends Activity {
 	private Set<Layer> layers;
 	private Set<MapItem> mapItems;
 
+	public LayersMenuState getSavedState() {
+		return this.savedState;
+	}
+	
+	public void setSavedState(LayersMenuState state) {
+		this.savedState = state;
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
