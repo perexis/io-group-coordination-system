@@ -1,11 +1,13 @@
 package pl.edu.agh.io.coordinator;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.MapItem;
 import pl.edu.agh.io.coordinator.resources.Point;
 import pl.edu.agh.io.coordinator.resources.User;
+import pl.edu.agh.io.coordinator.resources.UserItem;
 import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidLayerException;
@@ -31,6 +33,7 @@ public class MainMapActivity extends Activity {
 
 	private TextView debugInfo;
 	private boolean loggingOut = false;
+	private LayersMenuFragment fragment = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -67,19 +70,24 @@ public class MainMapActivity extends Activity {
 		case R.id.actionChat:
 			item.setChecked(!item.isChecked());
 			debugInfo.append("\n" + item.getTitle() + "()");
+			// ANOTHER MADNESS HERE
+			Set<UserItem> items = new HashSet<UserItem>();
+			items.add(new UserItem("gaśnica", "pro gaśnica", ""));
+			items.add(new UserItem("koc", "ciepły koc", ""));
+			fragment.setItems(items);
+			// NOT ANYMORE
 			return true;
 		case R.id.actionLayers:
 			debugInfo.append("\n" + item.getTitle() + "()");
-			new GetUsersInBackground().execute(new Intent());
-			new GetLayersInBackground().execute(new Intent());
-			new AddItemTolayerInBackground().execute(new Intent());
-			new GetMapItemsInBackground().execute(new Intent());
-			new RemoveMapItemInBackground().execute(new MapItem(1413913689, null,
-					null));
+			//new GetUsersInBackground().execute(new Intent());
+			//new GetLayersInBackground().execute(new Intent());
+			//new AddItemTolayerInBackground().execute(new Intent());
+			//new GetMapItemsInBackground().execute(new Intent());
+			//new RemoveMapItemInBackground().execute(new MapItem(1413913689, null, null));
 			//TESTING FRAGMENT, DON'T BE MAD
 			FragmentManager fragmentManager = getFragmentManager();
 			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-			LayersMenuFragment fragment = new LayersMenuFragment();
+			fragment = new LayersMenuFragment();
 			fragmentTransaction.add(R.id.mainMapTestLayout, fragment);
 			fragmentTransaction.commit();
 			//END OF MADNESS

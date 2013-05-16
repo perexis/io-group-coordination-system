@@ -176,8 +176,8 @@ public class LayersMenuFragment extends Fragment {
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
 		adapter = new LayersMenuListAdapter(getActivity());
+		super.onCreate(savedInstanceState);
 	}
 
 	@Override
