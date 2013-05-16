@@ -281,6 +281,11 @@ public final class R {
         public static final int label_login_method=0x7f05000b;
         public static final int label_password=0x7f050014;
         public static final int label_we_are_sorry=0x7f050011;
+        public static final int menu_item_groups=0x7f050028;
+        /**  LayersMenuFragment 
+         */
+        public static final int menu_item_items=0x7f050026;
+        public static final int menu_item_people=0x7f050027;
         public static final int radio_fingerprint=0x7f05000f;
         public static final int radio_login_password=0x7f05000d;
         public static final int radio_nfc=0x7f05000e;

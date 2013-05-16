@@ -1,13 +1,13 @@
 package pl.edu.agh.io.coordinator.utils.layersmenu;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.LayersMenuFragment;
 import pl.edu.agh.io.coordinator.R;
-import pl.edu.agh.io.coordinator.R.id;
-import pl.edu.agh.io.coordinator.R.layout;
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
@@ -30,9 +30,9 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 	public LayersMenuListAdapter(Context context) {
 		this.context = context;
 		this.menuGroups = new ArrayList<String>();
-		this.menuGroups.add("Items");
-		this.menuGroups.add("People");
-		this.menuGroups.add("Groups");
+		this.menuGroups.add(context.getString(R.string.menu_item_items));
+		this.menuGroups.add(context.getString(R.string.menu_item_people));
+		this.menuGroups.add(context.getString(R.string.menu_item_groups));
 		this.items = new ArrayList<UserItem>();
 		this.people = new ArrayList<User>();
 		this.groups = new ArrayList<Group>();
@@ -50,8 +50,19 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		return this.groups;
 	}
 	
+	private class UserItemComparator implements Comparator<UserItem>{
+
+		@Override
+		public int compare(UserItem lhs, UserItem rhs) {
+			return lhs.getId().compareTo(rhs.getId());
+		}
+		
+	}
+	
 	public void setItems(Set<UserItem> items) {
-		this.items = new ArrayList<UserItem>(items);
+		ArrayList<UserItem> list = new ArrayList<UserItem>(items);
+		Collections.sort(list, new UserItemComparator());
+		this.items = list;
 		notifyDataSetChanged();
 	}
 

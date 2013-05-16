@@ -1,32 +1,22 @@
 package pl.edu.agh.io.coordinator;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import pl.edu.agh.io.coordinator.R;
-import pl.edu.agh.io.coordinator.R.id;
-import pl.edu.agh.io.coordinator.R.layout;
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
 import pl.edu.agh.io.coordinator.utils.layersmenu.ExpandableListPosition;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListAdapter;
-
 import android.app.Fragment;
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.os.Parcelable.Creator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.LinearLayout;
