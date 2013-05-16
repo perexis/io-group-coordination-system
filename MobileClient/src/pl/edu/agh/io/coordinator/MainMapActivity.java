@@ -52,11 +52,12 @@ public class MainMapActivity extends Activity {
 		debugInfo.setText("Debug");
 
 		// TODO: remove ----v-------
+		/*
 		FragmentManager fragmentManager = getFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager
 				.beginTransaction();
 		fragmentTransaction.add(R.id.mainMapTestLayout, fragment);
-		fragmentTransaction.commit();
+		fragmentTransaction.commit(); */
 		// ------------------^------
 
 		new Thread() {

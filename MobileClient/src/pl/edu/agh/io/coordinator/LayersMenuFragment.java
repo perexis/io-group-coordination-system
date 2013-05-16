@@ -45,16 +45,25 @@ public class LayersMenuFragment extends Fragment {
 	}
 
 	public void setItems(Set<UserItem> items) {
+		if (adapter == null) {
+			return;
+		}
 		adapter.setItems(items);
 		clearGroupChecks(ITEM_POSITION);
 	}
 
 	public void setPeople(Set<User> people) {
+		if (adapter == null) {
+			return;
+		}
 		adapter.setPeople(people);
 		clearGroupChecks(USER_POSITION);
 	}
 
 	public void setGroups(Set<Group> groups) {
+		if (adapter == null) {
+			return;
+		}
 		adapter.setGroups(groups);
 		clearGroupChecks(GROUP_POSITION);
 	}
