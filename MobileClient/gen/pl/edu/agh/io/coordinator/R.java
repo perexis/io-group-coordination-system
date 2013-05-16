@@ -189,21 +189,21 @@ public final class R {
         public static final int social_share=0x7f0200a5;
     }
     public static final class id {
-        public static final int LinearLayout01=0x7f080011;
-        public static final int RelativeLayout1=0x7f080013;
-        public static final int actionChat=0x7f080017;
-        public static final int actionCreateGroup=0x7f080019;
-        public static final int actionCreateItem=0x7f08001b;
-        public static final int actionLayers=0x7f080018;
-        public static final int actionLogout=0x7f08001d;
-        public static final int actionRemoveGroup=0x7f08001a;
-        public static final int actionSettings=0x7f08001c;
-        public static final int action_settings=0x7f080016;
+        public static final int LinearLayout01=0x7f080013;
+        public static final int RelativeLayout1=0x7f080015;
+        public static final int actionChat=0x7f080019;
+        public static final int actionCreateGroup=0x7f08001b;
+        public static final int actionCreateItem=0x7f08001d;
+        public static final int actionLayers=0x7f08001a;
+        public static final int actionLogout=0x7f08001f;
+        public static final int actionRemoveGroup=0x7f08001c;
+        public static final int actionSettings=0x7f08001e;
+        public static final int action_settings=0x7f080018;
         public static final int button1=0x7f08000a;
         public static final int buttonCreateGroup=0x7f080003;
         public static final int buttonLogin=0x7f08000e;
-        public static final int debugInfo=0x7f080010;
-        public static final int expandableListView1=0x7f080014;
+        public static final int debugInfo=0x7f080011;
+        public static final int expandableListView=0x7f080016;
         public static final int inputGroupDescription=0x7f080001;
         public static final int inputGroupName=0x7f080000;
         public static final int inputLogin=0x7f08000c;
@@ -213,12 +213,14 @@ public final class R {
         public static final int labelPassword=0x7f080005;
         public static final int listViewAvailableGroups=0x7f080004;
         public static final int loginProgressBar=0x7f08000f;
+        public static final int mainMapLayout=0x7f080010;
+        public static final int mainMapTestLayout=0x7f080012;
         public static final int radioFingerprint=0x7f080009;
         public static final int radioGroupLoginMethod=0x7f080006;
         public static final int radioLoginPassword=0x7f080007;
         public static final int radioNFC=0x7f080008;
-        public static final int tvChild=0x7f080012;
-        public static final int tvGroup=0x7f080015;
+        public static final int tvChild=0x7f080014;
+        public static final int tvGroup=0x7f080017;
     }
     public static final class layout {
         public static final int activity_create_group=0x7f030000;

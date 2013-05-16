@@ -2,7 +2,6 @@ package pl.edu.agh.io.coordinator;
 
 import java.util.Set;
 
-import pl.edu.agh.io.coordinator.LayersMenuFragment.OnFragmentInteractionListener;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.MapItem;
 import pl.edu.agh.io.coordinator.resources.Point;
@@ -15,6 +14,8 @@ import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidSessionIDException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -26,8 +27,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainMapActivity extends Activity implements
-		OnFragmentInteractionListener {
+public class MainMapActivity extends Activity {
 
 	private TextView debugInfo;
 	private boolean loggingOut = false;
@@ -76,6 +76,13 @@ public class MainMapActivity extends Activity implements
 			new GetMapItemsInBackground().execute(new Intent());
 			new RemoveMapItemInBackground().execute(new MapItem(1413913689, null,
 					null));
+			//TESTING FRAGMENT, DON'T BE MAD
+			FragmentManager fragmentManager = getFragmentManager();
+			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+			LayersMenuFragment fragment = new LayersMenuFragment();
+			fragmentTransaction.add(R.id.mainMapTestLayout, fragment);
+			fragmentTransaction.commit();
+			//END OF MADNESS
 			return true;
 		case R.id.actionCreateGroup:
 			Intent intentCreateGroup = new Intent(MainMapActivity.this,
@@ -365,12 +372,6 @@ public class MainMapActivity extends Activity implements
 				invalidMapItem();
 			}
 		}
-
-	}
-
-	@Override
-	public void onFragmentInteraction(Uri uri) {
-		// TODO Auto-generated method stub
 
 	}
 
