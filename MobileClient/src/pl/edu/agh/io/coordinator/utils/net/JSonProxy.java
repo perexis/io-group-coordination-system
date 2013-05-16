@@ -532,6 +532,26 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
+	public void removeGroup(Group group) throws InvalidSessionIDException, InvalidGroupException, NetworkException {
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", SESSION_ID);
+		paramsInString.put("group", group.getId());
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("removeGroup", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidGroup")) {
+				throw new InvalidGroupException();
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
 	public void sendMessage(String message) throws InvalidSessionIDException, NetworkException {
 		Map<String, Object> paramsInString = new HashMap<String, Object>();
 		paramsInString.put("sessionID", SESSION_ID);

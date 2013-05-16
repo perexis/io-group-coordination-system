@@ -20,7 +20,6 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -33,14 +32,13 @@ public class MainMapActivity extends Activity {
 
 	private TextView debugInfo;
 	private boolean loggingOut = false;
-	private LayersMenuFragment fragment = null;
+	private LayersMenuFragment fragment = new LayersMenuFragment();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-				WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main_map);
 
 		debugInfo = (TextView) findViewById(R.id.debugInfo);
@@ -49,10 +47,8 @@ public class MainMapActivity extends Activity {
 		/*
 		 * new Thread() {
 		 * 
-		 * @Override public void run() { while (true) { try {
-		 * Thread.sleep(1000); new GetUsersInBackground().execute(new Intent());
-		 * } catch (InterruptedException e) { // TODO Auto-generated catch block
-		 * e.printStackTrace(); } } } }.start();
+		 * @Override public void run() { while (true) { try { Thread.sleep(1000); new GetUsersInBackground().execute(new Intent()); }
+		 * catch (InterruptedException e) { // TODO Auto-generated catch block e.printStackTrace(); } } } }.start();
 		 */
 
 	}
@@ -79,37 +75,33 @@ public class MainMapActivity extends Activity {
 			return true;
 		case R.id.actionLayers:
 			debugInfo.append("\n" + item.getTitle() + "()");
-			//new GetUsersInBackground().execute(new Intent());
-			//new GetLayersInBackground().execute(new Intent());
-			//new AddItemTolayerInBackground().execute(new Intent());
-			//new GetMapItemsInBackground().execute(new Intent());
-			//new RemoveMapItemInBackground().execute(new MapItem(1413913689, null, null));
-			//TESTING FRAGMENT, DON'T BE MAD
+			// new GetUsersInBackground().execute(new Intent());
+			// new GetLayersInBackground().execute(new Intent());
+			// new AddItemTolayerInBackground().execute(new Intent());
+			// new GetMapItemsInBackground().execute(new Intent());
+			// new RemoveMapItemInBackground().execute(new MapItem(1413913689,
+			// null, null));
+			// TESTING FRAGMENT, DON'T BE MAD
 			FragmentManager fragmentManager = getFragmentManager();
 			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-			fragment = new LayersMenuFragment();
 			fragmentTransaction.add(R.id.mainMapTestLayout, fragment);
 			fragmentTransaction.commit();
-			//END OF MADNESS
+			// END OF MADNESS
 			return true;
 		case R.id.actionCreateGroup:
-			Intent intentCreateGroup = new Intent(MainMapActivity.this,
-					CreateGroupActivity.class);
+			Intent intentCreateGroup = new Intent(MainMapActivity.this, CreateGroupActivity.class);
 			startActivity(intentCreateGroup);
 			return true;
 		case R.id.actionRemoveGroup:
-			Intent intentRemoveGroup = new Intent(MainMapActivity.this,
-					RemoveGroupActivity.class);
+			Intent intentRemoveGroup = new Intent(MainMapActivity.this, RemoveGroupActivity.class);
 			startActivity(intentRemoveGroup);
 			return true;
 		case R.id.actionCreateItem:
-			Intent intentCreateItem = new Intent(MainMapActivity.this,
-					CreateUserItemActivity.class);
+			Intent intentCreateItem = new Intent(MainMapActivity.this, CreateUserItemActivity.class);
 			startActivity(intentCreateItem);
 			return true;
 		case R.id.actionSettings:
-			Intent intentSettings = new Intent(MainMapActivity.this,
-					NotImplementedYetActivity.class);
+			Intent intentSettings = new Intent(MainMapActivity.this, NotImplementedYetActivity.class);
 			startActivity(intentSettings);
 			return true;
 		case R.id.actionLogout:
@@ -127,35 +119,27 @@ public class MainMapActivity extends Activity {
 
 	// alerts about invalid sessionID and finishes activity
 	private void invalidSessionId() {
-		new AlertDialog.Builder(MainMapActivity.this)
-				.setMessage(R.string.alert_invalid_session_id_logout)
-				.setTitle(R.string.alert_invalid_session_id)
-				.setCancelable(false)
-				.setIcon(R.drawable.alerts_and_states_warning)
-				.setPositiveButton(R.string.button_ok,
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								MainMapActivity.this.finish();
-							}
-						}).create().show();
+		new AlertDialog.Builder(MainMapActivity.this).setMessage(R.string.alert_invalid_session_id_logout)
+				.setTitle(R.string.alert_invalid_session_id).setCancelable(false).setIcon(R.drawable.alerts_and_states_warning)
+				.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						MainMapActivity.this.finish();
+					}
+				}).create().show();
 	}
 
 	// shows network problem alert
 	private void networkProblem() {
-		Toast.makeText(getApplicationContext(), R.string.alert_network_problem,
-				Toast.LENGTH_LONG).show();
+		Toast.makeText(getApplicationContext(), R.string.alert_network_problem, Toast.LENGTH_LONG).show();
 	}
 
 	private void invalidLayer() {
-		Toast.makeText(getApplicationContext(), "Invalid layer!!!",
-				Toast.LENGTH_LONG).show();
+		Toast.makeText(getApplicationContext(), "Invalid layer!!!", Toast.LENGTH_LONG).show();
 	}
 
 	private void invalidMapItem() {
-		Toast.makeText(getApplicationContext(), "Invalid map item!!!",
-				Toast.LENGTH_LONG).show();
+		Toast.makeText(getApplicationContext(), "Invalid map item!!!", Toast.LENGTH_LONG).show();
 	}
 
 	private class LogoutInBackground extends AsyncTask<Intent, Void, Exception> {
@@ -195,8 +179,7 @@ public class MainMapActivity extends Activity {
 
 	}
 
-	private class GetUsersInBackground extends
-			AsyncTask<Intent, Void, Exception> {
+	private class GetUsersInBackground extends AsyncTask<Intent, Void, Exception> {
 
 		private Set<User> users;
 
@@ -220,8 +203,7 @@ public class MainMapActivity extends Activity {
 
 			if (result == null) {
 				for (User user : users)
-					debugInfo.append("\n" + user.getName() + " "
-							+ user.getSurname());
+					debugInfo.append("\n" + user.getName() + " " + user.getSurname());
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
@@ -231,8 +213,7 @@ public class MainMapActivity extends Activity {
 
 	}
 
-	private class GetLayersInBackground extends
-			AsyncTask<Intent, Void, Exception> {
+	private class GetLayersInBackground extends AsyncTask<Intent, Void, Exception> {
 
 		private Set<Layer> layers;
 
@@ -266,8 +247,7 @@ public class MainMapActivity extends Activity {
 
 	}
 
-	private class GetMapItemsInBackground extends
-			AsyncTask<Intent, Void, Exception> {
+	private class GetMapItemsInBackground extends AsyncTask<Intent, Void, Exception> {
 
 		private Set<MapItem> notesItems;
 
@@ -293,8 +273,7 @@ public class MainMapActivity extends Activity {
 
 			if (result == null) {
 				for (MapItem item : notesItems)
-					debugInfo.append("\n" + item.getId() + " " + item.getData()
-							+ " " + item.getPosition().getLongitude() + " "
+					debugInfo.append("\n" + item.getId() + " " + item.getData() + " " + item.getPosition().getLongitude() + " "
 							+ item.getPosition().getLatitude());
 			} else if (result instanceof NetworkException) {
 				networkProblem();
@@ -307,8 +286,7 @@ public class MainMapActivity extends Activity {
 
 	}
 
-	private class AddItemTolayerInBackground extends
-			AsyncTask<Intent, Void, Exception> {
+	private class AddItemTolayerInBackground extends AsyncTask<Intent, Void, Exception> {
 
 		// private Set<MapItem> notesItems;
 		MapItem mapItem;
@@ -318,8 +296,7 @@ public class MainMapActivity extends Activity {
 			IJSonProxy proxy = JSonProxy.getInstance();
 
 			try {
-				mapItem = proxy.addItemToLayer(new Layer("notes"), new Point(
-						13.34, 57.78), "Testowa notatka");
+				mapItem = proxy.addItemToLayer(new Layer("notes"), new Point(13.34, 57.78), "Testowa notatka");
 			} catch (InvalidSessionIDException e) {
 				return e;
 			} catch (NetworkException e) {
@@ -347,8 +324,7 @@ public class MainMapActivity extends Activity {
 
 	}
 
-	private class RemoveMapItemInBackground extends
-			AsyncTask<MapItem, Void, Exception> {
+	private class RemoveMapItemInBackground extends AsyncTask<MapItem, Void, Exception> {
 
 		@Override
 		protected Exception doInBackground(MapItem... params) {

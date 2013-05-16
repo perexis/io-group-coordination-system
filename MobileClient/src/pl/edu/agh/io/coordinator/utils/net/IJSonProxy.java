@@ -72,6 +72,8 @@ public interface IJSonProxy {
 
 	public Set<String> getGroupUsers(Group group) throws InvalidSessionIDException, InvalidGroupException, NetworkException;
 
+	public void removeGroup(Group group) throws InvalidSessionIDException, InvalidGroupException, NetworkException;
+	
 	// Sends new message
 	public void sendMessage(String message) throws InvalidSessionIDException, NetworkException;
 

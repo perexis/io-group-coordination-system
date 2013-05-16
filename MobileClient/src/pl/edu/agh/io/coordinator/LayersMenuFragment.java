@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnChildClickListener;
 import android.widget.TextView;
 
 public class LayersMenuFragment extends Fragment {
@@ -185,6 +186,13 @@ public class LayersMenuFragment extends Fragment {
 		View toReturn = inflater.inflate(R.layout.fragment_layers_menu, container, false);
 		listView = (ExpandableListView) toReturn.findViewById(R.id.expandableListView);
 		listView.setAdapter(adapter);
+		listView.setOnChildClickListener(new OnChildClickListener() {	
+			@Override
+			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+		});
 		return toReturn;
 	}
 
