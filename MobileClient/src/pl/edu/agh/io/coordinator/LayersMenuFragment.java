@@ -6,18 +6,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import pl.edu.agh.io.coordinator.R;
+import pl.edu.agh.io.coordinator.R.id;
+import pl.edu.agh.io.coordinator.R.layout;
 import pl.edu.agh.io.coordinator.resources.Group;
-import pl.edu.agh.io.coordinator.resources.MapItem;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
+import pl.edu.agh.io.coordinator.utils.layersmenu.ExpandableListPosition;
+import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListAdapter;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.Parcelable.Creator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,189 +33,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class LayersMenuFragment extends Fragment {
-
-	private class LayersMenuListAdapter extends BaseExpandableListAdapter {
-
-		private Context context;
-		private List<String> menuGroups;
-		private List<UserItem> items;
-		private List<User> people;
-		private List<Group> groups;
-
-		public LayersMenuListAdapter(Context context) {
-			this.context = context;
-			this.menuGroups = new ArrayList<String>();
-			this.menuGroups.add("Items");
-			this.menuGroups.add("People");
-			this.menuGroups.add("Groups");
-			this.items = new ArrayList<UserItem>();
-			this.people = new ArrayList<User>();
-			this.groups = new ArrayList<Group>();
-		}
-
-		public List<UserItem> getItems() {
-			return this.items;
-		}
-		
-		public List<User> getPeople() {
-			return this.people;
-		}
-		
-		public List<Group> getGroups() {
-			return this.groups;
-		}
-		
-		public void setItems(Set<UserItem> items) {
-			this.items = new ArrayList<UserItem>(items);
-			notifyDataSetChanged();
-		}
-
-		public void setPeople(Set<User> people) {
-			this.people = new ArrayList<User>(people);
-			notifyDataSetChanged();
-		}
-
-		public void setGroups(Set<Group> groups) {
-			this.groups = new ArrayList<Group>(groups);
-			notifyDataSetChanged();
-		}
-
-		@Override
-		public boolean areAllItemsEnabled() {
-			return true;
-		}
-
-		@Override
-		public Object getChild(int groupPosition, int childPosition) {
-			if (groupPosition == ITEM_POSITION) {
-				return items.get(childPosition);
-			} else if (groupPosition == USER_POSITION) {
-				return people.get(childPosition);
-			} else if (groupPosition == GROUP_POSITION) {
-				return groups.get(childPosition);
-			} else {
-				return null;
-			}
-		}
-
-		@Override
-		public long getChildId(int groupPosition, int childPosition) {
-			return childPosition;
-		}
-
-		@Override
-		public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-			Object object = getChild(groupPosition, childPosition);
-			if (convertView == null) {
-				LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				convertView = layoutInflater.inflate(R.layout.child_layout, null);
-			}
-			TextView tv = (TextView) convertView.findViewById(R.id.tvChild);
-			String text = null;
-			if (groupPosition == ITEM_POSITION) {
-				text = ((UserItem) object).getId();
-			} else if (groupPosition == USER_POSITION) {
-				text = ((User) object).getId();
-			} else if (groupPosition == GROUP_POSITION) {
-				text = ((Group) object).getId();
-			}
-			tv.setText("   " + text);
-			tv.setTextColor(Color.BLACK);
-			return convertView;
-		}
-
-		@Override
-		public int getChildrenCount(int groupPosition) {
-			if (groupPosition == ITEM_POSITION) {
-				return items.size();
-			} else if (groupPosition == USER_POSITION) {
-				return people.size();
-			} else if (groupPosition == GROUP_POSITION) {
-				return groups.size();
-			} else {
-				return 0;
-			}
-		}
-
-		@Override
-		public Object getGroup(int groupPosition) {
-			return menuGroups.get(groupPosition);
-		}
-
-		@Override
-		public int getGroupCount() {
-			return 3;
-		}
-
-		@Override
-		public long getGroupId(int groupPosition) {
-			return groupPosition;
-		}
-
-		@Override
-		public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-			String group = (String) getGroup(groupPosition);
-			if (convertView == null) {
-				LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				convertView = layoutInflater.inflate(R.layout.group_layout, null);
-			}
-			TextView tv = (TextView) convertView.findViewById(R.id.tvGroup);
-			tv.setText(group);
-			tv.setTextColor(Color.BLACK);
-			return convertView;
-		}
-
-		@Override
-		public boolean hasStableIds() {
-			return true;
-		}
-
-		@Override
-		public boolean isChildSelectable(int arg0, int arg1) {
-			return true;
-		}
-
-	}
-
-	private class ExpandableListPosition {
-		
-		public int group;
-		public int child;
-		
-		public ExpandableListPosition(int group, int child) {
-			this.group = group;
-			this.child = child;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof ExpandableListPosition) {
-				ExpandableListPosition elp = (ExpandableListPosition) obj;
-				if ((this.group == elp.group) && (this.child == elp.child)) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
-		}
-		
-		@Override
-		public int hashCode() {
-			return (this.group << 16) + this.child;
-		}
-		
-	}
-	
-	private static final int ITEM_POSITION = 0;
-	private static final int USER_POSITION = 1;
-	private static final int GROUP_POSITION = 2;
 	
 	private LayersMenuListAdapter adapter;
 	private ExpandableListView listView;
 	private List<ExpandableListPosition> checked;
 
+	public static final int ITEM_POSITION = 0;
+	public static final int USER_POSITION = 1;
+	public static final int GROUP_POSITION = 2;
+	
 	private void clearGroupChecks(int group) {
 		for (ExpandableListPosition elp : checked) {
 			if (elp.group == group) {
