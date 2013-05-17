@@ -6,7 +6,10 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class User {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class User implements Parcelable {
 
 	private String id;
 	private String avatar;
@@ -62,6 +65,55 @@ public class User {
 		elements.put("phone", this.phone);
 		elements.put("email", this.email);
 		return new JSONObject(elements);
+	}
+
+	public static final Creator<User> CREATOR = new Creator<User>() {
+		@Override
+		public User createFromParcel(Parcel source) {
+			String id = source.readString();
+			String avatar = source.readString();
+			String name = source.readString();
+			String surname = source.readString();
+			String phone = source.readString();
+			String email = source.readString();
+			return new User(id, avatar, name, surname, phone, email);
+		}
+		@Override
+		public User[] newArray(int size) {
+			return new User[size];
+		}
+	}; 
+	
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.id);
+		dest.writeString(this.avatar);
+		dest.writeString(this.name);
+		dest.writeString(this.surname);
+		dest.writeString(this.phone);
+		dest.writeString(this.email);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		} else if (obj instanceof User) {
+			User user = (User) obj;
+			return this.id.equals(user.id);
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return id.hashCode();
 	}
 
 }

@@ -4,8 +4,12 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -254,6 +258,31 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
+	public UserState getUserState(String user) throws InvalidSessionIDException, InvalidUserException, NetworkException {
+		UserState toReturn = null;
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", SESSION_ID);
+		paramsInString.put("user", user);
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("getUserState", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidUser")) {
+				throw new InvalidUserException();
+			} else {
+				JSONObject retval = jsonObject.getJSONObject("retval");
+				toReturn = new UserState(retval);
+			}
+		} catch(JSONException e) {
+			e.printStackTrace();
+		}
+		return toReturn;
+	}
+	
+	@Override
 	public Set<UserItem> getPossibleUserItems() throws InvalidSessionIDException, NetworkException {
 		Set<UserItem> toReturn = new HashSet<UserItem>();
 		JSONObject params = createSessionOnlyParams();
@@ -330,7 +359,7 @@ public class JSonProxy implements IJSonProxy {
 
 	@Override
 	public Set<User> getUsers() throws InvalidSessionIDException, NetworkException {
-		Set<User> ret = new HashSet<User>();
+		Set<User> toReturn = new HashSet<User>();
 		JSONObject params = createSessionOnlyParams();
 		try {
 			String jsonString = getJSonString("getUsers", params);
@@ -339,18 +368,18 @@ public class JSonProxy implements IJSonProxy {
 			if (exception.equals("InvalidSessionID"))
 				throw new InvalidSessionIDException();
 			else {
-				JSONArray retArray = jsonObject.getJSONArray("retval");
-				int max = retArray.length();
+				JSONArray array = jsonObject.getJSONArray("retval");
+				int max = array.length();
 				for (int i = 0; i < max; i++) {
-					JSONObject jsonUser = retArray.getJSONObject(i);
+					JSONObject jsonUser = array.getJSONObject(i);
 					User user = new User(jsonUser);
-					ret.add(user);
+					toReturn.add(user);
 				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		return ret;
+		return toReturn;
 	}
 
 	@Override
@@ -503,9 +532,29 @@ public class JSonProxy implements IJSonProxy {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return toReturn;
 	}
 
+	@Override
+	public void removeGroup(Group group) throws InvalidSessionIDException, InvalidGroupException, NetworkException {
+		Map<String, Object> paramsInString = new HashMap<String, Object>();
+		paramsInString.put("sessionID", SESSION_ID);
+		paramsInString.put("group", group.getId());
+		JSONObject params = new JSONObject(paramsInString);
+		try {
+			String jsonString = getJSonString("removeGroup", params);
+			JSONObject jsonObject = new JSONObject(jsonString);
+			String exception = jsonObject.getString("exception");
+			if (exception.equals("InvalidSessionID")) {
+				throw new InvalidSessionIDException();
+			} else if (exception.equals("InvalidGroup")) {
+				throw new InvalidGroupException();
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void sendMessage(String message) throws InvalidSessionIDException, NetworkException {
 		Map<String, Object> paramsInString = new HashMap<String, Object>();
@@ -525,8 +574,8 @@ public class JSonProxy implements IJSonProxy {
 	}
 
 	@Override
-	public Set<Message> getMessages() throws InvalidSessionIDException, NetworkException {
-		Set<Message> toReturn = new HashSet<Message>();
+	public List<Message> getMessages() throws InvalidSessionIDException, NetworkException {
+		List<Message> toReturn = new LinkedList<Message>();
 		JSONObject params = createSessionOnlyParams();
 		try {
 			String jsonString = getJSonString("getMessages", params);
@@ -546,6 +595,21 @@ public class JSonProxy implements IJSonProxy {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
+		Comparator<Message> comparator = new Comparator<Message>() {
+			@Override
+			public int compare(Message lhs, Message rhs) {
+				long ltime = lhs.getSentTime();
+				long rtime = rhs.getSentTime();
+				if (ltime < rtime) {
+					return -1;
+				} else if (ltime > rtime) {
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+		};
+		Collections.sort(toReturn, comparator);
 		return toReturn;
 	}
 	

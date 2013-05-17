@@ -1,5 +1,6 @@
 package pl.edu.agh.io.coordinator.utils.net;
 
+import java.util.List;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.resources.Group;
@@ -44,6 +45,8 @@ public interface IJSonProxy {
 
 	public void updateSelfState(UserState newState) throws InvalidSessionIDException, NetworkException;
 
+	public UserState getUserState(String user) throws InvalidSessionIDException, InvalidUserException, NetworkException;
+	
 	// Returns all possible UserItems
 	public Set<UserItem> getPossibleUserItems() throws InvalidSessionIDException, NetworkException;
 
@@ -70,10 +73,12 @@ public interface IJSonProxy {
 
 	public Set<String> getGroupUsers(Group group) throws InvalidSessionIDException, InvalidGroupException, NetworkException;
 
+	public void removeGroup(Group group) throws InvalidSessionIDException, InvalidGroupException, NetworkException;
+	
 	// Sends new message
 	public void sendMessage(String message) throws InvalidSessionIDException, NetworkException;
 
 	// Receives new messages from server
-	public Set<Message> getMessages() throws InvalidSessionIDException, NetworkException;
+	public List<Message> getMessages() throws InvalidSessionIDException, NetworkException;
 
 }

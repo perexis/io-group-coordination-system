@@ -6,11 +6,13 @@
     <string name="hello_world">Hello world!</string>
     <string name="button_ok">OK</string>
     <string name="button_cancel">Cancel</string>
+    <string name="button_create">Create</string>
     <string name="alert_network_problem">Network problem occurred</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_create_group">Create Group</string>
     <string name="title_activity_remove_group">Remove Group</string>
     <string name="title_activity_create_user_item">Create User Item</string>
+    <string name="button_remove">Remove</string>
 
     <!-- LoginMethodActivity -->
     <string name="app_name">Operations Coordinator</string>
@@ -45,4 +47,25 @@
     <string name="action_create_item">Create item</string>
     <string name="action_logout">Logout</string>
 
+    <!-- CreateGroupActivity -->
+    <string name="label_available_groups">Available groups:</string>
+    <string name="hint_group_name">Group name</string>
+    <string name="hint_description">Description</string>
+    <string name="alert_could_not_create_group">Could not create group</string>
+    <string name="alert_group_created">Group successfully created</string>
+
+    <!-- LayersMenuFragment -->
+    <string name="menu_item_items">Items</string>
+    <string name="menu_item_people">People</string>
+    <string name="menu_item_groups">Groups</string>
+    
+    <!-- RemoveGroupActivity -->
+    <string name="alert_group_removed">Group removed</string>
+    <string name="label_select_group_to_remove">Select group to remove:</string>
+	<string name="alert_could_not_remove_group">Could not remove group</string>
+	
+	<!-- ChatFragment -->
+	<string name="button_send_message">Send</string>
+	<string name="hint_message">Message</string>
+	
 </resources>

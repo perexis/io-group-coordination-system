@@ -14,7 +14,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/listViewAvailableGroups"
         android:ems="10"
         android:hint="@string/hint_group_name"
         android:inputType="text" >
@@ -27,21 +26,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_alignRight="@+id/inputGroupName"
         android:layout_below="@+id/inputGroupName"
         android:ems="10"
         android:hint="@string/hint_description"
         android:inputType="text" />
-
-    <TextView
-        android:id="@+id/labelAvailableGroups"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/buttonCreateGroup"
-        android:layout_below="@+id/buttonCreateGroup"
-        android:layout_marginTop="30dp"
-        android:text="@string/label_available_groups"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <Button
         android:id="@+id/buttonCreateGroup"
@@ -56,8 +44,20 @@
         android:id="@+id/listViewAvailableGroups"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/labelAvailableGroups" >
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/inputGroupDescription"
+        android:layout_toRightOf="@+id/inputGroupDescription" >
     </ListView>
+
+    <TextView
+        android:id="@+id/labelAvailableGroups"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/listViewAvailableGroups"
+        android:layout_alignTop="@+id/inputGroupName"
+        android:layout_marginLeft="20dp"
+        android:text="@string/label_available_groups"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </RelativeLayout>

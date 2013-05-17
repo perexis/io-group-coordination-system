@@ -8,6 +8,7 @@
 build/
 bin/
 target/
+MobileClient/gen/
 
 # vim
 *.swp
