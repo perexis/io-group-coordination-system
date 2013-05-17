@@ -58,7 +58,7 @@ io.api.ApiConnector.prototype.setExceptionHandler = function(name, callback) {
  */
 io.api.ApiConnector.prototype.login = function(data, callback,
     opt_errcallback) {
-  this.request_('login', data, callback, opt_errcallback, true);
+  this.sendRequest('login', data, callback, opt_errcallback, true);
 };
 
 
@@ -68,7 +68,19 @@ io.api.ApiConnector.prototype.login = function(data, callback,
  *   optional on error call.
  */
 io.api.ApiConnector.prototype.getLayers = function(callback, opt_errcallback) {
-  this.request_('getLayers', {}, callback, opt_errcallback);
+  this.sendRequest('getLayers', {}, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!{item: {string}}} data - data to sent
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.removeMapItem = function(data, callback,
+    opt_errcallback) {
+  this.sendRequest('removeMapItem', data, callback, opt_errcallback);
 };
 
 
@@ -80,7 +92,7 @@ io.api.ApiConnector.prototype.getLayers = function(callback, opt_errcallback) {
  */
 io.api.ApiConnector.prototype.addItemToLayer = function(data, callback,
     opt_errcallback) {
-  this.request_('addItemToLayer', data, callback, opt_errcallback);
+  this.sendRequest('addItemToLayer', data, callback, opt_errcallback);
 };
 
 
@@ -92,7 +104,7 @@ io.api.ApiConnector.prototype.addItemToLayer = function(data, callback,
  */
 io.api.ApiConnector.prototype.getMapItems = function(data, callback,
     opt_errcallback) {
-  this.request_('getMapItems', data, callback, opt_errcallback);
+  this.sendRequest('getMapItems', data, callback, opt_errcallback);
 };
 
 
@@ -102,7 +114,7 @@ io.api.ApiConnector.prototype.getMapItems = function(data, callback,
  *   optional on error call.
  */
 io.api.ApiConnector.prototype.getUsers = function(callback, opt_errcallback) {
-  this.request_('getUsers', {}, callback, opt_errcallback);
+  this.sendRequest('getUsers', {}, callback, opt_errcallback);
 };
 
 
@@ -112,7 +124,7 @@ io.api.ApiConnector.prototype.getUsers = function(callback, opt_errcallback) {
  *   optional on error call.
  */
 io.api.ApiConnector.prototype.logout = function(callback, opt_errcallback) {
-  this.request_('logout', {}, callback, opt_errcallback);
+  this.sendRequest('logout', {}, callback, opt_errcallback);
 };
 
 
@@ -124,7 +136,7 @@ io.api.ApiConnector.prototype.logout = function(callback, opt_errcallback) {
  *   optional on error call.
  * @param {boolean=} opt_notincludesession
  */
-io.api.ApiConnector.prototype.request_ = function(resource, data, callback,
+io.api.ApiConnector.prototype.sendRequest = function(resource, data, callback,
     opt_errcallback, opt_notincludesession) {
   var url = this.url + resource;
   var xhr = new goog.net.XhrIo();
@@ -175,7 +187,6 @@ io.api.ApiConnector.prototype.request_ = function(resource, data, callback,
   });
 
   goog.events.listen(xhr, goog.net.EventType.ERROR, onError);
-
   xhr.send(url, 'POST', goog.json.serialize(data), headers);
 };
 

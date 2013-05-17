@@ -24,6 +24,7 @@ io.map.Page = function(main, elem) {
   this.curClickElem = null;
   this.pendingRefresh = false;
   this.markers = {};
+  this.activeInfo = null;
 };
 
 
@@ -67,7 +68,6 @@ io.map.Page.prototype.refreshLayers = function() {
           for (var key in self.markers[layer]) {
             var obj = self.markers[layer][key];
             obj['marker'].setVisible(false);
-            obj['info'].close();
           }
           self.markers[layer] = newMarkers;
           finished();
@@ -89,25 +89,52 @@ io.map.Page.prototype.putMapItem = function(item, newMarkers, markers) {
   } else {
     var marker = new google.maps.Marker({position: loc, map: self.map});
     var infowindow = new google.maps.InfoWindow({
-      content: item['data'], size: new google.maps.Size(50, 50)
+      content: soy.renderAsFragment(io.soy.map.markerWindow)
     });
     google.maps.event.addListener(marker, 'click', function() {
+      self.hideCurrentMarker();
       infowindow.open(self.map, marker);
+      self.activeInfo = infowindow;
+      self.initInfoWindow(item, marker);
     });
+    google.maps.event.addListener(infowindow, 'closeclick', function(e) {
+      self.hideCurrentMarker();
+    });
+
     newMarkers[id] = {'marker': marker, 'info:': infowindow};
+  }
+};
+
+io.map.Page.prototype.initInfoWindow = function(item, marker) {
+  var self = this;
+  var deleteCallback = function(e) {
+    e.preventDefault();
+    io.log().info('Deleting item with id: ' + item['id']);
+    self.main.api.removeMapItem({'item': item['id']}, function() {
+      self.hideCurrentMarker();
+      marker.setVisible(false);
+    });
+  };
+
+  goog.events.listen(goog.dom.getElement('deleteMarkerForm'),
+      goog.events.EventType.SUBMIT, deleteCallback);
+};
+
+io.map.Page.prototype.hideCurrentMarker = function() {
+  if (this.curClick != null) {
+    this.curClick['info'].close();
+    this.curClick['marker'].setVisible(false);
+    this.curClick = null;
+  }
+  if (this.activeInfo) {
+    this.activeInfo.close();
+    this.activeInfo = null;
   }
 };
 
 io.map.Page.prototype.onMapClick = function(e) {
   var self = this;
-  var hideCurrentMarker = function() {
-    if (self.curClick != null) {
-      self.curClick['info'].close();
-      self.curClick['marker'].setVisible(false);
-      self.curClick = null;
-    }
-  };
-  hideCurrentMarker();
+  this.hideCurrentMarker();
 
   var marker = new google.maps.Marker({position: e.latLng, map: this.map});
   var infowindow = new google.maps.InfoWindow({
@@ -116,12 +143,12 @@ io.map.Page.prototype.onMapClick = function(e) {
   infowindow.open(this.map, marker);
   this.curClick = {'info': infowindow, 'marker': marker};
   google.maps.event.addListener(infowindow, 'closeclick', function(e) {
-    hideCurrentMarker();
+    self.hideCurrentMarker();
   });
 
   var onItemAdded = function(json) {
     io.log().info('Successfully added item');
-    hideCurrentMarker();
+    self.hideCurrentMarker();
     self.refreshLayers();
   };
 
@@ -129,7 +156,7 @@ io.map.Page.prototype.onMapClick = function(e) {
     io.log().warning('Could not add item: ' + err);
   };
 
-  var clickPoint = new io.api.Point(e.latLng['kb'], e.latLng['lb']);
+  var clickPoint = new io.api.Point(e.latLng.lat(), e.latLng.lng());
   var addCallback = function(e) {
     e.preventDefault();
     var layer = goog.dom.getElement('addItemLayer').value;
