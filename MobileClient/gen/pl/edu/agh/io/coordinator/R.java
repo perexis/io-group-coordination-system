@@ -191,23 +191,25 @@ public final class R {
     public static final class id {
         public static final int LinearLayout01=0x7f080015;
         public static final int RelativeLayout1=0x7f080017;
-        public static final int actionChat=0x7f08001b;
-        public static final int actionCreateGroup=0x7f08001d;
-        public static final int actionCreateItem=0x7f08001f;
-        public static final int actionLayers=0x7f08001c;
-        public static final int actionLogout=0x7f080021;
-        public static final int actionRemoveGroup=0x7f08001e;
-        public static final int actionSettings=0x7f080020;
-        public static final int action_settings=0x7f08001a;
+        public static final int actionChat=0x7f08001f;
+        public static final int actionCreateGroup=0x7f080021;
+        public static final int actionCreateItem=0x7f080023;
+        public static final int actionLayers=0x7f080020;
+        public static final int actionLogout=0x7f080025;
+        public static final int actionRemoveGroup=0x7f080022;
+        public static final int actionSettings=0x7f080024;
+        public static final int action_settings=0x7f08001e;
         public static final int button1=0x7f08000a;
         public static final int buttonCreateGroup=0x7f080004;
         public static final int buttonLogin=0x7f08000e;
         public static final int buttonRemoveGroup=0x7f080014;
+        public static final int buttonSendMessage=0x7f080019;
         public static final int debugInfo=0x7f080011;
-        public static final int expandableListView=0x7f080018;
+        public static final int expandableListView=0x7f08001c;
         public static final int inputGroupDescription=0x7f080002;
         public static final int inputGroupName=0x7f080000;
         public static final int inputLogin=0x7f08000c;
+        public static final int inputMessage=0x7f08001b;
         public static final int inputPassword=0x7f08000d;
         public static final int labelAvailableGroups=0x7f080003;
         public static final int labelLogin=0x7f08000b;
@@ -221,8 +223,10 @@ public final class R {
         public static final int radioGroupLoginMethod=0x7f080006;
         public static final int radioLoginPassword=0x7f080007;
         public static final int radioNFC=0x7f080008;
+        public static final int scrollView1=0x7f080018;
+        public static final int textViewChat=0x7f08001a;
         public static final int tvChild=0x7f080016;
-        public static final int tvGroup=0x7f080019;
+        public static final int tvGroup=0x7f08001d;
     }
     public static final class layout {
         public static final int activity_create_group=0x7f030000;
@@ -233,8 +237,9 @@ public final class R {
         public static final int activity_not_implemented_yet=0x7f030005;
         public static final int activity_remove_group=0x7f030006;
         public static final int child_layout=0x7f030007;
-        public static final int fragment_layers_menu=0x7f030008;
-        public static final int group_layout=0x7f030009;
+        public static final int fragment_chat=0x7f030008;
+        public static final int fragment_layers_menu=0x7f030009;
+        public static final int group_layout=0x7f03000a;
     }
     public static final class menu {
         public static final int create_group=0x7f070000;
@@ -277,10 +282,14 @@ public final class R {
         public static final int button_login=0x7f050016;
         public static final int button_ok=0x7f050002;
         public static final int button_remove=0x7f05000a;
+        /**  ChatFragment 
+         */
+        public static final int button_send_message=0x7f05002d;
         public static final int hello_blank_fragment=0x7f050006;
         public static final int hello_world=0x7f050001;
         public static final int hint_description=0x7f050024;
         public static final int hint_group_name=0x7f050023;
+        public static final int hint_message=0x7f05002e;
         /**  CreateGroupActivity 
          */
         public static final int label_available_groups=0x7f050022;

@@ -1,10 +1,12 @@
 package pl.edu.agh.io.coordinator;
 
+import java.util.List;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.MapItem;
+import pl.edu.agh.io.coordinator.resources.Message;
 import pl.edu.agh.io.coordinator.resources.Point;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
@@ -29,12 +31,15 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainMapActivity extends Activity {
+public class MainMapActivity extends Activity implements
+		ChatFragment.OnFragmentInteractionListener {
 
 	private TextView debugInfo;
 	private boolean loggingOut = false;
 	private LayersMenuFragment fragment = new LayersMenuFragment();
 	private LayersMenuState savedState = null;
+	
+	private ChatFragment chatFragment;
 
 	private Set<UserItem> userItems;
 	private Set<User> users;
@@ -46,11 +51,11 @@ public class MainMapActivity extends Activity {
 	public LayersMenuState getSavedState() {
 		return this.savedState;
 	}
-	
+
 	public void setSavedState(LayersMenuState state) {
 		this.savedState = state;
 	}
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -61,14 +66,8 @@ public class MainMapActivity extends Activity {
 		debugInfo = (TextView) findViewById(R.id.debugInfo);
 		debugInfo.setText("Debug");
 
-		// TODO: remove ----v-------
-		/*
-		FragmentManager fragmentManager = getFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager
-				.beginTransaction();
-		fragmentTransaction.add(R.id.mainMapTestLayout, fragment);
-		fragmentTransaction.commit(); */
-		// ------------------^------
+		if(chatFragment==null)
+			chatFragment=ChatFragment.newInstance();
 
 		new Thread() {
 			@Override
@@ -79,6 +78,7 @@ public class MainMapActivity extends Activity {
 						new GetUsersInBackground().execute(new Intent());
 						new GetUserItemsInBackground().execute(new Intent());
 						new GetGroupsInBackground().execute(new Intent());
+						new GetMessagesInBackground().execute();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -100,17 +100,25 @@ public class MainMapActivity extends Activity {
 		switch (item.getItemId()) {
 		case R.id.actionChat:
 			item.setChecked(!item.isChecked());
-			return true;
-		case R.id.actionLayers:
-			item.setChecked(!item.isChecked());
 			FragmentManager fragmentManager = getFragmentManager();
 			FragmentTransaction fragmentTransaction = fragmentManager
 					.beginTransaction();
 			if (item.isChecked()) {
-				fragmentTransaction.add(R.id.mainMapTestLayout, fragment);
+				fragmentTransaction.add(R.id.mainMapTestLayout, chatFragment);
 			} else
-				fragmentTransaction.remove(fragment);
+				fragmentTransaction.remove(chatFragment);
 			fragmentTransaction.commit();
+			return true;
+		case R.id.actionLayers:
+			item.setChecked(!item.isChecked());
+			FragmentManager fragmentManager2 = getFragmentManager();
+			FragmentTransaction fragmentTransaction2 = fragmentManager2
+					.beginTransaction();
+			if (item.isChecked()) {
+				fragmentTransaction2.add(R.id.mainMapTestLayout, fragment);
+			} else
+				fragmentTransaction2.remove(fragment);
+			fragmentTransaction2.commit();
 			return true;
 		case R.id.actionCreateGroup:
 			Intent intentCreateGroup = new Intent(MainMapActivity.this,
@@ -460,6 +468,76 @@ public class MainMapActivity extends Activity {
 			}
 		}
 
+	}
+
+	private class SendMessageInBackground extends
+			AsyncTask<String, Void, Exception> {
+
+		@Override
+		protected Exception doInBackground(String... params) {
+			IJSonProxy proxy = JSonProxy.getInstance();
+
+			try {
+				proxy.sendMessage(params[0]);
+			} catch (InvalidSessionIDException e) {
+				return e;
+			} catch (NetworkException e) {
+				return e;
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Exception result) {
+
+			if (result instanceof NetworkException) {
+				networkProblem();
+			} else if (result instanceof InvalidSessionIDException) {
+				invalidSessionId();
+			}
+		}
+
+	}
+
+	private class GetMessagesInBackground extends
+			AsyncTask<Void, Void, Exception> {
+
+		List<Message> messages;
+		
+		@Override
+		protected Exception doInBackground(Void... params) {
+			IJSonProxy proxy = JSonProxy.getInstance();
+
+			try {
+				messages = proxy.getMessages();
+			} catch (InvalidSessionIDException e) {
+				return e;
+			} catch (NetworkException e) {
+				return e;
+			}
+
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Exception result) {
+
+			if (result == null) {
+				for(Message m :  messages){
+					chatFragment.newMessage(m);
+				}
+			} else if (result instanceof NetworkException) {
+				networkProblem();
+			} else if (result instanceof InvalidSessionIDException) {
+				invalidSessionId();
+			}
+		}
+
+	}
+
+	@Override
+	public void onChatSendMessage(String text) {
+		new SendMessageInBackground().execute(text);
 	}
 
 }

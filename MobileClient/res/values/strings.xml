@@ -64,4 +64,8 @@
     <string name="label_select_group_to_remove">Select group to remove:</string>
 	<string name="alert_could_not_remove_group">Could not remove group</string>
 	
+	<!-- ChatFragment -->
+	<string name="button_send_message">Send</string>
+	<string name="hint_message">Message</string>
+	
 </resources>
