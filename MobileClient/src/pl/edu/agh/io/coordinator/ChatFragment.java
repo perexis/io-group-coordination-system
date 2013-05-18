@@ -1,5 +1,7 @@
 package pl.edu.agh.io.coordinator;
 
+import java.util.ArrayList;
+
 import pl.edu.agh.io.coordinator.resources.Message;
 import android.app.Activity;
 import android.app.Fragment;
@@ -14,10 +16,16 @@ import android.widget.TextView;
 
 public class ChatFragment extends Fragment {
 
+	private final static String SAVED_STATE = "pl.edu.agh.io.coordinator.messagesSavedState";
+
 	private OnFragmentInteractionListener mListener;
 
 	private TextView chatTextView;
 	private EditText inputMessage;
+
+	private ArrayList<String> messages;
+
+	// private StringBuffer savedState;
 
 	public static ChatFragment newInstance() {
 		ChatFragment fragment = new ChatFragment();
@@ -27,10 +35,12 @@ public class ChatFragment extends Fragment {
 		 * param2);
 		 */
 		fragment.setArguments(args);
+
 		return fragment;
 	}
 
 	public ChatFragment() {
+		messages = new ArrayList<String>();
 	}
 
 	@Override
@@ -42,6 +52,8 @@ public class ChatFragment extends Fragment {
 			 * getArguments().getString(ARG_PARAM2);
 			 */
 		}
+		
+		
 	}
 
 	@Override
@@ -62,14 +74,22 @@ public class ChatFragment extends Fragment {
 		chatTextView = (TextView) view.findViewById(R.id.textViewChat);
 		inputMessage = (EditText) view.findViewById(R.id.inputMessage);
 
+		if(savedInstanceState!=null)
+			messages=savedInstanceState.getStringArrayList(SAVED_STATE);
+		
+		for (String mess : messages) {
+			chatTextView.append("\n" + mess);
+		}
+
 		// Inflate the layout for this fragment
 		return view;
 	}
 
 	public void onSendMessage() {
-		if (mListener != null && inputMessage.getText().length()!=0) {
+		if (mListener != null && inputMessage.getText().length() != 0) {
 			mListener.onChatSendMessage(inputMessage.getText().toString());
 			chatTextView.append("\n-->" + inputMessage.getText());
+			messages.add("-->" + inputMessage.getText());
 			inputMessage.getText().clear();
 		}
 	}
@@ -90,9 +110,21 @@ public class ChatFragment extends Fragment {
 		super.onDetach();
 		mListener = null;
 	}
+	
+	 @Override
+	 public void onSaveInstanceState(Bundle outState) {
+		 super.onSaveInstanceState(outState);
+		 outState.putStringArrayList(SAVED_STATE, messages);
+	 }
+	 
 
 	public void newMessage(Message m) {
-		chatTextView.append("\n" + m.getUserID()+" (" + m.getSentTime() +"): " + m.getText());
+		if (chatTextView != null)
+			chatTextView.append("\n" + m.getUserID() + " (" + m.getSentTime()
+					+ "): " + m.getText());
+
+		messages.add(m.getUserID() + " (" + m.getSentTime() + "): "
+				+ m.getText());
 	}
 
 	public interface OnFragmentInteractionListener {

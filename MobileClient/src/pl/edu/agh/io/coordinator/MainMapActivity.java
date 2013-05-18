@@ -1,5 +1,6 @@
 package pl.edu.agh.io.coordinator;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,10 +37,10 @@ public class MainMapActivity extends Activity implements
 
 	private TextView debugInfo;
 	private boolean loggingOut = false;
-	private LayersMenuFragment fragment = new LayersMenuFragment();
+	private LayersMenuFragment layersFragment = new LayersMenuFragment();
 	private LayersMenuState savedState = null;
-	
-	private ChatFragment chatFragment;
+
+	private ChatFragment chatFragment = ChatFragment.newInstance();
 
 	private Set<UserItem> userItems;
 	private Set<User> users;
@@ -47,6 +48,8 @@ public class MainMapActivity extends Activity implements
 
 	private Set<Layer> layers;
 	private Set<MapItem> mapItems;
+
+	private Set<Thread> threads = new HashSet<Thread>();
 
 	public LayersMenuState getSavedState() {
 		return this.savedState;
@@ -63,13 +66,7 @@ public class MainMapActivity extends Activity implements
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main_map);
 
-		debugInfo = (TextView) findViewById(R.id.debugInfo);
-		debugInfo.setText("Debug");
-
-		if(chatFragment==null)
-			chatFragment=ChatFragment.newInstance();
-
-		new Thread() {
+		Thread mainThread = new Thread() {
 			@Override
 			public void run() {
 				while (true) {
@@ -84,7 +81,10 @@ public class MainMapActivity extends Activity implements
 					}
 				}
 			}
-		}.start();
+		};
+
+		threads.add(mainThread);
+		mainThread.start();
 
 	}
 
@@ -104,7 +104,7 @@ public class MainMapActivity extends Activity implements
 			FragmentTransaction fragmentTransaction = fragmentManager
 					.beginTransaction();
 			if (item.isChecked()) {
-				fragmentTransaction.add(R.id.mainMapTestLayout, chatFragment);
+				fragmentTransaction.add(R.id.chatFrame, chatFragment);
 			} else
 				fragmentTransaction.remove(chatFragment);
 			fragmentTransaction.commit();
@@ -115,9 +115,10 @@ public class MainMapActivity extends Activity implements
 			FragmentTransaction fragmentTransaction2 = fragmentManager2
 					.beginTransaction();
 			if (item.isChecked()) {
-				fragmentTransaction2.add(R.id.mainMapTestLayout, fragment);
+				fragmentTransaction2
+						.add(R.id.layersFrame, layersFragment);
 			} else
-				fragmentTransaction2.remove(fragment);
+				fragmentTransaction2.remove(layersFragment);
 			fragmentTransaction2.commit();
 			return true;
 		case R.id.actionCreateGroup:
@@ -245,8 +246,8 @@ public class MainMapActivity extends Activity implements
 		protected void onPostExecute(Exception result) {
 
 			if (result == null) {
-				if (MainMapActivity.this.fragment != null)
-					MainMapActivity.this.fragment.setPeople(users);
+				if (MainMapActivity.this.layersFragment != null)
+					MainMapActivity.this.layersFragment.setPeople(users);
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
@@ -426,8 +427,8 @@ public class MainMapActivity extends Activity implements
 		protected void onPostExecute(Exception result) {
 
 			if (result == null) {
-				if (fragment != null)
-					fragment.setGroups(groups);
+				if (layersFragment != null)
+					layersFragment.setGroups(groups);
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
@@ -459,8 +460,8 @@ public class MainMapActivity extends Activity implements
 		protected void onPostExecute(Exception result) {
 
 			if (result == null) {
-				if (fragment != null)
-					fragment.setItems(userItems);
+				if (layersFragment != null)
+					layersFragment.setItems(userItems);
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
@@ -503,7 +504,7 @@ public class MainMapActivity extends Activity implements
 			AsyncTask<Void, Void, Exception> {
 
 		List<Message> messages;
-		
+
 		@Override
 		protected Exception doInBackground(Void... params) {
 			IJSonProxy proxy = JSonProxy.getInstance();
@@ -523,7 +524,7 @@ public class MainMapActivity extends Activity implements
 		protected void onPostExecute(Exception result) {
 
 			if (result == null) {
-				for(Message m :  messages){
+				for (Message m : messages) {
 					chatFragment.newMessage(m);
 				}
 			} else if (result instanceof NetworkException) {

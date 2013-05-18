@@ -3,18 +3,18 @@
     android:id="@+id/RelativeLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:columnCount="1"
-    android:orientation="vertical"
+    android:background="@android:color/holo_orange_dark"
     tools:context=".LayersMenuFragment" >
-
-    <!-- TODO: Update blank fragment layout -->
 
     <ExpandableListView
         android:id="@+id/expandableListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true" >
+
     </ExpandableListView>
 
 </RelativeLayout>
