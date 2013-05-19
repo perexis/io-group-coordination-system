@@ -11,6 +11,7 @@ import pl.edu.agh.io.coordinator.resources.Message;
 import pl.edu.agh.io.coordinator.resources.Point;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
+import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListener;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuState;
 import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
@@ -26,14 +27,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainMapActivity extends Activity implements
-		ChatFragment.OnFragmentInteractionListener {
+public class MainMapActivity extends Activity implements ChatFragment.OnFragmentInteractionListener, LayersMenuListener {
 
 	private TextView debugInfo;
 	private boolean loggingOut = false;
@@ -539,6 +540,42 @@ public class MainMapActivity extends Activity implements
 	@Override
 	public void onChatSendMessage(String text) {
 		new SendMessageInBackground().execute(text);
+	}
+
+	@Override
+	public void itemChecked(String item) {
+		// TODO Auto-generated method stub
+		Log.d("MainMapActivity", "executing itemChecked, item = " + item);
+	}
+
+	@Override
+	public void itemUnchecked(String item) {
+		// TODO Auto-generated method stub
+		Log.d("MainMapActivity", "executing itemUnhecked, item = " + item);
+	}
+
+	@Override
+	public void userChecked(String user) {
+		// TODO Auto-generated method stub
+		Log.d("MainMapActivity", "executing userChecked, user = " + user);
+	}
+
+	@Override
+	public void userUnchecked(String user) {
+		// TODO Auto-generated method stub
+		Log.d("MainMapActivity", "executing userUnchecked, user = " + user);
+	}
+
+	@Override
+	public void groupChecked(String group) {
+		// TODO Auto-generated method stub
+		Log.d("MainMapActivity", "executing groupChecked, group = " + group);
+	}
+
+	@Override
+	public void groupUnchecked(String group) {
+		// TODO Auto-generated method stub
+		Log.d("MainMapActivity", "executing groupUnhecked, group = " + group);
 	}
 
 }

@@ -64,32 +64,45 @@ public class LayersMenuFragment extends Fragment {
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		super.onCreateView(inflater, container, savedInstanceState);
 		Log.d("LayersMenuFragment", "starting onCreateView");
-		View toReturn = inflater.inflate(R.layout.fragment_layers_menu,
-				container, false);
-		listView = (ExpandableListView) toReturn
-				.findViewById(R.id.expandableListView);
+		View toReturn = inflater.inflate(R.layout.fragment_layers_menu, container, false);
+		listView = (ExpandableListView) toReturn.findViewById(R.id.expandableListView);
 		listView.setAdapter(adapter);
 		listView.setOnChildClickListener(new OnChildClickListener() {
 			@Override
-			public boolean onChildClick(ExpandableListView parent, View v,
-					int groupPosition, int childPosition, long id) {
+			public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+				MainMapActivity activity = (MainMapActivity) LayersMenuFragment.this.getActivity();
 				LinearLayout ll = (LinearLayout) v;
 				TextView tv = (TextView) ll.getChildAt(0);
 				String text = tv.getText().toString();
-				adapter.setCheck(groupPosition, text,
-						!adapter.getCheck(groupPosition, text));
+				boolean newCheck = !adapter.getCheck(groupPosition, text);
+				adapter.setCheck(groupPosition, text, newCheck);
+				if (newCheck) {
+					if (groupPosition == ITEM_POSITION) {
+						activity.itemChecked(text);
+					} else if (groupPosition == USER_POSITION) {
+						activity.userChecked(text);
+					} else if (groupPosition == GROUP_POSITION) {
+						activity.groupChecked(text);
+					}
+				} else {
+					if (groupPosition == ITEM_POSITION) {
+						activity.itemUnchecked(text);
+					} else if (groupPosition == USER_POSITION) {
+						activity.userUnchecked(text);
+					} else if (groupPosition == GROUP_POSITION) {
+						activity.groupUnchecked(text);
+					}
+				}
 				adapter.notifyDataSetChanged();
 				return true;
 			}
 		});
 		listView.setOnGroupClickListener(new OnGroupClickListener() {
 			@Override
-			public boolean onGroupClick(ExpandableListView parent, View v,
-					int groupPosition, long id) {
+			public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
 				if (listView.isGroupExpanded(groupPosition)) {
 					listView.collapseGroup(groupPosition);
 				} else {
@@ -110,8 +123,7 @@ public class LayersMenuFragment extends Fragment {
 			adapter.setItems(state.items);
 			adapter.setPeople(state.people);
 			adapter.setGroups(state.groups);
-			adapter.setAllChecks(state.itemsChecks, state.peopleChecks,
-					state.groupsChecks);
+			adapter.setAllChecks(state.itemsChecks, state.peopleChecks, state.groupsChecks);
 		}
 		return toReturn;
 	}
@@ -195,20 +207,17 @@ public class LayersMenuFragment extends Fragment {
 			Map<String, Boolean> itemsChecks = new HashMap<String, Boolean>();
 			int icLimit = savedInstanceState.getInt("icCount");
 			for (int i = 0; i < icLimit; ++i) {
-				itemsChecks.put(savedInstanceState.getString("ick" + i),
-						savedInstanceState.getBoolean("icv" + i));
+				itemsChecks.put(savedInstanceState.getString("ick" + i), savedInstanceState.getBoolean("icv" + i));
 			}
 			Map<String, Boolean> peopleChecks = new HashMap<String, Boolean>();
 			int pcLimit = savedInstanceState.getInt("pcCount");
 			for (int i = 0; i < pcLimit; ++i) {
-				peopleChecks.put(savedInstanceState.getString("pck" + i),
-						savedInstanceState.getBoolean("pcv" + i));
+				peopleChecks.put(savedInstanceState.getString("pck" + i), savedInstanceState.getBoolean("pcv" + i));
 			}
 			Map<String, Boolean> groupsChecks = new HashMap<String, Boolean>();
 			int gcLimit = savedInstanceState.getInt("gcCount");
 			for (int i = 0; i < gcLimit; ++i) {
-				groupsChecks.put(savedInstanceState.getString("gck" + i),
-						savedInstanceState.getBoolean("gcv" + i));
+				groupsChecks.put(savedInstanceState.getString("gck" + i), savedInstanceState.getBoolean("gcv" + i));
 			}
 			adapter.setItems(items);
 			adapter.setPeople(people);
