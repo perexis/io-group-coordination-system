@@ -28,6 +28,7 @@ public class User {
 	public User() {
 		this.items = new HashMap<>();
 		this.state = new UserState();
+		lastMessageCheck = System.currentTimeMillis();
 	}
 	
 	public User(String id) {

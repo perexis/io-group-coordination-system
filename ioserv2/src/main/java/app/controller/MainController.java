@@ -114,7 +114,11 @@ public class MainController {
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
 		}
-		String res = mapper.writeValueAsString(sessions.values());
+		List<User> tmp = new ArrayList<>();
+		for (String id : sessions.values()) {
+			tmp.add(users.get(id));
+		}
+		String res = mapper.writeValueAsString(tmp);
 		return String.format("{\"retval\": %s, \"exception\": null}", res);
 	}
 	
@@ -180,6 +184,7 @@ public class MainController {
 		}
 		for (Map<Long, MapItem> l : layers.values()) {
 			if (l.containsKey(itemId)) {
+				l.remove(itemId);
 				return "{\"exception\": null}";
 			}
 		}
@@ -309,7 +314,7 @@ public class MainController {
 		}
 		List<Message> newMessages = new ArrayList<>();
 		for (Message m : messages) {
-			if (m.getSentTime() > timestamp || m.getId().equals(u.getId())) {
+			if (m.getSentTime() < timestamp || m.getId().equals(u.getId())) {
 				continue;
 			}
 			newMessages.add(m);
@@ -341,7 +346,7 @@ public class MainController {
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
-		if (groups.containsKey(group.getId())) {
+		if (group.getId().equals("") || groups.containsKey(group.getId())) {
 			return "{\"exception\": \"CouldNotCreateGroup\"}";
 		}
 		groups.put(group.getId(), group);
@@ -410,6 +415,23 @@ public class MainController {
 		return String.format("{\"retval\": %s, \"exception\": null}", res);
 	}
 	
+	@RequestMapping(value = "/removeGroup", method = RequestMethod.POST, 
+			consumes="application/json; charset=utf-8", 
+			produces="application/json; charset=utf-8")
+	@ResponseBody
+	public synchronized String removeGroup(@RequestBody String json, HttpServletResponse response) throws Exception {
+		Long sessionId = JsonPath.with(json).getLong("sessionID");
+		String groupId = JsonPath.with(json).getString("group");
+		if (!sessions.containsKey(sessionId)) {
+			return "{\"exception\": \"InvalidSessionID\"}";
+		}
+		if (!groups.containsKey(groupId)) {
+			return "{\"exception\": \"InvalidGroup\"}";
+		}
+		groups.remove(groupId);
+		return "{\"exception\": null}";
+	}
+	
 	@RequestMapping(value = "/getUserState", method = RequestMethod.POST, 
 			consumes="application/json; charset=utf-8", 
 			produces="application/json; charset=utf-8")
@@ -447,7 +469,7 @@ public class MainController {
 		cleanUp(userId);
 		Long sessionId = generateUniqueSessionId();
 		sessions.put(sessionId, userId);
-		users.get(userId).setLastMessageCheck(0L);
+		users.get(userId).setLastMessageCheck(System.currentTimeMillis());
 		return sessionId;
 	}
 	

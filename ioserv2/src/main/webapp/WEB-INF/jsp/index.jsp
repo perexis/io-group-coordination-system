@@ -157,6 +157,11 @@ Log in as admin (login: admin, pass: admin (or just leave blank)):
 	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"group\": \"ID\"}"/>
 </form:form>
 
+<form:form class="testForm" action="/removeGroup" modelAttribute="formString" method="post">
+	<input class="testSubmit" type="submit" value="/removeGroup">
+	<form:input path="value" size="100" value="{\"sessionID\": SESSION, \"group\": \"ID\"}"/>
+</form:form>
+
 <hr/>
 
 <form:form class="testForm" action="/sendMessage" modelAttribute="formString" method="post">
