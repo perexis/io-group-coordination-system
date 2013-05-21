@@ -4,6 +4,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.MapItem;
@@ -34,12 +45,18 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainMapActivity extends Activity implements ChatFragment.OnFragmentInteractionListener, LayersMenuListener {
+public class MainMapActivity extends Activity implements
+		ChatFragment.OnFragmentInteractionListener, LayersMenuListener {
+
+	private static final LatLng DEFAULT_POSITION = new LatLng(50.061368,
+			19.936924);
 
 	private TextView debugInfo;
 	private boolean loggingOut = false;
 	private LayersMenuFragment layersFragment = new LayersMenuFragment();
 	private LayersMenuState savedState = null;
+
+	private GoogleMap googleMap;
 
 	private ChatFragment chatFragment = ChatFragment.newInstance();
 
@@ -67,6 +84,8 @@ public class MainMapActivity extends Activity implements ChatFragment.OnFragment
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main_map);
 
+		setUpMapIfNeeded();
+
 		Thread mainThread = new Thread() {
 			@Override
 			public void run() {
@@ -87,6 +106,12 @@ public class MainMapActivity extends Activity implements ChatFragment.OnFragment
 		threads.add(mainThread);
 		mainThread.start();
 
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		setUpMapIfNeeded();
 	}
 
 	@Override
@@ -116,8 +141,7 @@ public class MainMapActivity extends Activity implements ChatFragment.OnFragment
 			FragmentTransaction fragmentTransaction2 = fragmentManager2
 					.beginTransaction();
 			if (item.isChecked()) {
-				fragmentTransaction2
-						.add(R.id.layersFrame, layersFragment);
+				fragmentTransaction2.add(R.id.layersFrame, layersFragment);
 			} else
 				fragmentTransaction2.remove(layersFragment);
 			fragmentTransaction2.commit();
@@ -152,6 +176,30 @@ public class MainMapActivity extends Activity implements ChatFragment.OnFragment
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private void setUpMapIfNeeded() {
+		if (googleMap == null) {
+			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
+					R.id.mainMapFragment)).getMap();
+			if (googleMap == null) {
+				// TODO: print error
+			} else {
+				googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+				CameraUpdate cameraUpdate = CameraUpdateFactory
+						.newLatLng(DEFAULT_POSITION);
+				googleMap.moveCamera(cameraUpdate);
+
+				Marker marker = googleMap
+						.addMarker(new MarkerOptions()
+								.position(DEFAULT_POSITION)
+								.title("Pies")
+								.snippet("Taki tam")
+								.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+								//.icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
+
+			}
 		}
 	}
 
