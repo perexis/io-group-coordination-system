@@ -4,17 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.MapItem;
@@ -44,6 +33,15 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainMapActivity extends Activity implements
 		ChatFragment.OnFragmentInteractionListener, LayersMenuListener {
@@ -623,7 +621,19 @@ public class MainMapActivity extends Activity implements
 	@Override
 	public void groupUnchecked(String group) {
 		// TODO Auto-generated method stub
-		Log.d("MainMapActivity", "executing groupUnhecked, group = " + group);
+		Log.d("MainMapActivity", "executing groupUnchecked, group = " + group);
 	}
 
+	@Override
+	public void layerChecked(String layer) {
+		// TODO Auto-generated method stub
+		Log.d("MainMapActivity", "executing layerChecked, layer = " + layer);
+	}
+	
+	@Override
+	public void layerUnchecked(String layer) {
+		// TODO Auto-generated method stub
+		Log.d("MainMapActivity", "executing layerUnchecked, layer = " + layer);
+	}
+	
 }

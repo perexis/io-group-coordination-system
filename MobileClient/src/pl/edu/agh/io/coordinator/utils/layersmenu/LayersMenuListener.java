@@ -8,5 +8,7 @@ public interface LayersMenuListener {
 	void userUnchecked(String user);
 	void groupChecked(String group);
 	void groupUnchecked(String group);
+	void layerChecked(String layer);
+	void layerUnchecked(String layer);
 	
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.resources.Group;
+import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListAdapter;
@@ -31,6 +32,8 @@ public class LayersMenuFragment extends Fragment {
 	public static final int ITEM_POSITION = 0;
 	public static final int USER_POSITION = 1;
 	public static final int GROUP_POSITION = 2;
+	public static final int LAYER_POSITION = 3;
+	public static final int GROUP_COUNT = 4;
 
 	public LayersMenuFragment() {
 	}
@@ -56,6 +59,13 @@ public class LayersMenuFragment extends Fragment {
 		adapter.setGroups(groups);
 	}
 
+	public void setLayers(Set<Layer> layers) {
+		if (adapter == null) {
+			return;
+		}
+		adapter.setLayers(layers);
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d("LayersMenuFragment", "starting onCreate");
@@ -86,6 +96,8 @@ public class LayersMenuFragment extends Fragment {
 						activity.userChecked(text);
 					} else if (groupPosition == GROUP_POSITION) {
 						activity.groupChecked(text);
+					} else if (groupPosition == LAYER_POSITION) {
+						activity.layerChecked(text);
 					}
 				} else {
 					if (groupPosition == ITEM_POSITION) {
@@ -94,6 +106,8 @@ public class LayersMenuFragment extends Fragment {
 						activity.userUnchecked(text);
 					} else if (groupPosition == GROUP_POSITION) {
 						activity.groupUnchecked(text);
+					} else if (groupPosition == LAYER_POSITION) {
+						activity.layerUnchecked(text);
 					}
 				}
 				adapter.notifyDataSetChanged();
@@ -106,7 +120,7 @@ public class LayersMenuFragment extends Fragment {
 				if (listView.isGroupExpanded(groupPosition)) {
 					listView.collapseGroup(groupPosition);
 				} else {
-					for (int i = 0; i < 3; ++i) {
+					for (int i = 0; i < GROUP_COUNT; ++i) {
 						if (i == groupPosition) {
 							listView.expandGroup(i, true);
 						} else {
@@ -123,7 +137,8 @@ public class LayersMenuFragment extends Fragment {
 			adapter.setItems(state.items);
 			adapter.setPeople(state.people);
 			adapter.setGroups(state.groups);
-			adapter.setAllChecks(state.itemsChecks, state.peopleChecks, state.groupsChecks);
+			adapter.setLayers(state.layers);
+			adapter.setAllChecks(state.itemsChecks, state.peopleChecks, state.groupsChecks, state.layersChecks);
 		}
 		return toReturn;
 	}
@@ -149,6 +164,12 @@ public class LayersMenuFragment extends Fragment {
 		outState.putInt("groupsCount", groupsLimit);
 		for (int i = 0; i < groupsLimit; ++i) {
 			outState.putParcelable("group" + i, groups.get(i));
+		}
+		List<Layer> layers = adapter.getLayers();
+		int layersLimit = layers.size();
+		outState.putInt("layersCount", layersLimit);
+		for (int i = 0; i < layersLimit; ++i) {
+			outState.putParcelable("layer" + i, layers.get(i));
 		}
 		Map<String, Boolean> itemsChecks = adapter.getItemsChecks();
 		int icLimit = itemsChecks.size();
@@ -180,6 +201,16 @@ public class LayersMenuFragment extends Fragment {
 			outState.putBoolean("gcv" + i3, groupsChecks.get(s));
 			++i3;
 		}
+		Map<String, Boolean> layersChecks = adapter.getLayersChecks();
+		int lcLimit = layersChecks.size();
+		outState.putInt("lcCount", lcLimit);
+		Set<String> lcSet = layersChecks.keySet();
+		int i4 = 0;
+		for (String s : lcSet) {
+			outState.putString("lck" + i4, s);
+			outState.putBoolean("lcv" + i4, layersChecks.get(s));
+			++i4;
+		}
 	}
 
 	@Override
@@ -204,6 +235,12 @@ public class LayersMenuFragment extends Fragment {
 				Group group = savedInstanceState.getParcelable("group" + i);
 				groups.add(group);
 			}
+			Set<Layer> layers = new HashSet<Layer>();
+			int layersLimit = savedInstanceState.getInt("layersCount");
+			for (int i = 0; i < layersLimit; ++i) {
+				Layer layer = savedInstanceState.getParcelable("layer" + i);
+				layers.add(layer);
+			}
 			Map<String, Boolean> itemsChecks = new HashMap<String, Boolean>();
 			int icLimit = savedInstanceState.getInt("icCount");
 			for (int i = 0; i < icLimit; ++i) {
@@ -219,10 +256,15 @@ public class LayersMenuFragment extends Fragment {
 			for (int i = 0; i < gcLimit; ++i) {
 				groupsChecks.put(savedInstanceState.getString("gck" + i), savedInstanceState.getBoolean("gcv" + i));
 			}
+			Map<String, Boolean> layersChecks = new HashMap<String, Boolean>();
+			int lcLimit = savedInstanceState.getInt("lcCount");
+			for (int i = 0; i < lcLimit; ++i) {
+				layersChecks.put(savedInstanceState.getString("lck" + i), savedInstanceState.getBoolean("lcv" + i));
+			}
 			adapter.setItems(items);
 			adapter.setPeople(people);
 			adapter.setGroups(groups);
-			adapter.setAllChecks(itemsChecks, peopleChecks, groupsChecks);
+			adapter.setAllChecks(itemsChecks, peopleChecks, groupsChecks, layersChecks);
 		}
 		super.onActivityCreated(savedInstanceState);
 	}
@@ -235,9 +277,11 @@ public class LayersMenuFragment extends Fragment {
 		state.items = new HashSet<UserItem>(adapter.getItems());
 		state.people = new HashSet<User>(adapter.getPeople());
 		state.groups = new HashSet<Group>(adapter.getGroups());
+		state.layers = new HashSet<Layer>(adapter.getLayers());
 		state.itemsChecks = adapter.getItemsChecks();
 		state.peopleChecks = adapter.getPeopleChecks();
 		state.groupsChecks = adapter.getGroupsChecks();
+		state.layersChecks = adapter.getLayersChecks();
 		MainMapActivity activity = (MainMapActivity) getActivity();
 		activity.setSavedState(state);
 	}

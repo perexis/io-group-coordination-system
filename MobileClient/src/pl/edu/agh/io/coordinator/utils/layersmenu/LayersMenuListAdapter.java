@@ -11,6 +11,7 @@ import java.util.Set;
 import pl.edu.agh.io.coordinator.LayersMenuFragment;
 import pl.edu.agh.io.coordinator.R;
 import pl.edu.agh.io.coordinator.resources.Group;
+import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
 import android.content.Context;
@@ -41,7 +42,7 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		}
 
 	}
-	
+
 	private class GroupComparator implements Comparator<Group> {
 
 		@Override
@@ -51,14 +52,25 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 
 	}
 
+	private class LayerComparator implements Comparator<Layer> {
+
+		@Override
+		public int compare(Layer lhs, Layer rhs) {
+			return lhs.getName().compareTo(rhs.getName());
+		}
+
+	}
+
 	private Context context;
 	private List<String> menuGroups;
 	private List<UserItem> items;
 	private List<User> people;
 	private List<Group> groups;
+	private List<Layer> layers;
 	private Map<String, Boolean> itemsChecks;
 	private Map<String, Boolean> peopleChecks;
 	private Map<String, Boolean> groupsChecks;
+	private Map<String, Boolean> layersChecks;
 
 	public LayersMenuListAdapter(Context context) {
 		this.context = context;
@@ -66,12 +78,15 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		this.menuGroups.add(context.getString(R.string.menu_item_items));
 		this.menuGroups.add(context.getString(R.string.menu_item_people));
 		this.menuGroups.add(context.getString(R.string.menu_item_groups));
+		this.menuGroups.add(context.getString(R.string.menu_item_layers));
 		this.items = new ArrayList<UserItem>();
 		this.people = new ArrayList<User>();
 		this.groups = new ArrayList<Group>();
+		this.layers = new ArrayList<Layer>();
 		this.itemsChecks = new HashMap<String, Boolean>();
 		this.peopleChecks = new HashMap<String, Boolean>();
 		this.groupsChecks = new HashMap<String, Boolean>();
+		this.layersChecks = new HashMap<String, Boolean>();
 	}
 
 	public List<UserItem> getItems() {
@@ -86,6 +101,10 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		return this.groups;
 	}
 
+	public List<Layer> getLayers() {
+		return this.layers;
+	}
+
 	public Map<String, Boolean> getItemsChecks() {
 		return itemsChecks;
 	}
@@ -98,11 +117,16 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		return groupsChecks;
 	}
 
-	public void setAllChecks(Map<String, Boolean> items,
-			Map<String, Boolean> people, Map<String, Boolean> groups) {
+	public Map<String, Boolean> getLayersChecks() {
+		return layersChecks;
+	}
+
+	public void setAllChecks(Map<String, Boolean> items, Map<String, Boolean> people, Map<String, Boolean> groups,
+			Map<String, Boolean> layers) {
 		this.itemsChecks = items;
 		this.peopleChecks = people;
 		this.groupsChecks = groups;
+		this.layersChecks = layers;
 		notifyDataSetChanged();
 	}
 
@@ -114,6 +138,8 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 			map = peopleChecks;
 		} else if (group == LayersMenuFragment.GROUP_POSITION) {
 			map = groupsChecks;
+		} else if (group == LayersMenuFragment.LAYER_POSITION) {
+			map = layersChecks;
 		} else {
 			return;
 		}
@@ -128,6 +154,8 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 			map = peopleChecks;
 		} else if (group == LayersMenuFragment.GROUP_POSITION) {
 			map = groupsChecks;
+		} else if (group == LayersMenuFragment.LAYER_POSITION) {
+			map = layersChecks;
 		} else {
 			return null;
 		}
@@ -155,6 +183,13 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		notifyDataSetChanged();
 	}
 
+	public void setLayers(Set<Layer> layers) {
+		ArrayList<Layer> list = new ArrayList<Layer>(layers);
+		Collections.sort(list, new LayerComparator());
+		this.layers = list;
+		notifyDataSetChanged();
+	}
+
 	@Override
 	public boolean areAllItemsEnabled() {
 		return true;
@@ -168,6 +203,8 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 			return people.get(childPosition);
 		} else if (groupPosition == LayersMenuFragment.GROUP_POSITION) {
 			return groups.get(childPosition);
+		} else if (groupPosition == LayersMenuFragment.LAYER_POSITION) {
+			return layers.get(childPosition);
 		} else {
 			return null;
 		}
@@ -179,12 +216,10 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 	}
 
 	@Override
-	public View getChildView(int groupPosition, int childPosition,
-			boolean isLastChild, View convertView, ViewGroup parent) {
+	public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 		Object object = getChild(groupPosition, childPosition);
 		if (convertView == null) {
-			LayoutInflater layoutInflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = layoutInflater.inflate(R.layout.child_layout, null);
 		}
 		TextView tv = (TextView) convertView.findViewById(R.id.tvChild);
@@ -211,13 +246,19 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 			} else {
 				groupsChecks.put(text, false);
 			}
+		} else if (groupPosition == LayersMenuFragment.LAYER_POSITION) {
+			text = ((Layer) object).getName();
+			if (layersChecks.containsKey(text)) {
+				isChecked = layersChecks.get(text);
+			} else {
+				layersChecks.put(text, false);
+			}
 		}
 		tv.setText(text);
-		Log.d("LayersMenuListAdapter", "values: text = " + text
-				+ ", isChecked = " + isChecked);
+		Log.d("LayersMenuListAdapter", "values: text = " + text + ", isChecked = " + isChecked);
 		Log.d("LayersMenuListAdapter",
-				"values: sizes are " + itemsChecks.size() + ", "
-						+ peopleChecks.size() + ", " + groupsChecks.size());
+				"values: sizes are " + itemsChecks.size() + ", " + peopleChecks.size() + ", " + groupsChecks.size() + ", "
+						+ layersChecks.size());
 		if (isChecked) {
 			tv.setTextColor(Color.WHITE);
 			tv.setBackgroundColor(Color.BLACK);
@@ -236,6 +277,8 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 			return people.size();
 		} else if (groupPosition == LayersMenuFragment.GROUP_POSITION) {
 			return groups.size();
+		} else if (groupPosition == LayersMenuFragment.LAYER_POSITION) {
+			return layers.size();
 		} else {
 			return 0;
 		}
@@ -248,7 +291,7 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public int getGroupCount() {
-		return 3;
+		return LayersMenuFragment.GROUP_COUNT;
 	}
 
 	@Override
@@ -257,12 +300,10 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 	}
 
 	@Override
-	public View getGroupView(int groupPosition, boolean isExpanded,
-			View convertView, ViewGroup parent) {
+	public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 		String group = (String) getGroup(groupPosition);
 		if (convertView == null) {
-			LayoutInflater layoutInflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = layoutInflater.inflate(R.layout.group_layout, null);
 		}
 		TextView tv = (TextView) convertView.findViewById(R.id.tvGroup);

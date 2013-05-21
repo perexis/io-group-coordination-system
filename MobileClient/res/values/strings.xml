@@ -55,9 +55,10 @@
     <string name="alert_group_created">Group successfully created</string>
 
     <!-- LayersMenuFragment -->
-    <string name="menu_item_items">Items</string>
+    <string name="menu_item_items">User Items</string>
     <string name="menu_item_people">People</string>
     <string name="menu_item_groups">Groups</string>
+    <string name="menu_item_layers">Map Items</string>
     
     <!-- RemoveGroupActivity -->
     <string name="alert_group_removed">Group removed</string>

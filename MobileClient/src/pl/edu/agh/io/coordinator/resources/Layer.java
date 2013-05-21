@@ -1,6 +1,9 @@
 package pl.edu.agh.io.coordinator.resources;
 
-public class Layer {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Layer implements Parcelable {
 
 	private String name;
 
@@ -13,4 +16,26 @@ public class Layer {
 		return name;
 	}
 
+	public static final Creator<Layer> CREATOR = new Creator<Layer>() {
+		@Override
+		public Layer createFromParcel(Parcel source) {
+			String name = source.readString();
+			return new Layer(name);
+		}
+		@Override
+		public Layer[] newArray(int size) {
+			return new Layer[size];
+		}
+	}; 
+	
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.name);
+	}
+	
 }
