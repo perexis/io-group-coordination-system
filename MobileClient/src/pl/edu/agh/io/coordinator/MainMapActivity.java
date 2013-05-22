@@ -114,16 +114,13 @@ public class MainMapActivity extends Activity implements
 				AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 
 		setUpMapIfNeeded();
-
-		final Handler handler = new Handler();
 		Thread mainThread = new Thread() {
 
 			@Override
 			public void run() {
 				while (true) {
 					try {
-						Thread.sleep(500);
-						// handler.postDelayed(this, 1000);
+						Thread.sleep(1000);
 
 						new GetUsersInBackground().executeOnExecutor(
 								AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
