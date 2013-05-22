@@ -44,7 +44,7 @@ public class CreateGroupActivity extends Activity {
 				android.R.layout.simple_list_item_1, groups);
 		ListView availableGroups = (ListView) findViewById(R.id.listViewAvailableGroups);
 		availableGroups.setAdapter(listArrayAdapter);
-		new GetGroupsInBackground().execute(new Intent());
+		new GetGroupsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 		creatingGroupInProgress = false;
 		createButton = (Button) findViewById(R.id.buttonCreateGroup);
 		inputGroupName = (EditText) findViewById(R.id.inputGroupName);
@@ -63,7 +63,7 @@ public class CreateGroupActivity extends Activity {
 			createGroupInBackground = new CreateGroupInBackground();
 		if (!creatingGroupInProgress) {
 			createButton.setText(getString(R.string.button_cancel));
-			createGroupInBackground.execute(new Intent());
+			createGroupInBackground.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 			creatingGroupInProgress = true;
 		} else {
 			createGroupInBackground.cancel(false);
@@ -175,7 +175,7 @@ public class CreateGroupActivity extends Activity {
 				inputGroupName.setText("");
 				inputGroupDescription.setText("");
 				// refresh group list
-				new GetGroupsInBackground().execute(new Intent());
+				new GetGroupsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {

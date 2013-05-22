@@ -61,7 +61,7 @@ public class RemoveGroupActivity extends Activity {
 
 		});
 
-		new GetGroupsInBackground().execute(new Intent());
+		new GetGroupsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 		removingGroupInProgress = false;
 		removeButton = (Button) findViewById(R.id.buttonRemoveGroup);
 	}
@@ -77,7 +77,7 @@ public class RemoveGroupActivity extends Activity {
 			removeGroupInBackground = new RemoveGroupInBackground();
 		if (!removingGroupInProgress) {
 			removeButton.setText(getString(R.string.button_cancel));
-			removeGroupInBackground.execute(new Intent());
+			removeGroupInBackground.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 			removingGroupInProgress = true;
 		} else {
 			removeGroupInBackground.cancel(false);
@@ -186,7 +186,7 @@ public class RemoveGroupActivity extends Activity {
 			if (result == null) {
 				groupRemoved();
 				// refresh group list
-				new GetGroupsInBackground().execute(new Intent());
+				new GetGroupsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {

@@ -49,7 +49,7 @@ public class LoginPasswordActivity extends Activity {
 		if (!loginInProgress) {
 			loginButton.setText(getString(R.string.button_cancel));
 			Intent intent = new Intent();
-			loginInBackground.execute(intent);
+			loginInBackground.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, intent);
 			loginInProgress = true;
 		} else {
 			loginInBackground.cancel(false);

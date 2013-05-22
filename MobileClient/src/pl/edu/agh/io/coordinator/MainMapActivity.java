@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
@@ -26,10 +28,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.AsyncTaskLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -83,53 +87,66 @@ public class MainMapActivity extends Activity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main_map);
 
-		
-		
 		// TODO: implement better ----vvv-----
 		FragmentManager fragmentManager = getFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager
 				.beginTransaction();
 		fragmentTransaction.add(R.id.layersFrame, layersFragment);
 		fragmentTransaction.hide(layersFragment);
-		//fragmentTransaction.add(layersFragment, "layersFragment");
+		// fragmentTransaction.add(layersFragment, "layersFragment");
 		fragmentTransaction.commit();
 
-		/*fragmentManager = getFragmentManager();
-		fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.remove(layersFragment);
-		fragmentTransaction.commit();*/
+		/*
+		 * fragmentManager = getFragmentManager(); fragmentTransaction =
+		 * fragmentManager.beginTransaction();
+		 * fragmentTransaction.remove(layersFragment);
+		 * fragmentTransaction.commit();
+		 */
 
 		// TODO: ----------^^^---------
-		
-		new GetLayersInBackground().execute(new Intent());
+
+		new GetLayersInBackground().executeOnExecutor(
+				AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 
 		setUpMapIfNeeded();
 
+		final Handler handler = new Handler();
 		Thread mainThread = new Thread() {
+
 			@Override
 			public void run() {
 				while (true) {
 					try {
-						Thread.sleep(1000);
-						new GetUsersInBackground().execute(new Intent());
-						new GetUserItemsInBackground().execute(new Intent());
-						new GetGroupsInBackground().execute(new Intent());
-						new GetMessagesInBackground().execute();
+						Thread.sleep(500);
+						// handler.postDelayed(this, 1000);
+
+						new GetUsersInBackground().executeOnExecutor(
+								AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
+						new GetUserItemsInBackground().executeOnExecutor(
+								AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
+						new GetGroupsInBackground().executeOnExecutor(
+								AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
+						new GetMessagesInBackground()
+								.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 						if (layers != null)
 							for (Layer layer : layers)
-								new GetMapItemsInBackground().execute(layer);
-					} catch (InterruptedException e) {
+								new GetMapItemsInBackground()
+										.executeOnExecutor(
+												AsyncTask.THREAD_POOL_EXECUTOR,
+												layer);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 			}
 		};
 
-		threads.add(mainThread);
+		// threads.add(mainThread);
 		mainThread.start();
 
 	}
@@ -167,10 +184,10 @@ public class MainMapActivity extends Activity implements
 			FragmentTransaction fragmentTransaction2 = fragmentManager2
 					.beginTransaction();
 			if (item.isChecked()) {
-				//fragmentTransaction2.add(R.id.layersFrame, layersFragment);
+				// fragmentTransaction2.add(R.id.layersFrame, layersFragment);
 				fragmentTransaction2.show(layersFragment);
 			} else
-				//fragmentTransaction2.remove(layersFragment);
+				// fragmentTransaction2.remove(layersFragment);
 				fragmentTransaction2.hide(layersFragment);
 			fragmentTransaction2.commit();
 			return true;
@@ -198,7 +215,8 @@ public class MainMapActivity extends Activity implements
 			if (!loggingOut) {
 				loggingOut = true;
 				Intent intent = new Intent();
-				new LogoutInBackground().execute(intent);
+				new LogoutInBackground().executeOnExecutor(
+						AsyncTask.THREAD_POOL_EXECUTOR, intent);
 			}
 			return true;
 		default:
@@ -310,6 +328,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
+			Log.d("MainMapActivity", "GetUsersInBackground.doInBackground()");
 			IJSonProxy proxy = JSonProxy.getInstance();
 
 			try {
@@ -377,6 +396,9 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(Layer... params) {
+
+			Log.d("MainMapActivity", "GetMapItemsInBackground.doInBackground()");
+
 			IJSonProxy proxy = JSonProxy.getInstance();
 
 			try {
@@ -553,7 +575,7 @@ public class MainMapActivity extends Activity implements
 		@Override
 		protected Exception doInBackground(String... params) {
 			IJSonProxy proxy = JSonProxy.getInstance();
-
+			Log.d("MainMapActivity", "SendMessageInBackground.doInBackground()");
 			try {
 				proxy.sendMessage(params[0]);
 			} catch (InvalidSessionIDException e) {
@@ -566,7 +588,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected void onPostExecute(Exception result) {
-
+			Log.d("MainMapActivity", "SendMessageInBackground.onPostExecute()");
 			if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
@@ -614,7 +636,8 @@ public class MainMapActivity extends Activity implements
 
 	@Override
 	public void onChatSendMessage(String text) {
-		new SendMessageInBackground().execute(text);
+		new SendMessageInBackground().executeOnExecutor(
+				AsyncTask.THREAD_POOL_EXECUTOR, text);
 	}
 
 	@Override
