@@ -11,9 +11,25 @@
   height: 550px;
 }
 
-.add-element-window {
+.add-element-window .marker-window {
   width: 300px;
   height: 100%;
+}
+
+.my-infowindow {
+  margin-top: -20px;
+}
+
+.image-infowindow {
+  min-width: 400px;
+  min-height: 200px;
+}
+
+.image-infowindow img {
+  max-width: 400px;
+  height: auto;
+  margin-bottom: 10px;
+  max-height: 400px;
 }
 
 body {

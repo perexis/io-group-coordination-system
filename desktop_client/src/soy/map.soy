@@ -4,7 +4,7 @@
  * Onclick info window for adding elemetns.
  */
 {template .addElement}
-<div class="add-element-window">
+<div class="add-element-window my-infowindow">
   <form id="addItemForm">
     <h3>Add item to the map</h3>
     <input id="addItemLayer" type="text" class="input-block-level" placeholder="Layer">
@@ -18,11 +18,53 @@
  * Marker window
  */
 {template .markerWindow}
-<div class="marker-window">
+<div class="marker-window my-infowindow">
   <div id="markerContent"></div>
   <form id="deleteMarkerForm">
     <button type="submit" class="btn btn-primary" id="deleteMarkerButton">Delete</button>
   </form>
 </div>
+{/template}
+
+/**
+ * Image window content
+ * @param url
+ */
+{template .imageContent}
+<h3>Image</h3>
+<div class="image-infowindow">
+  <a href="{$url}" target="_blank"><img src="{$url}"></a>
+</div>
+{/template}
+
+/**
+ * Video window content
+ * @param url
+ */
+{template .videoContent}
+<h3>Video</h3>
+<iframe width="560" height="315" src="http://www.youtube.com/embed/{$url}" frameborder="0" allowfullscreen></iframe>
+{/template}
+
+/**
+ * Video window content
+ * @param text
+ */
+{template .noteContent}
+<h3>Note</h3>
+<p>{$text}</p>
+{/template}
+
+/**
+ * Map layers menu
+ * @param layers - the layers list
+ */
+{template .layersMenu}
+<ul class="nav nav-list">
+  <li class="nav-header">Layers2</li>
+  {foreach $layer in $layers}
+    <li id="layer_{$layer}"><a href="#">{$layer}</a></li>
+  {/foreach}
+</ul>
 {/template}
 
