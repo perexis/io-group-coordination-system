@@ -1,5 +1,6 @@
 package pl.edu.agh.io.coordinator;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,8 @@ import pl.edu.agh.io.coordinator.resources.Message;
 import pl.edu.agh.io.coordinator.resources.Point;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
+import pl.edu.agh.io.coordinator.utils.container.DataContainer;
+import pl.edu.agh.io.coordinator.utils.container.DataContainer.OnDataContainerChangesListener;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListener;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuState;
 import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
@@ -31,12 +34,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -44,12 +47,13 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainMapActivity extends Activity implements
-		ChatFragment.OnFragmentInteractionListener, LayersMenuListener {
+		ChatFragment.OnFragmentInteractionListener, LayersMenuListener,
+		OnDataContainerChangesListener {
 
 	private static final LatLng DEFAULT_POSITION = new LatLng(50.061368,
-			19.936924);
+			19.936924); // Cracow
 
-	private TextView debugInfo;
+	private DataContainer dataContainer = new DataContainer(this);
 	private boolean loggingOut = false;
 	private LayersMenuFragment layersFragment = new LayersMenuFragment();
 	private LayersMenuState savedState = null;
@@ -63,7 +67,8 @@ public class MainMapActivity extends Activity implements
 	private Set<Group> groups;
 
 	private Set<Layer> layers;
-	private Set<MapItem> mapItems;
+
+	private HashMap<MapItem, Marker> mapItemToMarker = new HashMap<MapItem, Marker>();
 
 	private Set<Thread> threads = new HashSet<Thread>();
 
@@ -82,6 +87,8 @@ public class MainMapActivity extends Activity implements
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main_map);
 
+		new GetLayersInBackground().execute(new Intent());
+
 		setUpMapIfNeeded();
 
 		Thread mainThread = new Thread() {
@@ -94,6 +101,9 @@ public class MainMapActivity extends Activity implements
 						new GetUserItemsInBackground().execute(new Intent());
 						new GetGroupsInBackground().execute(new Intent());
 						new GetMessagesInBackground().execute();
+						if (layers != null)
+							for (Layer layer : layers)
+								new GetMapItemsInBackground().execute(layer);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -167,7 +177,6 @@ public class MainMapActivity extends Activity implements
 		case R.id.actionLogout:
 			if (!loggingOut) {
 				loggingOut = true;
-				debugInfo.append("\n" + item.getTitle() + "()");
 				Intent intent = new Intent();
 				new LogoutInBackground().execute(intent);
 			}
@@ -185,8 +194,8 @@ public class MainMapActivity extends Activity implements
 				// TODO: print error
 			} else {
 				googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-				CameraUpdate cameraUpdate = CameraUpdateFactory
-						.newLatLng(DEFAULT_POSITION);
+				CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+						DEFAULT_POSITION, 16.0f);
 				googleMap.moveCamera(cameraUpdate);
 
 				Marker marker = googleMap
@@ -194,8 +203,23 @@ public class MainMapActivity extends Activity implements
 								.position(DEFAULT_POSITION)
 								.title("Pies")
 								.snippet("Taki tam")
-								.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-								//.icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
+								.icon(BitmapDescriptorFactory
+										.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+				// .icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
+
+				googleMap.setMyLocationEnabled(true);
+				googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+
+				googleMap
+						.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+
+							@Override
+							public void onInfoWindowClick(Marker marker) {
+								Toast.makeText(getApplicationContext(),
+										marker.getSnippet(), Toast.LENGTH_SHORT)
+										.show();
+							}
+						});
 
 			}
 		}
@@ -324,11 +348,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected void onPostExecute(Exception result) {
-
-			if (result == null) {
-				for (Layer layer : layers)
-					debugInfo.append("\n" + layer.getName());
-			} else if (result instanceof NetworkException) {
+			if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
 				invalidSessionId();
@@ -338,14 +358,18 @@ public class MainMapActivity extends Activity implements
 	}
 
 	private class GetMapItemsInBackground extends
-			AsyncTask<Intent, Void, Exception> {
+			AsyncTask<Layer, Void, Exception> {
+
+		Set<MapItem> mapItems;
+		Layer layer;
 
 		@Override
-		protected Exception doInBackground(Intent... params) {
+		protected Exception doInBackground(Layer... params) {
 			IJSonProxy proxy = JSonProxy.getInstance();
 
 			try {
-				mapItems = proxy.getMapItems(new Layer("notes"));
+				mapItems = proxy.getMapItems(params[0]);
+				layer = params[0];
 			} catch (InvalidSessionIDException e) {
 				return e;
 			} catch (NetworkException e) {
@@ -359,12 +383,8 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected void onPostExecute(Exception result) {
-
 			if (result == null) {
-				for (MapItem item : mapItems)
-					debugInfo.append("\n" + item.getId() + " " + item.getData()
-							+ " " + item.getPosition().getLongitude() + " "
-							+ item.getPosition().getLatitude());
+				dataContainer.newMapItemsSet(layer, mapItems);
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
@@ -403,9 +423,7 @@ public class MainMapActivity extends Activity implements
 		@Override
 		protected void onPostExecute(Exception result) {
 
-			if (result == null) {
-				debugInfo.append("\nMapItemId: " + mapItem.getId());
-			} else if (result instanceof NetworkException) {
+			if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
 				invalidSessionId();
@@ -439,9 +457,7 @@ public class MainMapActivity extends Activity implements
 		@Override
 		protected void onPostExecute(Exception result) {
 
-			if (result == null) {
-				debugInfo.append("\nUsunięto MapItem");
-			} else if (result instanceof NetworkException) {
+			if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
 				invalidSessionId();
@@ -629,11 +645,61 @@ public class MainMapActivity extends Activity implements
 		// TODO Auto-generated method stub
 		Log.d("MainMapActivity", "executing layerChecked, layer = " + layer);
 	}
-	
+
 	@Override
 	public void layerUnchecked(String layer) {
 		// TODO Auto-generated method stub
 		Log.d("MainMapActivity", "executing layerUnchecked, layer = " + layer);
 	}
-	
+
+	@Override
+	public void mapItemAdded(Layer layer, MapItem mapItem) {
+		Log.d("MainMapActivity", "adding mapItem " + mapItem.getData() + " to layer " + layer.getName() );
+		if (layer.getName().equals("notes")) {
+			Marker marker = googleMap
+					.addMarker(new MarkerOptions()
+							.position(
+									new LatLng(mapItem.getPosition()
+											.getLatitude(), mapItem
+											.getPosition().getLongitude()))
+							.title(getString(R.string.layer_note))
+							.snippet(mapItem.getData())
+							.icon(BitmapDescriptorFactory
+									.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+			// .icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
+			mapItemToMarker.put(mapItem, marker);
+		} else if (layer.getName().equals("images")) {
+			Marker marker = googleMap
+					.addMarker(new MarkerOptions()
+							.position(
+									new LatLng(mapItem.getPosition()
+											.getLatitude(), mapItem
+											.getPosition().getLongitude()))
+							.title(getString(R.string.layer_image))
+							.snippet(mapItem.getData())
+							.icon(BitmapDescriptorFactory
+									.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
+			mapItemToMarker.put(mapItem, marker);
+		} else if (layer.getName().equals("videos")) {
+			Marker marker = googleMap
+					.addMarker(new MarkerOptions()
+							.position(
+									new LatLng(mapItem.getPosition()
+											.getLatitude(), mapItem
+											.getPosition().getLongitude()))
+							.title(getString(R.string.layer_video))
+							.snippet(mapItem.getData())
+							.icon(BitmapDescriptorFactory
+									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+			mapItemToMarker.put(mapItem, marker);
+		}
+	}
+
+	@Override
+	public void mapItemRemoved(Layer layer, MapItem mapItem) {
+		Log.d(this.toString(), "removing mapItem " + mapItem.getData() + " from layer " + layer.getName() );
+		mapItemToMarker.get(mapItem).remove(); // remove Marker from map
+		mapItemToMarker.remove(mapItem);
+	}
+
 }

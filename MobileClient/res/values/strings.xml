@@ -13,6 +13,11 @@
     <string name="title_activity_remove_group">Remove Group</string>
     <string name="title_activity_create_user_item">Create User Item</string>
     <string name="button_remove">Remove</string>
+    
+    <!-- Layer -->
+    <string name="layer_note">Note</string>
+    <string name="layer_image">Image</string>
+    <string name="layer_video">Video</string>
 
     <!-- LoginMethodActivity -->
     <string name="app_name">Operations Coordinator</string>

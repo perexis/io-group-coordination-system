@@ -33,6 +33,14 @@ public class MapItem {
 	public String getData() {
 		return data;
 	}
+	
+	@Override
+	public boolean equals(Object o){
+		if(o instanceof MapItem)
+			return ((MapItem) o).getId() == this.getId();
+		else
+			return false;
+	}
 
 	public JSONObject toJsonObject() {
 		Map<String, Object> elements = new HashMap<String, Object>();

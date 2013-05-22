@@ -78,8 +78,9 @@ public class JSonProxy implements IJSonProxy {
 			httpPost.setEntity(stringEntity);
 		} catch (UnsupportedEncodingException e1) {
 			e1.printStackTrace();
+			throw new NetworkException();
 		}
-		try {
+		try{
 			HttpResponse response = client.execute(httpPost);
 			StatusLine statusLine = response.getStatusLine();
 			int statusCode = statusLine.getStatusCode();
@@ -94,7 +95,7 @@ public class JSonProxy implements IJSonProxy {
 			} else {
 				throw new NetworkException();
 			}
-		} catch (Exception e) {
+		}catch (Exception e) {
 			throw new NetworkException();
 		}
 		return builder.toString();

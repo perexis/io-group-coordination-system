@@ -22,12 +22,21 @@ public class Layer implements Parcelable {
 			String name = source.readString();
 			return new Layer(name);
 		}
+
 		@Override
 		public Layer[] newArray(int size) {
 			return new Layer[size];
 		}
-	}; 
-	
+	};
+
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Layer)
+			return ((Layer) o).getName().equals(this.getName());
+		else
+			return false;
+	}
+
 	@Override
 	public int describeContents() {
 		return 0;
@@ -37,5 +46,5 @@ public class Layer implements Parcelable {
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(this.name);
 	}
-	
+
 }
