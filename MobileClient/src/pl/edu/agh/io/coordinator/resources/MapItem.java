@@ -42,6 +42,11 @@ public class MapItem {
 			return false;
 	}
 
+	@Override
+	public int hashCode(){
+		return Long.valueOf(id).hashCode();
+	}
+	
 	public JSONObject toJsonObject() {
 		Map<String, Object> elements = new HashMap<String, Object>();
 		elements.put("id", this.id);

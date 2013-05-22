@@ -87,6 +87,24 @@ public class MainMapActivity extends Activity implements
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main_map);
 
+		
+		
+		// TODO: implement better ----vvv-----
+		FragmentManager fragmentManager = getFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager
+				.beginTransaction();
+		fragmentTransaction.add(R.id.layersFrame, layersFragment);
+		fragmentTransaction.hide(layersFragment);
+		//fragmentTransaction.add(layersFragment, "layersFragment");
+		fragmentTransaction.commit();
+
+		/*fragmentManager = getFragmentManager();
+		fragmentTransaction = fragmentManager.beginTransaction();
+		fragmentTransaction.remove(layersFragment);
+		fragmentTransaction.commit();*/
+
+		// TODO: ----------^^^---------
+		
 		new GetLayersInBackground().execute(new Intent());
 
 		setUpMapIfNeeded();
@@ -149,9 +167,11 @@ public class MainMapActivity extends Activity implements
 			FragmentTransaction fragmentTransaction2 = fragmentManager2
 					.beginTransaction();
 			if (item.isChecked()) {
-				fragmentTransaction2.add(R.id.layersFrame, layersFragment);
+				//fragmentTransaction2.add(R.id.layersFrame, layersFragment);
+				fragmentTransaction2.show(layersFragment);
 			} else
-				fragmentTransaction2.remove(layersFragment);
+				//fragmentTransaction2.remove(layersFragment);
+				fragmentTransaction2.hide(layersFragment);
 			fragmentTransaction2.commit();
 			return true;
 		case R.id.actionCreateGroup:
@@ -197,16 +217,6 @@ public class MainMapActivity extends Activity implements
 				CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
 						DEFAULT_POSITION, 16.0f);
 				googleMap.moveCamera(cameraUpdate);
-
-				Marker marker = googleMap
-						.addMarker(new MarkerOptions()
-								.position(DEFAULT_POSITION)
-								.title("Pies")
-								.snippet("Taki tam")
-								.icon(BitmapDescriptorFactory
-										.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-				// .icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
-
 				googleMap.setMyLocationEnabled(true);
 				googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
@@ -348,7 +358,9 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected void onPostExecute(Exception result) {
-			if (result instanceof NetworkException) {
+			if (result == null) {
+				layersFragment.setLayers(layers);
+			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
 				invalidSessionId();
@@ -384,7 +396,8 @@ public class MainMapActivity extends Activity implements
 		@Override
 		protected void onPostExecute(Exception result) {
 			if (result == null) {
-				dataContainer.newMapItemsSet(layer, mapItems);
+				if (layersFragment != null)
+					dataContainer.newMapItemsSet(layer, mapItems);
 			} else if (result instanceof NetworkException) {
 				networkProblem();
 			} else if (result instanceof InvalidSessionIDException) {
@@ -654,7 +667,8 @@ public class MainMapActivity extends Activity implements
 
 	@Override
 	public void mapItemAdded(Layer layer, MapItem mapItem) {
-		Log.d("MainMapActivity", "adding mapItem " + mapItem.getData() + " to layer " + layer.getName() );
+		Log.d("MainMapActivity", "adding mapItem " + mapItem.getData()
+				+ " to layer " + layer.getName());
 		if (layer.getName().equals("notes")) {
 			Marker marker = googleMap
 					.addMarker(new MarkerOptions()
@@ -681,23 +695,20 @@ public class MainMapActivity extends Activity implements
 									.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
 			mapItemToMarker.put(mapItem, marker);
 		} else if (layer.getName().equals("videos")) {
-			Marker marker = googleMap
-					.addMarker(new MarkerOptions()
-							.position(
-									new LatLng(mapItem.getPosition()
-											.getLatitude(), mapItem
-											.getPosition().getLongitude()))
-							.title(getString(R.string.layer_video))
-							.snippet(mapItem.getData())
-							.icon(BitmapDescriptorFactory
-									.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+			Marker marker = googleMap.addMarker(new MarkerOptions()
+					.position(mapItem.getPosition().getLatLng())
+					.title(getString(R.string.layer_video))
+					.snippet(mapItem.getData())
+					.icon(BitmapDescriptorFactory
+							.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 			mapItemToMarker.put(mapItem, marker);
 		}
 	}
 
 	@Override
 	public void mapItemRemoved(Layer layer, MapItem mapItem) {
-		Log.d(this.toString(), "removing mapItem " + mapItem.getData() + " from layer " + layer.getName() );
+		Log.d(this.toString(), "removing mapItem " + mapItem.getData()
+				+ " from layer " + layer.getName());
 		mapItemToMarker.get(mapItem).remove(); // remove Marker from map
 		mapItemToMarker.remove(mapItem);
 	}

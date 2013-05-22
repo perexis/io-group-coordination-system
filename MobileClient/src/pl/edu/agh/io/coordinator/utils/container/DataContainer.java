@@ -30,7 +30,7 @@ public class DataContainer {
 			Set<MapItem> newMapItems) {
 		HashSet<MapItem> toRemove = new HashSet<MapItem>();
 		for (MapItem i : mapItems.keySet()) {
-			if (mapItems.get(i).equals(layer) && !newMapItems.contains(i)) {
+			if (mapItems.get(i).equals(layer) && (!newMapItems.contains(i))) {
 				Log.d("DataContainer", "removing mapItem " + i.getData()
 						+ " from layer " + layer.getName());
 				listener.mapItemRemoved(layer, i);

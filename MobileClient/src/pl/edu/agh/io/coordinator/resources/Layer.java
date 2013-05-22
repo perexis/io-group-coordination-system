@@ -36,6 +36,11 @@ public class Layer implements Parcelable {
 		else
 			return false;
 	}
+	
+	@Override
+	public int hashCode(){
+		return this.name.hashCode();
+	}
 
 	@Override
 	public int describeContents() {
