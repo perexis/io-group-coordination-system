@@ -2,13 +2,21 @@
 
 /**
  * Onclick info window for adding elemetns.
+ * @param layers
  */
 {template .addElement}
 <div class="add-element-window my-infowindow">
   <form id="addItemForm">
     <h3>Add item to the map</h3>
-    <input id="addItemLayer" type="text" class="input-block-level" placeholder="Layer">
-    <input id="addItemData" type="text" class="input-block-level" placeholder="Data">
+    <p>Select layer:</p>
+    {foreach $layer in $layers}
+      <label class="radio">
+      <input type="radio" class="addRadio" name="optionsRadios" id="optionsRadios{index($layer)}" value="{$layer}"
+        {if isFirst($layer)}checked{/if}>
+        {$layer}
+      </label>
+    {/foreach}
+    <textarea id="addItemData" type="text" class="input-block-level" placeholder="Insert text or url here" rows="3"></textarea>
     <button type="submit" class="btn btn-primary" id="addItemBtn">Add</button>
   </form>
 </div>
