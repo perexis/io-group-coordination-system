@@ -222,9 +222,12 @@ io.map.Page.prototype.onMapClick = function(e) {
   this.hideCurrentMarker();
 
   var marker = new google.maps.Marker({position: e.latLng, map: this.map});
-  var infowindow = new google.maps.InfoWindow({
-    content: soy.renderAsFragment(io.soy.map.addElement)
+  var layers = [];
+  goog.object.forEach(self.layers, function(active, layer) {
+    goog.array.insert(layers, layer);
   });
+  var infowindow = new google.maps.InfoWindow({
+    content: soy.renderAsFragment(io.soy.map.addElement, {layers: layers})});
   infowindow.open(this.map, marker);
   this.curClick = {'info': infowindow, 'marker': marker};
   google.maps.event.addListener(infowindow, 'closeclick', function(e) {
@@ -244,9 +247,15 @@ io.map.Page.prototype.onMapClick = function(e) {
   var clickPoint = new io.api.Point(e.latLng.lng(), e.latLng.lat());
   var addCallback = function(e) {
     e.preventDefault();
-    var layer = goog.dom.getElement('addItemLayer').value;
+    var layer = null;
+    var radios = goog.dom.getElementsByClass('addRadio');
+    goog.array.forEach(radios, function(radio) {
+      if (radio.checked) {
+        layer = radio.value;
+      }
+    });
     var data = goog.dom.getElement('addItemData').value;
-    io.log().info('Adding item, layer:' + layer + ' data:' + data);
+    io.log().info('Adding item, layer:' + layer + ' elemData:' + data);
     self.main.api.addItemToLayer({'point': clickPoint, 'data': data,
       'layer': layer}, onItemAdded, onItemAddError);
   };
@@ -258,12 +267,12 @@ io.map.Page.prototype.onMapClick = function(e) {
 
 io.map.Page.prototype.initMap = function() {
   google.maps['visualRefresh'] = true;
-  var W = 47.369057;
-  var E = 8.541671;
+  var W = 50.0681007;
+  var E = 19.9125939;
   var mapDiv = goog.dom.getElement('map');
   var mapOptions = {
     center: new google.maps.LatLng(W, E),
-    zoom: 3,
+    zoom: 10,
     mapTypeId: google.maps.MapTypeId.ROADMAP
   };
   this.map = new google.maps.Map(mapDiv, mapOptions);
@@ -272,7 +281,10 @@ io.map.Page.prototype.initMap = function() {
     self.onMapClick(e);
   });
   io.geo.locate(function(position) {
-    io.log().info(goog.debug.expose(position));
+    var point = new google.maps.LatLng(position.coords.latitude,
+        position.coords.longitude);
+    self.map.setCenter(point);
+    self.map.setZoom(18);
   });
 };
 
