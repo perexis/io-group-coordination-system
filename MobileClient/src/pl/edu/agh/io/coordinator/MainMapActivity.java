@@ -54,6 +54,47 @@ public class MainMapActivity extends Activity implements
 		ChatFragment.OnFragmentInteractionListener, LayersMenuListener,
 		OnDataContainerChangesListener {
 
+	private class MainThread extends Thread {
+		
+		private boolean stopped = false;
+		
+		public synchronized void safelyStop() {
+			stopped = true;
+		}
+		
+		@Override
+		public void run() {
+			boolean isStopped = false;
+			while (true) {
+				try {
+					Thread.sleep(1000);
+					Log.d("MainMapActivity", "getting data from server");
+					new GetUsersInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
+					new GetUserItemsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
+					new GetGroupsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
+					new GetMessagesInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					if (layers != null)
+						for (Layer layer : layers)
+							new GetMapItemsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, layer);
+					synchronized (this) {
+						Log.d("MainMapActivity.MainThread", "checking isStopped");
+						isStopped = stopped;
+					}
+					if (isStopped) {
+						Log.d("MainMapActivity.MainThread", "stopping main thread");
+						break;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+	}
+	
+	private boolean layersMenuVisible = false;
+	private boolean chatVisible = false;
+	
 	private static final LatLng DEFAULT_POSITION = new LatLng(50.061368,
 			19.936924); // Cracow
 
@@ -74,6 +115,8 @@ public class MainMapActivity extends Activity implements
 
 	private HashMap<MapItem, Marker> mapItemToMarker = new HashMap<MapItem, Marker>();
 
+	private MainThread mainThread;
+	
 	private Set<Thread> threads = new HashSet<Thread>();
 
 	public LayersMenuState getSavedState() {
@@ -86,6 +129,7 @@ public class MainMapActivity extends Activity implements
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.d("MainMapActivity", "starting onCreate");
 		super.onCreate(savedInstanceState);
 
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -96,10 +140,14 @@ public class MainMapActivity extends Activity implements
 		FragmentManager fragmentManager = getFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager
 				.beginTransaction();
+		Log.d("MainMapActivity", "LMDEBUG: isLayersFragmentAdded: " + Boolean.valueOf(layersFragment.isAdded()).toString());
 		fragmentTransaction.add(R.id.layersFrame, layersFragment);
 		fragmentTransaction.hide(layersFragment);
+		fragmentTransaction.add(R.id.chatFrame, chatFragment);
+		fragmentTransaction.hide(chatFragment);
 		// fragmentTransaction.add(layersFragment, "layersFragment");
 		fragmentTransaction.commit();
+		Log.d("MainMapActivity", "LMDEBUG: isLayersFragmentShown: " + Boolean.valueOf(layersFragment.isVisible()).toString());
 
 		/*
 		 * fragmentManager = getFragmentManager(); fragmentTransaction =
@@ -114,50 +162,64 @@ public class MainMapActivity extends Activity implements
 				AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 
 		setUpMapIfNeeded();
-		Thread mainThread = new Thread() {
-
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						Thread.sleep(1000);
-
-						new GetUsersInBackground().executeOnExecutor(
-								AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
-						new GetUserItemsInBackground().executeOnExecutor(
-								AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
-						new GetGroupsInBackground().executeOnExecutor(
-								AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
-						new GetMessagesInBackground()
-								.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-						if (layers != null)
-							for (Layer layer : layers)
-								new GetMapItemsInBackground()
-										.executeOnExecutor(
-												AsyncTask.THREAD_POOL_EXECUTOR,
-												layer);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		};
+		mainThread = new MainThread();
 
 		// threads.add(mainThread);
 		mainThread.start();
 
+		if (savedInstanceState != null) {
+			Log.d("MainMapActivity", "getting saved state");
+			layersMenuVisible = savedInstanceState.getBoolean("layersMenuVisible");
+			chatVisible = savedInstanceState.getBoolean("chatVisible");
+			if (layersMenuVisible) {
+				Log.d("MainMapActivity", "getting saved state: layersMenuVisible");
+				FragmentTransaction lmvTransaction = fragmentManager.beginTransaction();
+				lmvTransaction.show(layersFragment);
+				lmvTransaction.commit();
+			}
+			if (chatVisible) {
+				Log.d("MainMapActivity", "getting saved state: chatVisible");
+				FragmentTransaction cvTransaction = fragmentManager.beginTransaction();
+				cvTransaction.show(chatFragment);
+				cvTransaction.commit();
+			}
+		}
+		
 	}
 
 	@Override
 	protected void onResume() {
+		Log.d("MainMapActivity", "starting onResume");
 		super.onResume();
 		setUpMapIfNeeded();
 	}
 
 	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		Log.d("MainMapActivity", "starting onSaveInstanceState");
+		FragmentManager fragmentManager = getFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		fragmentTransaction.remove(layersFragment);
+		fragmentTransaction.remove(chatFragment);
+		fragmentTransaction.commit();
+		outState.putBoolean("layersMenuVisible", layersMenuVisible);
+		outState.putBoolean("chatVisible", chatVisible);
+		super.onSaveInstanceState(outState);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		Log.d("MainMapActivity", "starting onDestroy");
+		super.onDestroy();
+		mainThread.safelyStop();
+	}
+	
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
+		Log.d("MainMapActivity", "starting onCreateOptionsMenu");
 		getMenuInflater().inflate(R.menu.main_map, menu);
+		menu.getItem(0).setChecked(chatVisible);
+		menu.getItem(1).setChecked(layersMenuVisible);
 		return true;
 	}
 
@@ -165,21 +227,23 @@ public class MainMapActivity extends Activity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.actionChat:
+			Log.d("MainMapActivity", "LMDEBUG: Chat clicked");
+			chatVisible = !item.isChecked();
 			item.setChecked(!item.isChecked());
 			FragmentManager fragmentManager = getFragmentManager();
-			FragmentTransaction fragmentTransaction = fragmentManager
-					.beginTransaction();
+			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 			if (item.isChecked()) {
-				fragmentTransaction.add(R.id.chatFrame, chatFragment);
+				fragmentTransaction.show(chatFragment);
 			} else
-				fragmentTransaction.remove(chatFragment);
+				fragmentTransaction.hide(chatFragment);
 			fragmentTransaction.commit();
 			return true;
 		case R.id.actionLayers:
+			Log.d("MainMapActivity", "LMDEBUG: Layers menu clicked");
+			layersMenuVisible = !item.isChecked();
 			item.setChecked(!item.isChecked());
 			FragmentManager fragmentManager2 = getFragmentManager();
-			FragmentTransaction fragmentTransaction2 = fragmentManager2
-					.beginTransaction();
+			FragmentTransaction fragmentTransaction2 = fragmentManager2.beginTransaction();
 			if (item.isChecked()) {
 				// fragmentTransaction2.add(R.id.layersFrame, layersFragment);
 				fragmentTransaction2.show(layersFragment);
@@ -189,31 +253,26 @@ public class MainMapActivity extends Activity implements
 			fragmentTransaction2.commit();
 			return true;
 		case R.id.actionCreateGroup:
-			Intent intentCreateGroup = new Intent(MainMapActivity.this,
-					CreateGroupActivity.class);
+			Intent intentCreateGroup = new Intent(MainMapActivity.this, CreateGroupActivity.class);
 			startActivity(intentCreateGroup);
 			return true;
 		case R.id.actionRemoveGroup:
-			Intent intentRemoveGroup = new Intent(MainMapActivity.this,
-					RemoveGroupActivity.class);
+			Intent intentRemoveGroup = new Intent(MainMapActivity.this, RemoveGroupActivity.class);
 			startActivity(intentRemoveGroup);
 			return true;
 		case R.id.actionCreateItem:
-			Intent intentCreateItem = new Intent(MainMapActivity.this,
-					CreateUserItemActivity.class);
+			Intent intentCreateItem = new Intent(MainMapActivity.this, CreateUserItemActivity.class);
 			startActivity(intentCreateItem);
 			return true;
 		case R.id.actionSettings:
-			Intent intentSettings = new Intent(MainMapActivity.this,
-					NotImplementedYetActivity.class);
+			Intent intentSettings = new Intent(MainMapActivity.this, NotImplementedYetActivity.class);
 			startActivity(intentSettings);
 			return true;
 		case R.id.actionLogout:
 			if (!loggingOut) {
 				loggingOut = true;
 				Intent intent = new Intent();
-				new LogoutInBackground().executeOnExecutor(
-						AsyncTask.THREAD_POOL_EXECUTOR, intent);
+				new LogoutInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, intent);
 			}
 			return true;
 		default:

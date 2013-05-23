@@ -25,3 +25,5 @@ desktop_client/src/js/gen/
 # private database credentials
 jdbc.properties
 
+MobileClient/project.properties
+
