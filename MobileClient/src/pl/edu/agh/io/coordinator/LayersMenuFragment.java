@@ -38,6 +38,10 @@ public class LayersMenuFragment extends Fragment {
 	public LayersMenuFragment() {
 	}
 
+	public boolean getCheck(int group, String child) {
+		return adapter.getCheck(group, child);
+	}
+	
 	public void setItems(Set<UserItem> items) {
 		if (adapter == null) {
 			return;
