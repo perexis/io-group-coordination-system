@@ -74,4 +74,13 @@
 	<string name="button_send_message">Send</string>
 	<string name="hint_message">Message</string>
 	
+	<!-- CreateUserItemActivity -->
+	<string name="label_position">Position:</string>
+	<string name="label_type">Type:</string>
+	<string name="button_submit">Submit</string>
+	
+	<!-- NoteCreateDataFragment -->
+	<string name="hint_type_here">Type here</string>
+	<string name="label_note">Note:</string>
+	
 </resources>

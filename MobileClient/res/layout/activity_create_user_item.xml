@@ -9,8 +9,50 @@
     tools:context=".CreateUserItemActivity" >
 
     <TextView
+        android:id="@+id/labelPosition"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:text="@string/label_position" />
+
+    <TextView
+        android:id="@+id/textViewPosition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/labelPosition"
+        android:layout_alignBottom="@+id/labelPosition"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/labelPosition"
+        android:text="40N 19E" />
+
+    <TextView
+        android:id="@+id/labelType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/labelPosition"
+        android:text="@string/label_type" />
+
+    <Spinner
+        android:id="@+id/spinnerType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/labelType"
+        android:layout_toRightOf="@+id/labelType" />
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/button_submit" />
+
+    <RelativeLayout
+        android:id="@+id/additionalData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/spinnerType" >
+    </RelativeLayout>
 
 </RelativeLayout>
