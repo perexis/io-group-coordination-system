@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
@@ -28,12 +26,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.AsyncTaskLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,7 +51,40 @@ public class MainMapActivity extends Activity implements
 		ChatFragment.OnFragmentInteractionListener, LayersMenuListener,
 		OnDataContainerChangesListener {
 
-	private class MainThread extends Thread {
+	
+	
+	
+	public final static String MY_POSITION = "pl.edu.agh.io.coordinator.MY_POSITION";
+	
+	private boolean layersMenuVisible = false;
+	private boolean chatVisible = false;
+	
+	private static final LatLng DEFAULT_POSITION = new LatLng(50.061368,
+			19.936924); // Cracow
+
+	private DataContainer dataContainer = new DataContainer(this);
+	private boolean loggingOut = false;
+	private LayersMenuFragment layersFragment = new LayersMenuFragment();
+	private LayersMenuState savedState = null;
+
+	private GoogleMap googleMap;
+	private Location myLocation;
+
+	private ChatFragment chatFragment = ChatFragment.newInstance();
+
+	private Set<UserItem> userItems;
+	private Set<User> users;
+	private Set<Group> groups;
+
+	private Set<Layer> layers;
+
+	private HashMap<MapItem, Marker> mapItemToMarker = new HashMap<MapItem, Marker>();
+
+	private MainThread mainThread;
+	
+	private Set<Thread> threads = new HashSet<Thread>();
+	
+private class MainThread extends Thread {
 		
 		private boolean stopped = false;
 		
@@ -92,32 +122,6 @@ public class MainMapActivity extends Activity implements
 		
 	}
 	
-	private boolean layersMenuVisible = false;
-	private boolean chatVisible = false;
-	
-	private static final LatLng DEFAULT_POSITION = new LatLng(50.061368,
-			19.936924); // Cracow
-
-	private DataContainer dataContainer = new DataContainer(this);
-	private boolean loggingOut = false;
-	private LayersMenuFragment layersFragment = new LayersMenuFragment();
-	private LayersMenuState savedState = null;
-
-	private GoogleMap googleMap;
-
-	private ChatFragment chatFragment = ChatFragment.newInstance();
-
-	private Set<UserItem> userItems;
-	private Set<User> users;
-	private Set<Group> groups;
-
-	private Set<Layer> layers;
-
-	private HashMap<MapItem, Marker> mapItemToMarker = new HashMap<MapItem, Marker>();
-
-	private MainThread mainThread;
-	
-	private Set<Thread> threads = new HashSet<Thread>();
 
 	public LayersMenuState getSavedState() {
 		return this.savedState;
@@ -261,7 +265,11 @@ public class MainMapActivity extends Activity implements
 			startActivity(intentRemoveGroup);
 			return true;
 		case R.id.actionCreateItem:
-			Intent intentCreateItem = new Intent(MainMapActivity.this, CreateUserItemActivity.class);
+			myLocation=new Location("justTest");
+			myLocation.setLatitude(50.0);
+			myLocation.setLongitude(20.0);
+			Intent intentCreateItem = new Intent(MainMapActivity.this, CreateMapItemActivity.class);
+			intentCreateItem.putExtra(MY_POSITION, myLocation);
 			startActivity(intentCreateItem);
 			return true;
 		case R.id.actionSettings:
@@ -749,6 +757,7 @@ public class MainMapActivity extends Activity implements
 		Log.d("MainMapActivity", "adding mapItem " + mapItem.getData()
 				+ " to layer " + layer.getName());
 		if (layer.getName().equals("notes")) {
+			if(googleMap!=null){
 			Marker marker = googleMap
 					.addMarker(new MarkerOptions()
 							.position(
@@ -761,7 +770,9 @@ public class MainMapActivity extends Activity implements
 									.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
 			// .icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
 			mapItemToMarker.put(mapItem, marker);
+			}
 		} else if (layer.getName().equals("images")) {
+			if(googleMap!=null){
 			Marker marker = googleMap
 					.addMarker(new MarkerOptions()
 							.position(
@@ -773,7 +784,9 @@ public class MainMapActivity extends Activity implements
 							.icon(BitmapDescriptorFactory
 									.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
 			mapItemToMarker.put(mapItem, marker);
+			}
 		} else if (layer.getName().equals("videos")) {
+			if(googleMap!=null){
 			Marker marker = googleMap.addMarker(new MarkerOptions()
 					.position(mapItem.getPosition().getLatLng())
 					.title(getString(R.string.layer_video))
@@ -781,6 +794,7 @@ public class MainMapActivity extends Activity implements
 					.icon(BitmapDescriptorFactory
 							.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 			mapItemToMarker.put(mapItem, marker);
+			}
 		}
 	}
 

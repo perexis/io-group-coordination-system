@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".CreateUserItemActivity" >
+    tools:context=".CreateMapItemActivity" >
 
     <TextView
         android:id="@+id/labelPosition"
@@ -21,8 +21,7 @@
         android:layout_alignBaseline="@+id/labelPosition"
         android:layout_alignBottom="@+id/labelPosition"
         android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@+id/labelPosition"
-        android:text="40N 19E" />
+        android:layout_toRightOf="@+id/labelPosition" />
 
     <TextView
         android:id="@+id/labelType"
@@ -49,10 +48,12 @@
 
     <RelativeLayout
         android:id="@+id/additionalData"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/submitButton"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/spinnerType" >
+
     </RelativeLayout>
 
 </RelativeLayout>

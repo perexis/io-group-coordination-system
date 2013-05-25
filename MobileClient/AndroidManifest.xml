@@ -61,8 +61,8 @@
             android:label="@string/title_activity_remove_group" >
         </activity>
         <activity
-            android:name="pl.edu.agh.io.coordinator.CreateUserItemActivity"
-            android:label="@string/title_activity_create_user_item" >
+            android:name="pl.edu.agh.io.coordinator.CreateMapItemActivity"
+            android:label="@string/title_activity_create_map_item" >
         </activity>
 
         <meta-data
