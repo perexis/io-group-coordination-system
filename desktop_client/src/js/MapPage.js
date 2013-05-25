@@ -8,6 +8,7 @@ goog.require('goog.events');
 goog.require('goog.net.jsloader');
 goog.require('goog.object');
 goog.require('io.api.ApiConnector');
+goog.require('io.chat.Page');
 goog.require('io.geo');
 goog.require('io.log');
 goog.require('io.soy.map');
@@ -55,6 +56,8 @@ io.map.Page.prototype.render = function() {
       });
     });
   });
+  var chat = new io.chat.Page(this.main, goog.dom.getElement('chat'));
+  chat.render();
 };
 
 io.map.Page.prototype.loadLayers = function(callback) {

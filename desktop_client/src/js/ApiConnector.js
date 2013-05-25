@@ -63,6 +63,29 @@ io.api.ApiConnector.prototype.login = function(data, callback,
 
 
 /**
+ * @param {!{message: {string}}} data with message.
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.sendMessage = function(data, callback,
+    opt_errcallback) {
+  this.sendRequest('sendMessage', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.getMessages = function(callback,
+    opt_errcallback) {
+  this.sendRequest('getMessages', {}, callback, opt_errcallback);
+};
+
+
+/**
  * @param {function(string, goog.net.XhrIo=)} callback - on success call.
  * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
  *   optional on error call.
