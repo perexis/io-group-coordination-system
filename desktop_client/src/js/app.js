@@ -50,6 +50,7 @@ io.initLoginPage_ = function(opt_errormessage) {
     };
 
     var onError = function(reason) {
+      api.disable();
       if (reason == 'CouldNotLogin') {
         reason = 'Wrong login or password';
       }

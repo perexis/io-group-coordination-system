@@ -27,9 +27,13 @@ io.main.Page = function(login, sid, api, logout, root) {
   this.api = api;
   this.logout = logout;
   this.root = root;
+  this.timer = new goog.Timer(2000);
+  this.timer.start();
+  var self = this;
   api.setExceptionHandler('InvalidSessionID', function(e) {
     io.log().warning('Session has expired, logging out');
-    logout('Session has expired');
+    self.timer.stop();
+    self.logout('Session has expired');
   });
 };
 
@@ -43,6 +47,7 @@ io.main.Page.prototype.render = function() {
   var onLogoutBtn = function() {
     io.log().info('Logging out');
     self.api.logout(function() {
+      self.timer.stop();
       self.logout();
     });
   };

@@ -26,6 +26,8 @@ io.map.Page = function(main, elem) {
   this.elem = elem;
   this.curClickElem = null;
   this.pendingRefresh = false;
+  this.showUsers = true;
+  this.userMarkers = {};
   this.markers = {};
   this.activeInfo = null;
   this.layers = {};
@@ -49,9 +51,7 @@ io.map.Page.prototype.render = function() {
     self.initMap();
     self.loadLayers(function() {
       self.refreshLayers();
-      var timer = new goog.Timer(1000);
-      timer.start();
-      goog.events.listen(timer, goog.Timer.TICK, function() {
+      goog.events.listen(self.main.timer, goog.Timer.TICK, function() {
         self.refreshLayers();
       });
     });
@@ -80,15 +80,64 @@ io.map.Page.prototype.loadLayers = function(callback) {
           ul.className = '';
           self.layers[layer] = false;
         }
-        self.refreshLayers();
+        self.refreshMapItems();
       };
       toggle();
       goog.events.listen(ul, goog.events.EventType.CLICK, toggle);
     });
+    var ulUsers = goog.dom.getElement('layer_users');
+    var toggleUsers = function() {
+      if (ulUsers.className == '') {
+        ulUsers.className = 'active';
+        self.showUsers = true;
+      } else {
+        ulUsers.className = '';
+        self.showUsers = false;
+      }
+      self.refreshUsers();
+    };
+    toggleUsers();
+    goog.events.listen(ulUsers, goog.events.EventType.CLICK, toggleUsers);
   });
 };
 
 io.map.Page.prototype.refreshLayers = function() {
+  this.refreshUsers();
+  this.refreshMapItems();
+};
+
+io.map.Page.prototype.refreshUsers = function() {
+  var self = this;
+  var newMarkers = {};
+  var cleanup = function() {
+    goog.object.forEach(self.userMarkers, function(obj, key) {
+      obj['info'].close();
+      obj['marker'].setVisible(false);
+    });
+    self.userMarkers = newMarkers;
+  };
+  if (this.showUsers) {
+    this.main.api.getUsers(function(users) {
+      var numUsers = users.length;
+      var finished = function() {
+        numUsers--;
+        if (numUsers == 0) {
+          cleanup();
+        }
+      };
+      goog.array.forEach(users, function(user) {
+        self.main.api.getUserState({'user': user['id']}, function(state) {
+          self.putUser(user, state, self.userMarkers, newMarkers);
+          finished();
+        });
+      });
+    });
+  } else {
+    cleanup();
+  }
+};
+
+io.map.Page.prototype.refreshMapItems = function() {
   if (!this.pendingRefresh) {
     var self = this;
     self.pendingRefresh = true;
@@ -208,6 +257,45 @@ io.map.Page.prototype.initInfoWindow = function(item, marker) {
       goog.events.EventType.SUBMIT, deleteCallback);
 };
 
+io.map.Page.prototype.putUser = function(user, position,
+    markers, newMarkers) {
+  var self = this;
+  var pos = position['position'];
+  var id = user['id'];
+  var loc = new google.maps.LatLng(pos['latitude'], pos['longitude']);
+  if (markers[id]) {
+    newMarkers[id] = markers[id];
+    newMarkers[id]['marker'].setPosition(loc);
+    delete markers[id];
+  } else {
+    var marker = new google.maps.Marker({
+      position: loc,
+      map: self.map,
+      animation: google.maps.Animation.DROP
+    });
+
+    var infowindow = new google.maps.InfoWindow();
+    google.maps.event.addListener(marker, 'click', function() {
+      self.hideCurrentMarker();
+      infowindow.setContent(soy.renderAsFragment(io.soy.map.userWindow, {
+        name: user['name'],
+        surname: user['surname'],
+        email: user['email'],
+        phone: user['phone'],
+        id: user['id'],
+        avatar: user['avatar']
+      }));
+      infowindow.open(self.map, marker);
+      self.activeInfo = infowindow;
+    });
+    google.maps.event.addListener(infowindow, 'closeclick', function(e) {
+      self.hideCurrentMarker();
+    });
+
+    newMarkers[id] = {'marker': marker, 'info': infowindow};
+  }
+};
+
 io.map.Page.prototype.hideCurrentMarker = function() {
   if (this.curClick != null) {
     this.curClick['info'].close();
@@ -240,7 +328,7 @@ io.map.Page.prototype.onMapClick = function(e) {
   var onItemAdded = function(json) {
     io.log().info('Successfully added item');
     self.hideCurrentMarker();
-    self.refreshLayers();
+    self.refreshMapItems();
   };
 
   var onItemAddError = function(err) {
@@ -288,6 +376,11 @@ io.map.Page.prototype.initMap = function() {
         position.coords.longitude);
     self.map.setCenter(point);
     self.map.setZoom(18);
+    self.main.api.updateSelfState({'newState': {'position':
+          {'latitude': point.lat(), 'longitude': point.lng()}, 'speed': 0}},
+    function(x) {
+      io.log().info('Updated self state');
+    });
   });
 };
 

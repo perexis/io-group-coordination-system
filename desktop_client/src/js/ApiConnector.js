@@ -29,7 +29,16 @@ io.api.Point = function(longitude, latitude) {
 io.api.ApiConnector = function() {
   this.url = 'http://io.wojtasskorcz.eu.cloudbees.net/';
   this.exHandlers = {};
+  this.disabled = false;
   io.log().info('Initialized API pointing to: ' + this.url);
+};
+
+
+/**
+ * Returns place where images are hosted.
+ */
+io.api.ApiConnector.prototype.getImageHost = function() {
+  return this.url;
 };
 
 
@@ -142,12 +151,45 @@ io.api.ApiConnector.prototype.getUsers = function(callback, opt_errcallback) {
 
 
 /**
+ * @param {!{user: {string}}} data - users' login.
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.getUserState = function(data,
+    callback, opt_errcallback) {
+  this.sendRequest('getUserState', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!{position: {longitude: {number}, latitude: {number}},
+ *   speed: {number}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.updateSelfState = function(data,
+    callback, opt_errcallback) {
+  this.sendRequest('updateSelfState', data, callback, opt_errcallback);
+};
+
+
+/**
  * @param {function(string, goog.net.XhrIo=)} callback - on success call.
  * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
  *   optional on error call.
  */
 io.api.ApiConnector.prototype.logout = function(callback, opt_errcallback) {
   this.sendRequest('logout', {}, callback, opt_errcallback);
+};
+
+
+/**
+ * Disables any further request made by this API
+ */
+io.api.ApiConnector.prototype.disable = function() {
+  this.disabled = true;
 };
 
 
@@ -161,6 +203,9 @@ io.api.ApiConnector.prototype.logout = function(callback, opt_errcallback) {
  */
 io.api.ApiConnector.prototype.sendRequest = function(resource, data, callback,
     opt_errcallback, opt_notincludesession) {
+  if (this.disabled) {
+    return;
+  }
   var url = this.url + resource;
   var xhr = new goog.net.XhrIo();
   var headers = {'Content-Type': 'application/json'};

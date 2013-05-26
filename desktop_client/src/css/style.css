@@ -12,6 +12,16 @@
   overflow-y: auto;
 }
 
+.user-window {
+  min-width: 150px;
+}
+
+.user-window img {
+  max-width: 100px;
+  height: auto;
+  max-height: 100px;
+}
+
 .chat-input {
   margin-bottom: -15px;
 }
@@ -38,14 +48,14 @@
 
 .image-infowindow {
   min-width: 400px;
-  min-height: 200px;
+  min-height: 300px;
 }
 
 .image-infowindow img {
   max-width: 400px;
   height: auto;
   margin-bottom: 10px;
-  max-height: 400px;
+  max-height: 300px;
 }
 
 body {

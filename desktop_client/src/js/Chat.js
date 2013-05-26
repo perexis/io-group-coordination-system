@@ -42,9 +42,7 @@ io.chat.Page.prototype.render = function() {
   goog.events.listen(goog.dom.getElement('chatForm'),
       goog.events.EventType.SUBMIT, chatCallback);
 
-  var timer = new goog.Timer(2000);
-  timer.start();
-  goog.events.listen(timer, goog.Timer.TICK, function() {
+  goog.events.listen(this.main.timer, goog.Timer.TICK, function() {
     self.refreshChat();
   });
 };
