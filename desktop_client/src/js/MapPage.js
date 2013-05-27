@@ -37,6 +37,11 @@ io.map.Page = function(main, elem) {
     'videos': this.handleVideoMarker,
     'notes': this.handleNoteMarker
   };
+  this.possibleItems = [];
+  var self = this;
+  this.main.api.getPossibleUserItems(function(items) {
+    self.possibleItems = items;
+  });
 };
 
 
@@ -276,17 +281,40 @@ io.map.Page.prototype.putUser = function(user, position,
 
     var infowindow = new google.maps.InfoWindow();
     google.maps.event.addListener(marker, 'click', function() {
+      self.main.api.getUserItems({'user': id}, function(userItems) {
+        io.log().info(goog.debug.deepExpose(userItems));
+        var myItems = {};
+        goog.array.forEach(userItems, function(itm) {
+          myItems[itm] = true;
+        });
+        var items = goog.array.map(self.possibleItems, function(item) {
+          return [item['id'], myItems[item['id']]];
+        });
+        infowindow.setContent(soy.renderAsFragment(io.soy.map.userWindow, {
+          name: user['name'],
+          surname: user['surname'],
+          email: user['email'],
+          phone: user['phone'],
+          id: user['id'],
+          avatar: user['avatar'],
+          items: items
+        }));
+        infowindow.open(self.map, marker);
+        self.activeInfo = infowindow;
+        goog.array.forEach(items, function(item) {
+          var input = goog.dom.getElement('item_' + item[0]);
+          var toggle = function(e) {
+            var data = {'item': item[0], 'user': id};
+            if (input.checked) { // user checked
+              self.main.api.addItemToUser(data);
+            } else {
+              self.main.api.removeItemFromUser(data);
+            }
+          };
+          goog.events.listen(input, goog.events.EventType.CLICK, toggle);
+        });
+      });
       self.hideCurrentMarker();
-      infowindow.setContent(soy.renderAsFragment(io.soy.map.userWindow, {
-        name: user['name'],
-        surname: user['surname'],
-        email: user['email'],
-        phone: user['phone'],
-        id: user['id'],
-        avatar: user['avatar']
-      }));
-      infowindow.open(self.map, marker);
-      self.activeInfo = infowindow;
     });
     google.maps.event.addListener(infowindow, 'closeclick', function(e) {
       self.hideCurrentMarker();

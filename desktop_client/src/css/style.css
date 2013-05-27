@@ -13,7 +13,23 @@
 }
 
 .user-window {
-  min-width: 150px;
+  min-width: 300px;
+}
+
+.user-window:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+.user-window .user-items {
+  float: right;
+}
+
+.user-window .user-details {
+  float: left;
 }
 
 .user-window img {

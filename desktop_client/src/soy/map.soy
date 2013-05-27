@@ -43,18 +43,26 @@
  * @param phone
  * @param id 
  * @param avatar 
+ * @param items
  */
 {template .userWindow}
-<div class="user-window my-infowindow">
+<div class="clearfix user-window my-infowindow">
 <h3>User</h3>
+<div class="user-details">
 <strong>Name:</strong>{sp}{if $name or $surname}{$name}{sp}{$surname}{else}unknown{/if}<br>
 <strong>Email:</strong>{sp}{if $email}<a href="mailto:{$email}">{$email}</a>{else}unknown{/if}<br>
 <strong>Phone:</strong>{sp}{if $phone}<a href="tel:{$phone}">{$phone}</a>{else}unknown{/if}<br>
 <strong>ID:</strong>{sp}{if $id}{$id}{else}unknown{/if}<br>
 <strong>Avatar:</strong>{sp}{if $avatar}<img src="{$avatar}">{else}unknown{/if}<br>
 </div>
+<div class="user-items">
+{foreach $item in $items}
+  <label class="checkbox">
+    <input id="item_{$item[0]}" type="checkbox" {if $item[1]}checked{/if}>{sp}{$item[0]}
+  </label>
+{/foreach}
+</div>
 {/template}
-
 
 
 /**

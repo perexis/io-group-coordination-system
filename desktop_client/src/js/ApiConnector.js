@@ -151,6 +151,53 @@ io.api.ApiConnector.prototype.getUsers = function(callback, opt_errcallback) {
 
 
 /**
+ * @param {!{user: {string}, item: {string}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.addItemToUser = function(data, callback,
+    opt_errcallback) {
+  this.sendRequest('addItemToUser', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!{user: {string}, item: {string}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.removeItemFromUser = function(data, callback,
+    opt_errcallback) {
+  this.sendRequest('removeItemFromUser', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!{user: {string}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.getUserItems = function(data, callback,
+    opt_errcallback) {
+  this.sendRequest('getUserItems', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.getPossibleUserItems = function(callback,
+    opt_errcallback) {
+  this.sendRequest('getPossibleUserItems', {}, callback, opt_errcallback);
+};
+
+
+/**
  * @param {!{user: {string}}} data - users' login.
  * @param {function(string, goog.net.XhrIo=)} callback - on success call.
  * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
