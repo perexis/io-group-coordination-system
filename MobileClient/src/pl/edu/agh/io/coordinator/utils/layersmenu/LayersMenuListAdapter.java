@@ -189,7 +189,7 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		this.layers = list;
 		notifyDataSetChanged();
 	}
-
+	
 	@Override
 	public boolean areAllItemsEnabled() {
 		return true;

@@ -51,16 +51,14 @@ public class MainMapActivity extends Activity implements
 		ChatFragment.OnFragmentInteractionListener, LayersMenuListener,
 		OnDataContainerChangesListener {
 
-	
-	
-	
 	public final static String MY_POSITION = "pl.edu.agh.io.coordinator.MY_POSITION";
 	
 	private boolean layersMenuVisible = false;
 	private boolean chatVisible = false;
 	
-	private static final LatLng DEFAULT_POSITION = new LatLng(50.061368,
-			19.936924); // Cracow
+	private boolean isMenuCreated = false;
+	
+	private static final LatLng DEFAULT_POSITION = new LatLng(50.061368, 19.936924); // Cracow
 
 	private DataContainer dataContainer = new DataContainer(this);
 	private boolean loggingOut = false;
@@ -84,7 +82,7 @@ public class MainMapActivity extends Activity implements
 	
 	private Set<Thread> threads = new HashSet<Thread>();
 	
-private class MainThread extends Thread {
+	private class MainThread extends Thread {
 		
 		private boolean stopped = false;
 		
@@ -122,7 +120,6 @@ private class MainThread extends Thread {
 		
 	}
 	
-
 	public LayersMenuState getSavedState() {
 		return this.savedState;
 	}
@@ -131,6 +128,15 @@ private class MainThread extends Thread {
 		this.savedState = state;
 	}
 
+	private void initFragments(FragmentManager fragmentManager) {
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		fragmentTransaction.add(R.id.layersFrame, layersFragment);
+		fragmentTransaction.hide(layersFragment);
+		fragmentTransaction.add(R.id.chatFrame, chatFragment);
+		fragmentTransaction.hide(chatFragment);
+		fragmentTransaction.commit();
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d("MainMapActivity", "starting onCreate");
@@ -140,27 +146,8 @@ private class MainThread extends Thread {
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main_map);
 
-		// TODO: implement better ----vvv-----
 		FragmentManager fragmentManager = getFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager
-				.beginTransaction();
-		Log.d("MainMapActivity", "LMDEBUG: isLayersFragmentAdded: " + Boolean.valueOf(layersFragment.isAdded()).toString());
-		fragmentTransaction.add(R.id.layersFrame, layersFragment);
-		fragmentTransaction.hide(layersFragment);
-		fragmentTransaction.add(R.id.chatFrame, chatFragment);
-		fragmentTransaction.hide(chatFragment);
-		// fragmentTransaction.add(layersFragment, "layersFragment");
-		fragmentTransaction.commit();
-		Log.d("MainMapActivity", "LMDEBUG: isLayersFragmentShown: " + Boolean.valueOf(layersFragment.isVisible()).toString());
-
-		/*
-		 * fragmentManager = getFragmentManager(); fragmentTransaction =
-		 * fragmentManager.beginTransaction();
-		 * fragmentTransaction.remove(layersFragment);
-		 * fragmentTransaction.commit();
-		 */
-
-		// TODO: ----------^^^---------
+		initFragments(fragmentManager);
 
 		new GetLayersInBackground().executeOnExecutor(
 				AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
@@ -172,30 +159,36 @@ private class MainThread extends Thread {
 		mainThread.start();
 
 		if (savedInstanceState != null) {
-			Log.d("MainMapActivity", "getting saved state");
+			Log.d("MainMapActivity", "starting getting saved state");
 			layersMenuVisible = savedInstanceState.getBoolean("layersMenuVisible");
 			chatVisible = savedInstanceState.getBoolean("chatVisible");
-			if (layersMenuVisible) {
-				Log.d("MainMapActivity", "getting saved state: layersMenuVisible");
-				FragmentTransaction lmvTransaction = fragmentManager.beginTransaction();
-				lmvTransaction.show(layersFragment);
-				lmvTransaction.commit();
-			}
-			if (chatVisible) {
-				Log.d("MainMapActivity", "getting saved state: chatVisible");
-				FragmentTransaction cvTransaction = fragmentManager.beginTransaction();
-				cvTransaction.show(chatFragment);
-				cvTransaction.commit();
-			}
+			savedState = savedInstanceState.getParcelable("savedState");
 		}
 		
 	}
 
 	@Override
+	protected void onRestart() {
+		Log.d("MainMapActivity", "starting onRestart");
+		FragmentManager fragmentManager = getFragmentManager();
+		initFragments(fragmentManager);
+		super.onRestart();
+	}
+	
+	@Override
+	protected void onStart() {
+		Log.d("MainMapActivity", "starting onStart");
+		super.onStart();
+	}
+	
+	@Override
 	protected void onResume() {
 		Log.d("MainMapActivity", "starting onResume");
-		super.onResume();
 		setUpMapIfNeeded();
+		if (!isMenuCreated) {
+			invalidateOptionsMenu();
+		}
+		super.onResume();
 	}
 
 	@Override
@@ -208,7 +201,21 @@ private class MainThread extends Thread {
 		fragmentTransaction.commit();
 		outState.putBoolean("layersMenuVisible", layersMenuVisible);
 		outState.putBoolean("chatVisible", chatVisible);
+		outState.putParcelable("savedState", savedState);
 		super.onSaveInstanceState(outState);
+	}
+	
+	@Override
+	protected void onPause() {
+		Log.d("MainMapActivity", "starting onPause");
+		isMenuCreated = false;
+		super.onPause();
+	}
+	
+	@Override
+	protected void onStop() {
+		Log.d("MainMapActivity", "starting onStop");
+		super.onStop();
 	}
 	
 	@Override
@@ -224,9 +231,29 @@ private class MainThread extends Thread {
 		getMenuInflater().inflate(R.menu.main_map, menu);
 		menu.getItem(0).setChecked(chatVisible);
 		menu.getItem(1).setChecked(layersMenuVisible);
+		isMenuCreated = true;
 		return true;
 	}
 
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		Log.d("MainMapActivity", "starting onPrepareOptionsMenu");
+		FragmentManager fragmentManager = getFragmentManager();
+		if (layersMenuVisible) {
+			Log.d("MainMapActivity", "getting saved state: layersMenuVisible");
+			FragmentTransaction lmvTransaction = fragmentManager.beginTransaction();
+			lmvTransaction.show(layersFragment);
+			lmvTransaction.commit();
+		}
+		if (chatVisible) {
+			Log.d("MainMapActivity", "getting saved state: chatVisible");
+			FragmentTransaction cvTransaction = fragmentManager.beginTransaction();
+			cvTransaction.show(chatFragment);
+			cvTransaction.commit();
+		}
+		return true;
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {

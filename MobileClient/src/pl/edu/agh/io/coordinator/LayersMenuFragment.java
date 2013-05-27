@@ -6,12 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.android.gms.internal.ac;
+import com.google.android.gms.internal.ad;
+
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListAdapter;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuState;
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,6 +39,31 @@ public class LayersMenuFragment extends Fragment {
 	public static final int LAYER_POSITION = 3;
 	public static final int GROUP_COUNT = 4;
 
+	private int getExpandedGroup() {
+		if (listView.isGroupExpanded(ITEM_POSITION)) {
+			return ITEM_POSITION;
+		} else if (listView.isGroupExpanded(USER_POSITION)) {
+			return USER_POSITION;
+		} else if (listView.isGroupExpanded(GROUP_POSITION)) {
+			return GROUP_POSITION;
+		} else if (listView.isGroupExpanded(LAYER_POSITION)) {
+			return LAYER_POSITION;
+		} else {
+			return -1;
+		}
+	}
+	
+	private void setExpandedGroup(int group) {
+		Log.d("LayersMenuFragment", "starting setExpandedGroup");
+		for (int i = 0; i < GROUP_COUNT; ++i) {
+			if (i == group) {
+				listView.expandGroup(i);
+			} else {
+				listView.collapseGroup(i);
+			}
+		}
+	}
+	
 	public LayersMenuFragment() {
 	}
 
@@ -71,15 +100,20 @@ public class LayersMenuFragment extends Fragment {
 	}
 	
 	@Override
+	public void onAttach(Activity activity) {
+		Log.d("LayersMenuFragment", "starting onAttach");
+		super.onAttach(activity);
+	}
+	
+	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d("LayersMenuFragment", "starting onCreate");
-		super.onCreate(savedInstanceState);
 		adapter = new LayersMenuListAdapter(getActivity());
+		super.onCreate(savedInstanceState);
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		super.onCreateView(inflater, container, savedInstanceState);
 		Log.d("LayersMenuFragment", "starting onCreateView");
 		View toReturn = inflater.inflate(R.layout.fragment_layers_menu, container, false);
 		listView = (ExpandableListView) toReturn.findViewById(R.id.expandableListView);
@@ -135,15 +169,6 @@ public class LayersMenuFragment extends Fragment {
 				return true;
 			}
 		});
-		MainMapActivity activity = (MainMapActivity) getActivity();
-		LayersMenuState state = activity.getSavedState();
-		if (state != null) {
-			adapter.setItems(state.items);
-			adapter.setPeople(state.people);
-			adapter.setGroups(state.groups);
-			adapter.setLayers(state.layers);
-			adapter.setAllChecks(state.itemsChecks, state.peopleChecks, state.groupsChecks, state.layersChecks);
-		}
 		return toReturn;
 	}
 
@@ -151,133 +176,40 @@ public class LayersMenuFragment extends Fragment {
 	public void onSaveInstanceState(Bundle outState) {
 		Log.d("LayersMenuFragment", "starting onSaveInstanceState");
 		super.onSaveInstanceState(outState);
-		List<UserItem> items = adapter.getItems();
-		int itemsLimit = items.size();
-		outState.putInt("itemsCount", itemsLimit);
-		for (int i = 0; i < itemsLimit; ++i) {
-			outState.putParcelable("item" + i, items.get(i));
-		}
-		List<User> people = adapter.getPeople();
-		int peopleLimit = people.size();
-		outState.putInt("peopleCount", peopleLimit);
-		for (int i = 0; i < peopleLimit; ++i) {
-			outState.putParcelable("person" + i, people.get(i));
-		}
-		List<Group> groups = adapter.getGroups();
-		int groupsLimit = groups.size();
-		outState.putInt("groupsCount", groupsLimit);
-		for (int i = 0; i < groupsLimit; ++i) {
-			outState.putParcelable("group" + i, groups.get(i));
-		}
-		List<Layer> layers = adapter.getLayers();
-		int layersLimit = layers.size();
-		outState.putInt("layersCount", layersLimit);
-		for (int i = 0; i < layersLimit; ++i) {
-			outState.putParcelable("layer" + i, layers.get(i));
-		}
-		Map<String, Boolean> itemsChecks = adapter.getItemsChecks();
-		int icLimit = itemsChecks.size();
-		outState.putInt("icCount", icLimit);
-		Set<String> icSet = itemsChecks.keySet();
-		int i1 = 0;
-		for (String s : icSet) {
-			outState.putString("ick" + i1, s);
-			outState.putBoolean("icv" + i1, itemsChecks.get(s));
-			++i1;
-		}
-		Map<String, Boolean> peopleChecks = adapter.getPeopleChecks();
-		int pcLimit = peopleChecks.size();
-		outState.putInt("pcCount", pcLimit);
-		Set<String> pcSet = peopleChecks.keySet();
-		int i2 = 0;
-		for (String s : pcSet) {
-			outState.putString("pck" + i2, s);
-			outState.putBoolean("pcv" + i2, peopleChecks.get(s));
-			++i2;
-		}
-		Map<String, Boolean> groupsChecks = adapter.getGroupsChecks();
-		int gcLimit = groupsChecks.size();
-		outState.putInt("gcCount", gcLimit);
-		Set<String> gcSet = groupsChecks.keySet();
-		int i3 = 0;
-		for (String s : gcSet) {
-			outState.putString("gck" + i3, s);
-			outState.putBoolean("gcv" + i3, groupsChecks.get(s));
-			++i3;
-		}
-		Map<String, Boolean> layersChecks = adapter.getLayersChecks();
-		int lcLimit = layersChecks.size();
-		outState.putInt("lcCount", lcLimit);
-		Set<String> lcSet = layersChecks.keySet();
-		int i4 = 0;
-		for (String s : lcSet) {
-			outState.putString("lck" + i4, s);
-			outState.putBoolean("lcv" + i4, layersChecks.get(s));
-			++i4;
-		}
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		Log.d("LayersMenuFragment", "starting onActivityCreated");
-		if (savedInstanceState != null) {
-			Set<UserItem> items = new HashSet<UserItem>();
-			int itemsLimit = savedInstanceState.getInt("itemsCount");
-			for (int i = 0; i < itemsLimit; ++i) {
-				UserItem item = savedInstanceState.getParcelable("item" + i);
-				items.add(item);
-			}
-			Set<User> people = new HashSet<User>();
-			int peopleLimit = savedInstanceState.getInt("peopleCount");
-			for (int i = 0; i < peopleLimit; ++i) {
-				User person = savedInstanceState.getParcelable("person" + i);
-				people.add(person);
-			}
-			Set<Group> groups = new HashSet<Group>();
-			int groupsLimit = savedInstanceState.getInt("groupsCount");
-			for (int i = 0; i < groupsLimit; ++i) {
-				Group group = savedInstanceState.getParcelable("group" + i);
-				groups.add(group);
-			}
-			Set<Layer> layers = new HashSet<Layer>();
-			int layersLimit = savedInstanceState.getInt("layersCount");
-			for (int i = 0; i < layersLimit; ++i) {
-				Layer layer = savedInstanceState.getParcelable("layer" + i);
-				layers.add(layer);
-			}
-			Map<String, Boolean> itemsChecks = new HashMap<String, Boolean>();
-			int icLimit = savedInstanceState.getInt("icCount");
-			for (int i = 0; i < icLimit; ++i) {
-				itemsChecks.put(savedInstanceState.getString("ick" + i), savedInstanceState.getBoolean("icv" + i));
-			}
-			Map<String, Boolean> peopleChecks = new HashMap<String, Boolean>();
-			int pcLimit = savedInstanceState.getInt("pcCount");
-			for (int i = 0; i < pcLimit; ++i) {
-				peopleChecks.put(savedInstanceState.getString("pck" + i), savedInstanceState.getBoolean("pcv" + i));
-			}
-			Map<String, Boolean> groupsChecks = new HashMap<String, Boolean>();
-			int gcLimit = savedInstanceState.getInt("gcCount");
-			for (int i = 0; i < gcLimit; ++i) {
-				groupsChecks.put(savedInstanceState.getString("gck" + i), savedInstanceState.getBoolean("gcv" + i));
-			}
-			Map<String, Boolean> layersChecks = new HashMap<String, Boolean>();
-			int lcLimit = savedInstanceState.getInt("lcCount");
-			for (int i = 0; i < lcLimit; ++i) {
-				layersChecks.put(savedInstanceState.getString("lck" + i), savedInstanceState.getBoolean("lcv" + i));
-			}
-			adapter.setItems(items);
-			adapter.setPeople(people);
-			adapter.setGroups(groups);
-			adapter.setAllChecks(itemsChecks, peopleChecks, groupsChecks, layersChecks);
-		}
 		super.onActivityCreated(savedInstanceState);
 	}
 
 	@Override
-	public void onDestroyView() {
-		Log.d("LayersMenuFragment", "starting onDestroyView");
-		super.onDestroyView();
+	public void onStart() {
+		Log.d("LayersMenuFragment", "starting onStart");
+		MainMapActivity activity = (MainMapActivity) getActivity();
+		if (activity.getSavedState() != null) {
+			LayersMenuState state = activity.getSavedState();
+			adapter.setItems(state.items);
+			adapter.setPeople(state.people);
+			adapter.setGroups(state.groups);
+			adapter.setAllChecks(state.itemsChecks, state.peopleChecks, state.groupsChecks, state.layersChecks);
+			setExpandedGroup(state.expandedGroup);
+		}
+		super.onStart();
+	}
+	
+	@Override
+	public void onResume() {
+		Log.d("LayersMenuFragment", "starting onResume");
+		super.onResume();
+	}
+	
+	@Override
+	public void onPause() {
+		Log.d("LayersMenuFragment", "starting onPause");
 		LayersMenuState state = new LayersMenuState();
+		state.expandedGroup = getExpandedGroup();
 		state.items = new HashSet<UserItem>(adapter.getItems());
 		state.people = new HashSet<User>(adapter.getPeople());
 		state.groups = new HashSet<Group>(adapter.getGroups());
@@ -288,6 +220,29 @@ public class LayersMenuFragment extends Fragment {
 		state.layersChecks = adapter.getLayersChecks();
 		MainMapActivity activity = (MainMapActivity) getActivity();
 		activity.setSavedState(state);
+		super.onPause();
+	}
+	
+	@Override
+	public void onStop() {
+		Log.d("LayersMenuFragment", "starting onStop");
+		LayersMenuState state = new LayersMenuState();
+		state.expandedGroup = getExpandedGroup();
+		state.items = new HashSet<UserItem>(adapter.getItems());
+		state.people = new HashSet<User>(adapter.getPeople());
+		state.groups = new HashSet<Group>(adapter.getGroups());
+		state.layers = new HashSet<Layer>(adapter.getLayers());
+		state.itemsChecks = adapter.getItemsChecks();
+		state.peopleChecks = adapter.getPeopleChecks();
+		state.groupsChecks = adapter.getGroupsChecks();
+		state.layersChecks = adapter.getLayersChecks();
+		super.onStop();
+	}
+	
+	@Override
+	public void onDestroyView() {
+		Log.d("LayersMenuFragment", "starting onDestroyView");
+		super.onDestroyView();
 	}
 
 	@Override
