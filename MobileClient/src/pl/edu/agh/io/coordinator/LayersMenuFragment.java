@@ -1,13 +1,7 @@
 package pl.edu.agh.io.coordinator;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import com.google.android.gms.internal.ac;
-import com.google.android.gms.internal.ad;
 
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
@@ -188,8 +182,8 @@ public class LayersMenuFragment extends Fragment {
 	public void onStart() {
 		Log.d("LayersMenuFragment", "starting onStart");
 		MainMapActivity activity = (MainMapActivity) getActivity();
-		if (activity.getSavedState() != null) {
-			LayersMenuState state = activity.getSavedState();
+		if (activity.getSavedLayersMenuState() != null) {
+			LayersMenuState state = activity.getSavedLayersMenuState();
 			adapter.setItems(state.items);
 			adapter.setPeople(state.people);
 			adapter.setGroups(state.groups);
@@ -219,7 +213,7 @@ public class LayersMenuFragment extends Fragment {
 		state.groupsChecks = adapter.getGroupsChecks();
 		state.layersChecks = adapter.getLayersChecks();
 		MainMapActivity activity = (MainMapActivity) getActivity();
-		activity.setSavedState(state);
+		activity.setSavedLayersMenuState(state);
 		super.onPause();
 	}
 	

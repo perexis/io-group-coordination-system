@@ -5,16 +5,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.android.gms.internal.s;
-
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.os.Parcelable.Creator;
-
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 public class LayersMenuState implements Parcelable {
 

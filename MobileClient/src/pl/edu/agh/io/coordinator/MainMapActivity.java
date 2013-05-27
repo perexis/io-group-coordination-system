@@ -12,6 +12,7 @@ import pl.edu.agh.io.coordinator.resources.Message;
 import pl.edu.agh.io.coordinator.resources.Point;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
+import pl.edu.agh.io.coordinator.utils.chat.ChatState;
 import pl.edu.agh.io.coordinator.utils.container.DataContainer;
 import pl.edu.agh.io.coordinator.utils.container.DataContainer.OnDataContainerChangesListener;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListener;
@@ -63,7 +64,8 @@ public class MainMapActivity extends Activity implements
 	private DataContainer dataContainer = new DataContainer(this);
 	private boolean loggingOut = false;
 	private LayersMenuFragment layersFragment = new LayersMenuFragment();
-	private LayersMenuState savedState = null;
+	private LayersMenuState savedLayersMenuState = null;
+	private ChatState savedChatState = null;
 
 	private GoogleMap googleMap;
 	private Location myLocation;
@@ -120,14 +122,22 @@ public class MainMapActivity extends Activity implements
 		
 	}
 	
-	public LayersMenuState getSavedState() {
-		return this.savedState;
+	public LayersMenuState getSavedLayersMenuState() {
+		return this.savedLayersMenuState;
 	}
 
-	public void setSavedState(LayersMenuState state) {
-		this.savedState = state;
+	public void setSavedLayersMenuState(LayersMenuState state) {
+		this.savedLayersMenuState = state;
 	}
-
+	
+	public ChatState getSavedChatState() {
+		return this.savedChatState;
+	}
+	
+	public void setSavedChatState(ChatState state) {
+		this.savedChatState = state;
+	}
+	
 	private void initFragments(FragmentManager fragmentManager) {
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 		fragmentTransaction.add(R.id.layersFrame, layersFragment);
@@ -162,7 +172,8 @@ public class MainMapActivity extends Activity implements
 			Log.d("MainMapActivity", "starting getting saved state");
 			layersMenuVisible = savedInstanceState.getBoolean("layersMenuVisible");
 			chatVisible = savedInstanceState.getBoolean("chatVisible");
-			savedState = savedInstanceState.getParcelable("savedState");
+			savedLayersMenuState = savedInstanceState.getParcelable("savedLayersMenuState");
+			savedChatState = savedInstanceState.getParcelable("savedChatState");
 		}
 		
 	}
@@ -201,7 +212,8 @@ public class MainMapActivity extends Activity implements
 		fragmentTransaction.commit();
 		outState.putBoolean("layersMenuVisible", layersMenuVisible);
 		outState.putBoolean("chatVisible", chatVisible);
-		outState.putParcelable("savedState", savedState);
+		outState.putParcelable("savedLayersMenuState", savedLayersMenuState);
+		outState.putParcelable("savedChatState", savedChatState);
 		super.onSaveInstanceState(outState);
 	}
 	
@@ -221,8 +233,8 @@ public class MainMapActivity extends Activity implements
 	@Override
 	protected void onDestroy() {
 		Log.d("MainMapActivity", "starting onDestroy");
-		super.onDestroy();
 		mainThread.safelyStop();
+		super.onDestroy();
 	}
 	
 	@Override
