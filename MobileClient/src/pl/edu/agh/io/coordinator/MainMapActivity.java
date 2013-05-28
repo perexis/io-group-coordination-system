@@ -100,7 +100,9 @@ public class MainMapActivity extends Activity implements
 					new GetUsersInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 					new GetUserItemsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 					new GetGroupsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
-					new GetMessagesInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					if (chatFragment.isActive()) {
+						new GetMessagesInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					}
 					if (layers != null)
 						for (Layer layer : layers)
 							new GetMapItemsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, layer);
@@ -172,6 +174,11 @@ public class MainMapActivity extends Activity implements
 			chatVisible = savedInstanceState.getBoolean("chatVisible");
 			savedLayersMenuState = savedInstanceState.getParcelable("savedLayersMenuState");
 			savedChatState = savedInstanceState.getParcelable("savedChatState");
+			if (savedChatState != null) {
+				Log.d("MainMapActivity", "starting ... " + savedChatState.messages.size());
+			} else {
+				Log.d("MainMapActivity", "starting ... " + "null");
+			}
 		}
 		
 	}
@@ -364,39 +371,6 @@ public class MainMapActivity extends Activity implements
 			}
 		}
 	}
-
-	// alerts about invalid sessionID and finishes activity
-	/*private void invalidSessionId() { //TODO remove?
-		new AlertDialog.Builder(MainMapActivity.this)
-				.setMessage(R.string.alert_invalid_session_id_logout)
-				.setTitle(R.string.alert_invalid_session_id)
-				.setCancelable(false)
-				.setIcon(R.drawable.alerts_and_states_warning)
-				.setPositiveButton(R.string.button_ok,
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								MainMapActivity.this.finish();
-							}
-						}).create().show();
-	}*/
-
-	// shows network problem alert
-	/*private void networkProblem() { //TODO remove?
-		Toast.makeText(getApplicationContext(), R.string.alert_network_problem,
-				Toast.LENGTH_LONG).show();
-	}*/
-
-	/*private void invalidLayer() { // TODO remove?
-		Toast.makeText(getApplicationContext(), "Invalid layer!!!",
-				Toast.LENGTH_LONG).show();
-	}*/
-
-	/*private void invalidMapItem() { // TODO remove?
-		Toast.makeText(getApplicationContext(), "Invalid map item!!!",
-				Toast.LENGTH_LONG).show();
-	}*/
 
 	private class LogoutInBackground extends AsyncTask<Intent, Void, Exception> {
 

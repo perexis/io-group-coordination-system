@@ -22,13 +22,15 @@ public class ChatFragment extends Fragment {
 
 	//private final static String SAVED_STATE = "pl.edu.agh.io.coordinator.messagesSavedState";
 
+	private boolean chatActive;
+	
 	private OnFragmentInteractionListener mListener;
 
 	private TextView chatTextView;
 	private EditText inputMessage;
 
 	private List<String> messages;
-
+	
 	// private StringBuffer savedState;
 
 	public static ChatFragment newInstance() {
@@ -44,8 +46,13 @@ public class ChatFragment extends Fragment {
 
 	public ChatFragment() {
 		messages = new ArrayList<String>();
+		chatActive = false;
 	}
 
+	public synchronized boolean isActive() {
+		return chatActive;
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d("ChatFragment", "starting onCreate");
@@ -116,27 +123,12 @@ public class ChatFragment extends Fragment {
 	@Override
 	public void onStart() {
 		Log.d("ChatFragment", "starting onStart");
-		MainMapActivity activity = (MainMapActivity) getActivity();
-		if (activity.getSavedChatState() != null) {
-			Log.d("ChatFragment", "in onStart: saved state is not null");
-			ChatState state = activity.getSavedChatState();
-			this.messages = state.messages;
-			Log.d("ChatFragment", "    messages:" + this.messages.size());
-			this.chatTextView.setText("");
-			for (String s : messages) {
-				this.chatTextView.append("\n" + s);
-			}
-		}
 		super.onStart();
 	}
 	
 	@Override
 	public void onStop() {
 		Log.d("ChatFragment", "starting onStop");
-		ChatState state = new ChatState();
-		state.messages = new LinkedList<String>(this.messages);
-		MainMapActivity activity = (MainMapActivity) getActivity();
-		activity.setSavedChatState(state);
 		super.onStop();
 	}
 	
@@ -155,12 +147,33 @@ public class ChatFragment extends Fragment {
 	@Override
 	public void onResume() {
 		Log.d("ChatFragment", "starting onResume");
+		MainMapActivity activity = (MainMapActivity) getActivity();
+		if (activity.getSavedChatState() != null) {
+			Log.d("ChatFragment", "in onResume: saved state is not null");
+			ChatState state = activity.getSavedChatState();
+			this.messages = state.messages;
+			Log.d("ChatFragment", "    messages:" + this.messages.size());
+			this.chatTextView.setText("");
+			for (String s : messages) {
+				this.chatTextView.append("\n" + s);
+			}
+		}
+		synchronized (this) {
+			chatActive = true;
+		}
 		super.onResume();
 	}
 	
 	@Override
 	public void onPause() {
 		Log.d("ChatFragment", "starting onPause");
+		ChatState state = new ChatState();
+		state.messages = new LinkedList<String>(this.messages);
+		MainMapActivity activity = (MainMapActivity) getActivity();
+		activity.setSavedChatState(state);
+		synchronized (this) {
+			chatActive = false;
+		}
 		super.onPause();
 	}
 	
@@ -177,9 +190,10 @@ public class ChatFragment extends Fragment {
 	}
 	
 	public void newMessage(Message m) {
-		if (chatTextView != null)
+		Log.d("ChatFragment", "starting newMessage for message = " + m.getText());
+		if (chatTextView != null) {
 			chatTextView.append("\n" + m.getUserID() + " (" + m.getSentTime() + "): " + m.getText());
-
+		}
 		messages.add(m.getUserID() + " (" + m.getSentTime() + "): " + m.getText());
 	}
 
