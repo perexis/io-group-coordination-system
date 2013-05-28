@@ -1,6 +1,7 @@
 package pl.edu.agh.io.coordinator;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +24,7 @@ import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidMapItemException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidSessionIDException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
@@ -35,6 +37,7 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.google.android.gms.internal.ay;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -51,6 +54,7 @@ public class MainMapActivity extends Activity implements
 		OnDataContainerChangesListener {
 
 	public final static String ITEM_POSITION = "pl.edu.agh.io.coordinator.ITEM_POSITION";
+	public static MainMapActivity currentInstance = null;
 	
 	private boolean layersMenuVisible = false;
 	private boolean chatVisible = false;
@@ -152,6 +156,8 @@ public class MainMapActivity extends Activity implements
 		Log.d("MainMapActivity", "starting onCreate");
 		super.onCreate(savedInstanceState);
 
+		currentInstance = this;
+		
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main_map);
@@ -671,7 +677,14 @@ public class MainMapActivity extends Activity implements
 
 			if (result == null) {
 				for (Message m : messages) {
-					chatFragment.newMessage(m);
+					if (!chatFragment.isActive()) {
+						Log.d("MainMapActivity", "starting dropping message");
+						new WaitForChatActivation(m).start();
+						//new AddMessageAfterActivation(m).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
+					} else {
+						Log.d("MainMapActivity", "starting adding message");
+						chatFragment.newMessage(m);
+					}
 				}
 			} else if (result instanceof NetworkException) {
 				Alerts.networkProblem(MainMapActivity.this);
@@ -682,6 +695,57 @@ public class MainMapActivity extends Activity implements
 
 	}
 
+	private class WaitForChatActivation extends Thread {
+		
+		private Message message;
+		
+		public WaitForChatActivation(Message message) {
+			this.message = message;
+		}
+		
+		@Override
+		public void run() {
+			Log.d("MainMapActivity", "starting waiting thread");
+			ChatFragment chatFragment = MainMapActivity.this.chatFragment;
+			while (!chatFragment.isActive()) {
+				ChatFragment tempChatFragment = MainMapActivity.currentInstance.chatFragment;
+				if (tempChatFragment != null) {
+					chatFragment = tempChatFragment;
+				}
+			}
+			Log.d("MainMapActivity", "finished waiting thread");
+			new AddMessageAfterActivation(message).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
+		}
+		
+	}
+	
+	private class AddMessageAfterActivation extends AsyncTask<Void, Void, Void> {
+		
+		private Message message;
+		
+		public AddMessageAfterActivation(Message message) {
+			this.message = message;
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params) {
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute(Void result) {
+			ChatFragment chatFragment = MainMapActivity.currentInstance.chatFragment;
+			if ((chatFragment != null) && (chatFragment.isActive())) {
+				Log.d("MainMapActivity", "starting adding message after waiting");
+				chatFragment.newMessage(message);
+			} else {
+				Log.d("MainMapActivity", "starting dropping message again");
+				new WaitForChatActivation(message).start();
+			}
+		}
+		
+	}
+	
 	@Override
 	public void onChatSendMessage(String text) {
 		new SendMessageInBackground().executeOnExecutor(

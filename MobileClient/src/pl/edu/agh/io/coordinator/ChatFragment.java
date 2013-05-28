@@ -195,6 +195,7 @@ public class ChatFragment extends Fragment {
 			chatTextView.append("\n" + m.getUserID() + " (" + m.getSentTime() + "): " + m.getText());
 		}
 		messages.add(m.getUserID() + " (" + m.getSentTime() + "): " + m.getText());
+
 	}
 
 	public interface OnFragmentInteractionListener {
