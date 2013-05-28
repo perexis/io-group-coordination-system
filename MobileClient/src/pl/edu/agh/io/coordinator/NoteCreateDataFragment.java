@@ -2,11 +2,11 @@ package pl.edu.agh.io.coordinator;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 public class NoteCreateDataFragment extends Fragment {
 
@@ -34,7 +34,7 @@ public class NoteCreateDataFragment extends Fragment {
 	}
 	
 	public String getInput(){
-		return null;
+		return ((EditText) getActivity().findViewById(R.id.inputNote)).getText().toString();
 	}
 
 }

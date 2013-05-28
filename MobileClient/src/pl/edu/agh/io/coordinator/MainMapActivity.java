@@ -1,7 +1,6 @@
 package pl.edu.agh.io.coordinator;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -9,9 +8,9 @@ import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.MapItem;
 import pl.edu.agh.io.coordinator.resources.Message;
-import pl.edu.agh.io.coordinator.resources.Point;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
+import pl.edu.agh.io.coordinator.utils.Alerts;
 import pl.edu.agh.io.coordinator.utils.chat.ChatState;
 import pl.edu.agh.io.coordinator.utils.container.DataContainer;
 import pl.edu.agh.io.coordinator.utils.container.DataContainer.OnDataContainerChangesListener;
@@ -24,10 +23,8 @@ import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidMapItemException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidSessionIDException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -42,6 +39,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -52,7 +50,7 @@ public class MainMapActivity extends Activity implements
 		ChatFragment.OnFragmentInteractionListener, LayersMenuListener,
 		OnDataContainerChangesListener {
 
-	public final static String MY_POSITION = "pl.edu.agh.io.coordinator.MY_POSITION";
+	public final static String ITEM_POSITION = "pl.edu.agh.io.coordinator.ITEM_POSITION";
 	
 	private boolean layersMenuVisible = false;
 	private boolean chatVisible = false;
@@ -82,7 +80,7 @@ public class MainMapActivity extends Activity implements
 
 	private MainThread mainThread;
 	
-	private Set<Thread> threads = new HashSet<Thread>();
+	//private Set<Thread> threads = new HashSet<Thread>();
 	
 	private class MainThread extends Thread {
 		
@@ -308,7 +306,7 @@ public class MainMapActivity extends Activity implements
 			myLocation.setLatitude(50.0);
 			myLocation.setLongitude(20.0);
 			Intent intentCreateItem = new Intent(MainMapActivity.this, CreateMapItemActivity.class);
-			intentCreateItem.putExtra(MY_POSITION, myLocation);
+			intentCreateItem.putExtra(ITEM_POSITION, myLocation);
 			startActivity(intentCreateItem);
 			return true;
 		case R.id.actionSettings:
@@ -335,29 +333,40 @@ public class MainMapActivity extends Activity implements
 				// TODO: print error
 			} else {
 				googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-				CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-						DEFAULT_POSITION, 16.0f);
+				CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(DEFAULT_POSITION, 16.0f);
 				googleMap.moveCamera(cameraUpdate);
 				googleMap.setMyLocationEnabled(true);
 				googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-				googleMap
-						.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+				googleMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+					
+					@Override
+					public void onInfoWindowClick(Marker marker) {
+						Toast.makeText(getApplicationContext(), marker.getSnippet(), Toast.LENGTH_SHORT).show();
+					}
+					
+				});
 
-							@Override
-							public void onInfoWindowClick(Marker marker) {
-								Toast.makeText(getApplicationContext(),
-										marker.getSnippet(), Toast.LENGTH_SHORT)
-										.show();
-							}
-						});
-
+				googleMap.setOnMapLongClickListener(new OnMapLongClickListener() {
+					
+					@Override
+					public void onMapLongClick(LatLng arg0) {
+						Intent intentCreateItem = new Intent(MainMapActivity.this, CreateMapItemActivity.class);
+						Location location = new Location("Map item");
+						location.setLatitude(arg0.latitude);
+						location.setLongitude(arg0.longitude);
+						intentCreateItem.putExtra(ITEM_POSITION, location);
+						startActivity(intentCreateItem);
+					}
+					
+				});
+				
 			}
 		}
 	}
 
 	// alerts about invalid sessionID and finishes activity
-	private void invalidSessionId() {
+	/*private void invalidSessionId() { //TODO remove?
 		new AlertDialog.Builder(MainMapActivity.this)
 				.setMessage(R.string.alert_invalid_session_id_logout)
 				.setTitle(R.string.alert_invalid_session_id)
@@ -371,23 +380,23 @@ public class MainMapActivity extends Activity implements
 								MainMapActivity.this.finish();
 							}
 						}).create().show();
-	}
+	}*/
 
 	// shows network problem alert
-	private void networkProblem() {
+	/*private void networkProblem() { //TODO remove?
 		Toast.makeText(getApplicationContext(), R.string.alert_network_problem,
 				Toast.LENGTH_LONG).show();
-	}
+	}*/
 
-	private void invalidLayer() {
+	/*private void invalidLayer() { // TODO remove?
 		Toast.makeText(getApplicationContext(), "Invalid layer!!!",
 				Toast.LENGTH_LONG).show();
-	}
+	}*/
 
-	private void invalidMapItem() {
+	/*private void invalidMapItem() { // TODO remove?
 		Toast.makeText(getApplicationContext(), "Invalid map item!!!",
 				Toast.LENGTH_LONG).show();
-	}
+	}*/
 
 	private class LogoutInBackground extends AsyncTask<Intent, Void, Exception> {
 
@@ -417,10 +426,10 @@ public class MainMapActivity extends Activity implements
 			if (result == null) {
 				MainMapActivity.this.finish();
 			} else if (result instanceof NetworkException) {
-				networkProblem();
+				Alerts.networkProblem(MainMapActivity.this);
 				loggingOut = false;
 			} else if (result instanceof InvalidSessionIDException) {
-				invalidSessionId();
+				Alerts.invalidSessionId(MainMapActivity.this);
 			}
 		}
 
@@ -452,9 +461,9 @@ public class MainMapActivity extends Activity implements
 				if (MainMapActivity.this.layersFragment != null)
 					MainMapActivity.this.layersFragment.setPeople(users);
 			} else if (result instanceof NetworkException) {
-				networkProblem();
+				Alerts.networkProblem(MainMapActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				invalidSessionId();
+				Alerts.invalidSessionId(MainMapActivity.this);
 			}
 		}
 
@@ -483,9 +492,9 @@ public class MainMapActivity extends Activity implements
 			if (result == null) {
 				layersFragment.setLayers(layers);
 			} else if (result instanceof NetworkException) {
-				networkProblem();
+				Alerts.networkProblem(MainMapActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				invalidSessionId();
+				Alerts.invalidSessionId(MainMapActivity.this);
 			}
 		}
 
@@ -524,49 +533,11 @@ public class MainMapActivity extends Activity implements
 				if (layersFragment != null)
 					dataContainer.newMapItemsSet(layer, mapItems);
 			} else if (result instanceof NetworkException) {
-				networkProblem();
+				Alerts.networkProblem(MainMapActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				invalidSessionId();
+				Alerts.invalidSessionId(MainMapActivity.this);
 			} else if (result instanceof InvalidLayerException) {
-				invalidLayer();
-			}
-		}
-
-	}
-
-	private class AddItemTolayerInBackground extends
-			AsyncTask<Intent, Void, Exception> {
-
-		// private Set<MapItem> notesItems;
-		MapItem mapItem;
-
-		@Override
-		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
-
-			try {
-				mapItem = proxy.addItemToLayer(new Layer("notes"), new Point(
-						13.34, 57.78), "Testowa notatka");
-			} catch (InvalidSessionIDException e) {
-				return e;
-			} catch (NetworkException e) {
-				return e;
-			} catch (InvalidLayerException e) {
-				return e;
-			}
-
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Exception result) {
-
-			if (result instanceof NetworkException) {
-				networkProblem();
-			} else if (result instanceof InvalidSessionIDException) {
-				invalidSessionId();
-			} else if (result instanceof InvalidLayerException) {
-				invalidLayer();
+				Alerts.invalidLayer(MainMapActivity.this);
 			}
 		}
 
@@ -596,11 +567,11 @@ public class MainMapActivity extends Activity implements
 		protected void onPostExecute(Exception result) {
 
 			if (result instanceof NetworkException) {
-				networkProblem();
+				Alerts.networkProblem(MainMapActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				invalidSessionId();
+				Alerts.invalidSessionId(MainMapActivity.this);
 			} else if (result instanceof InvalidMapItemException) {
-				invalidMapItem();
+				Alerts.invalidMapItem(MainMapActivity.this);
 			}
 		}
 
@@ -631,9 +602,9 @@ public class MainMapActivity extends Activity implements
 				if (layersFragment != null)
 					layersFragment.setGroups(groups);
 			} else if (result instanceof NetworkException) {
-				networkProblem();
+				Alerts.networkProblem(MainMapActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				invalidSessionId();
+				Alerts.invalidSessionId(MainMapActivity.this);
 			}
 		}
 
@@ -664,9 +635,9 @@ public class MainMapActivity extends Activity implements
 				if (layersFragment != null)
 					layersFragment.setItems(userItems);
 			} else if (result instanceof NetworkException) {
-				networkProblem();
+				Alerts.networkProblem(MainMapActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				invalidSessionId();
+				Alerts.invalidSessionId(MainMapActivity.this);
 			}
 		}
 
@@ -693,9 +664,9 @@ public class MainMapActivity extends Activity implements
 		protected void onPostExecute(Exception result) {
 			Log.d("MainMapActivity", "SendMessageInBackground.onPostExecute()");
 			if (result instanceof NetworkException) {
-				networkProblem();
+				Alerts.networkProblem(MainMapActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				invalidSessionId();
+				Alerts.invalidSessionId(MainMapActivity.this);
 			}
 		}
 
@@ -729,9 +700,9 @@ public class MainMapActivity extends Activity implements
 					chatFragment.newMessage(m);
 				}
 			} else if (result instanceof NetworkException) {
-				networkProblem();
+				Alerts.networkProblem(MainMapActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				invalidSessionId();
+				Alerts.invalidSessionId(MainMapActivity.this);
 			}
 		}
 
