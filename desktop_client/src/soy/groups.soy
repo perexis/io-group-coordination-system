@@ -1,0 +1,54 @@
+{namespace io.soy.groups}
+
+/**
+ * The user groups page.
+ * @param groups 
+ */
+{template .page}
+<div class="container-fluid">
+  <div class="row-fluid">
+    <form id="createGroup">
+        <legend>Create new group</legend>
+        <input type="text" placeholder="Unique group name" id="groupName">
+        <textarea id="createGroupData" type="text" class="input-block-level" placeholder="Group description" rows="3"></textarea>
+        <button tdescriptionype="submit" class="btn btn-primary">Create</button>
+    </form>
+    <p class="lead">Review existing groups and customize their members</p>
+    <ul class="nav nav-list">
+      {foreach $group in $groups}
+        <li class="clearfix">
+          <p>{$group['id']}{sp}-{sp}{$group['description']}</p>
+          <form id="deleteGroup_{$group['id']}" class="pull-right">
+            <button type="submit" class="btn">Delete group</button>
+          </form>
+          <ul id="groups_{$group['id']}" class="nav nav-list"></ul>
+        </li>
+      {/foreach}
+    </ul>
+  </div>
+</div>
+{/template}
+
+
+/**
+ * The user groups.
+ * @param users
+ * @param group 
+ * @param gUsers 
+ */
+{template .users}
+{foreach $user in $users}
+  <li>
+    <label class="checkbox">
+        <input id="groups_{$user['id']}_{$group['id']}" type="checkbox"
+        {if $gUsers[$user['id']]}
+          checked
+        {/if}
+        >
+        
+        {$user['id']}{sp}-{sp}{$user['name']}{sp}{$user['surname']}
+    </label>
+  </li>
+{/foreach}
+{/template}
+

@@ -6,6 +6,7 @@ goog.require('goog.debug');
 goog.require('goog.dom');
 goog.require('goog.events');
 goog.require('io.api.ApiConnector');
+goog.require('io.groups.Page');
 goog.require('io.log');
 goog.require('io.map.Page');
 goog.require('io.settings.Page');
@@ -60,6 +61,12 @@ io.main.Page.prototype.render = function() {
     (new io.settings.Page(self, self.pageDiv)).render();
   };
 
+  var onGroupsBtn = function() {
+    (new io.groups.Page(self, self.pageDiv)).render();
+  };
+
+  goog.events.listen(goog.dom.getElement('groupsButton'),
+      goog.events.EventType.CLICK, onGroupsBtn);
   goog.events.listen(goog.dom.getElement('settingsButton'),
       goog.events.EventType.CLICK, onSettingsBtn);
   goog.events.listen(goog.dom.getElement('mapButton'),

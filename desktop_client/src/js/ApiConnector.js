@@ -223,6 +223,77 @@ io.api.ApiConnector.prototype.updateSelfState = function(data,
 
 
 /**
+ * @param {!{group: {string}, user: {string}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.removeFromGroup = function(data,
+    callback, opt_errcallback) {
+  this.sendRequest('removeFromGroup', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!{group: {string}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.removeGroup = function(data,
+    callback, opt_errcallback) {
+  this.sendRequest('removeGroup', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!{group: {id: {string}, description: {string}}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.createGroup = function(data,
+    callback, opt_errcallback) {
+  this.sendRequest('createGroup', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!{group: {string}, user: {string}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.addToGroup = function(data,
+    callback, opt_errcallback) {
+  this.sendRequest('addToGroup', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {!{group: {string}}} data
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.getGroupUsers = function(data,
+    callback, opt_errcallback) {
+  this.sendRequest('getGroupUsers', data, callback, opt_errcallback);
+};
+
+
+/**
+ * @param {function(string, goog.net.XhrIo=)} callback - on success call.
+ * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
+ *   optional on error call.
+ */
+io.api.ApiConnector.prototype.getGroups = function(
+    callback, opt_errcallback) {
+  this.sendRequest('getGroups', {}, callback, opt_errcallback);
+};
+
+
+/**
  * @param {function(string, goog.net.XhrIo=)} callback - on success call.
  * @param {function(string, goog.net.XhrIo=)=} opt_errcallback -
  *   optional on error call.
