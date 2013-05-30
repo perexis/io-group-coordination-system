@@ -43,6 +43,7 @@ import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -194,6 +195,9 @@ public class MainMapActivity extends Activity implements
 			} else {
 				Log.d("MainMapActivity", "starting ... " + "null");
 			}
+			CameraUpdate update = CameraUpdateFactory.newCameraPosition((CameraPosition) savedInstanceState
+					.getParcelable("cameraPosition"));
+			googleMap.moveCamera(update);
 		}
 		
 	}
@@ -234,6 +238,7 @@ public class MainMapActivity extends Activity implements
 		outState.putBoolean("chatVisible", chatVisible);
 		outState.putParcelable("savedLayersMenuState", savedLayersMenuState);
 		outState.putParcelable("savedChatState", savedChatState);
+		outState.putParcelable("cameraPosition", googleMap.getCameraPosition());
 		super.onSaveInstanceState(outState);
 	}
 	
