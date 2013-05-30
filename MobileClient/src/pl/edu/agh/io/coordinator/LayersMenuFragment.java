@@ -187,6 +187,7 @@ public class LayersMenuFragment extends Fragment {
 			adapter.setItems(state.items);
 			adapter.setPeople(state.people);
 			adapter.setGroups(state.groups);
+			adapter.setLayers(state.layers);
 			adapter.setAllChecks(state.itemsChecks, state.peopleChecks, state.groupsChecks, state.layersChecks);
 			setExpandedGroup(state.expandedGroup);
 		}

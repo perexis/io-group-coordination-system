@@ -1,8 +1,8 @@
 package pl.edu.agh.io.coordinator;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.resources.Group;
@@ -24,7 +24,6 @@ import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidMapItemException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidSessionIDException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
@@ -37,7 +36,6 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.google.android.gms.internal.ay;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -83,6 +81,8 @@ public class MainMapActivity extends Activity implements
 	private HashMap<MapItem, Marker> mapItemToMarker = new HashMap<MapItem, Marker>();
 
 	private MainThread mainThread;
+	
+	private Map<String, Boolean> activeLayers = new HashMap<String, Boolean>();
 	
 	//private Set<Thread> threads = new HashSet<Thread>();
 	
@@ -142,6 +142,14 @@ public class MainMapActivity extends Activity implements
 		this.savedChatState = state;
 	}
 	
+	public boolean isLayerActive(String layer) {
+		if (activeLayers.containsKey(layer)) {
+			return this.activeLayers.get(layer);
+		} else {
+			return false;
+		}
+	}
+	
 	private void initFragments(FragmentManager fragmentManager) {
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 		fragmentTransaction.add(R.id.layersFrame, layersFragment);
@@ -179,6 +187,7 @@ public class MainMapActivity extends Activity implements
 			layersMenuVisible = savedInstanceState.getBoolean("layersMenuVisible");
 			chatVisible = savedInstanceState.getBoolean("chatVisible");
 			savedLayersMenuState = savedInstanceState.getParcelable("savedLayersMenuState");
+			activeLayers = new HashMap<String, Boolean>(savedLayersMenuState.layersChecks);
 			savedChatState = savedInstanceState.getParcelable("savedChatState");
 			if (savedChatState != null) {
 				Log.d("MainMapActivity", "starting ... " + savedChatState.messages.size());
@@ -790,14 +799,16 @@ public class MainMapActivity extends Activity implements
 
 	@Override
 	public void layerChecked(String layer) {
-		// TODO Auto-generated method stub
 		Log.d("MainMapActivity", "executing layerChecked, layer = " + layer);
+		activeLayers.put(layer, true);
+		dataContainer.showLayer(layer);
 	}
 
 	@Override
 	public void layerUnchecked(String layer) {
-		// TODO Auto-generated method stub
 		Log.d("MainMapActivity", "executing layerUnchecked, layer = " + layer);
+		activeLayers.put(layer, false);
+		dataContainer.hideLayer(layer);
 	}
 
 	@Override
@@ -850,8 +861,10 @@ public class MainMapActivity extends Activity implements
 	public void mapItemRemoved(Layer layer, MapItem mapItem) {
 		Log.d(this.toString(), "removing mapItem " + mapItem.getData()
 				+ " from layer " + layer.getName());
-		mapItemToMarker.get(mapItem).remove(); // remove Marker from map
-		mapItemToMarker.remove(mapItem);
+		if (mapItemToMarker.containsKey(mapItem)) {
+			mapItemToMarker.get(mapItem).remove(); // remove Marker from map
+			mapItemToMarker.remove(mapItem);
+		}
 	}
 
 }

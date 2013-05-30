@@ -31,10 +31,13 @@ public class Layer implements Parcelable {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof Layer)
-			return ((Layer) o).getName().equals(this.getName());
-		else
+		if (o == null) {
 			return false;
+		}
+		if (o instanceof Layer) {
+			return ((Layer) o).getName().equals(this.getName());
+		}
+		return false;
 	}
 	
 	@Override
