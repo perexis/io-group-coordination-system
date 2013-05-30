@@ -11,6 +11,7 @@ import pl.edu.agh.io.coordinator.resources.MapItem;
 import pl.edu.agh.io.coordinator.resources.Message;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
+import pl.edu.agh.io.coordinator.resources.UserState;
 import pl.edu.agh.io.coordinator.utils.Alerts;
 import pl.edu.agh.io.coordinator.utils.chat.ChatState;
 import pl.edu.agh.io.coordinator.utils.container.DataContainer;
@@ -22,6 +23,7 @@ import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidLayerException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidMapItemException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidSessionIDException;
+import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidUserException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -74,12 +76,12 @@ public class MainMapActivity extends Activity implements
 	private ChatFragment chatFragment = ChatFragment.newInstance();
 
 	private Set<UserItem> userItems;
-	private Set<User> users;
 	private Set<Group> groups;
 
 	private Set<Layer> layers;
 
 	private HashMap<MapItem, Marker> mapItemToMarker = new HashMap<MapItem, Marker>();
+	private HashMap<User, Marker> mapUserToMarker = new HashMap<User, Marker>();
 
 	private MainThread mainThread;
 	
@@ -432,16 +434,25 @@ public class MainMapActivity extends Activity implements
 	private class GetUsersInBackground extends
 			AsyncTask<Intent, Void, Exception> {
 
+		private Set<User> users;
+		private Map<User, UserState> userStates;
+		
 		@Override
 		protected Exception doInBackground(Intent... params) {
 			Log.d("MainMapActivity", "GetUsersInBackground.doInBackground()");
 			IJSonProxy proxy = JSonProxy.getInstance();
-
+			userStates = new HashMap<User, UserState>();
 			try {
 				users = proxy.getUsers();
+				for (User u : users) {
+					UserState state = proxy.getUserState(u.getId());
+					userStates.put(u, state);
+				}
 			} catch (InvalidSessionIDException e) {
 				return e;
 			} catch (NetworkException e) {
+				return e;
+			} catch (InvalidUserException e) {
 				return e;
 			}
 
@@ -452,12 +463,16 @@ public class MainMapActivity extends Activity implements
 		protected void onPostExecute(Exception result) {
 
 			if (result == null) {
-				if (MainMapActivity.this.layersFragment != null)
+				if (MainMapActivity.this.layersFragment != null) {
 					MainMapActivity.this.layersFragment.setPeople(users);
+					dataContainer.newUsersSet(userStates);
+				}
 			} else if (result instanceof NetworkException) {
 				Alerts.networkProblem(MainMapActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
 				Alerts.invalidSessionId(MainMapActivity.this);
+			} else if (result instanceof InvalidUserException) {
+				Alerts.invalidUser(MainMapActivity.this);
 			}
 		}
 
@@ -869,6 +884,27 @@ public class MainMapActivity extends Activity implements
 		if (mapItemToMarker.containsKey(mapItem)) {
 			mapItemToMarker.get(mapItem).remove(); // remove Marker from map
 			mapItemToMarker.remove(mapItem);
+		}
+	}
+
+	@Override
+	public void userAdded(User user, UserState state) {
+		if (googleMap != null) {
+			if (mapUserToMarker.containsKey(user)) {
+				mapUserToMarker.get(user).remove();
+			}
+			Marker marker = googleMap.addMarker(new MarkerOptions().position(state.getPosition().getLatLng())
+					.title(user.getName() + " " + user.getSurname())
+					.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+			mapUserToMarker.put(user, marker);
+		}
+	}
+
+	@Override
+	public void userRemoved(User user) {
+		if (mapUserToMarker.containsKey(user)) {
+			mapUserToMarker.get(user).remove();
+			mapUserToMarker.remove(user);
 		}
 	}
 

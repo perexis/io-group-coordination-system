@@ -41,5 +41,26 @@ public class Point {
 		elements.put("longitude", this.coords.longitude);
 		return new JSONObject(elements);
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) {
+			return false;
+		}
+		if (o instanceof Point) {
+			Point p = (Point) o;
+			if ((p.getLatitude() == this.getLatitude()) && (p.getLongitude() == this.getLongitude())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		Double latitude = Double.valueOf(this.getLatitude());
+		Double longitude = Double.valueOf(this.getLongitude());
+		return latitude.hashCode() + longitude.hashCode();
+	}
 
 }

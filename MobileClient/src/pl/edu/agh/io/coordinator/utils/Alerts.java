@@ -31,6 +31,10 @@ public class Alerts {
 		Toast.makeText(activity.getApplicationContext(), R.string.alert_invalid_map_item, Toast.LENGTH_LONG).show();
 	}
 
+	public static void invalidUser(final Activity activity) {
+		Toast.makeText(activity.getApplicationContext(), R.string.alert_invalid_user, Toast.LENGTH_LONG).show();
+	}
+	
 	public static void groupCreated(final Activity activity) {
 		new AlertDialog.Builder(activity).setMessage(R.string.alert_group_created).setIcon(R.drawable.alerts_and_states_warning)
 				.setPositiveButton(R.string.button_ok, null).create().show();

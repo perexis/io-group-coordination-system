@@ -35,4 +35,24 @@ public class UserState {
 		return new JSONObject(elements);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (o == null) {
+			return false;
+		}
+		if (o instanceof UserState) {
+			UserState us = (UserState) o;
+			if ((us.getPosition().equals(this.getPosition())) && (us.getSpeed() == this.getSpeed())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		Double speed = Double.valueOf(this.getSpeed());
+		return this.getPosition().hashCode() + speed.hashCode();
+	}
+	
 }
