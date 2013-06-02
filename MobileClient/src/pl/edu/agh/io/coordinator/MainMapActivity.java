@@ -104,9 +104,9 @@ public class MainMapActivity extends Activity implements
 				try {
 					Thread.sleep(1000);
 					Log.d("MainMapActivity", "getting data from server");
-					new GetUsersInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
-					new GetUserItemsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
-					new GetGroupsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
+					new GetUsersInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					//new GetUserItemsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
+					//new GetGroupsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 					if (chatFragment.isActive()) {
 						new GetMessagesInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					}
@@ -432,13 +432,13 @@ public class MainMapActivity extends Activity implements
 	}
 
 	private class GetUsersInBackground extends
-			AsyncTask<Intent, Void, Exception> {
+			AsyncTask<Void, Void, Exception> {
 
 		private Set<User> users;
 		private Map<User, UserState> userStates;
 		
 		@Override
-		protected Exception doInBackground(Intent... params) {
+		protected Exception doInBackground(Void... params) {
 			Log.d("MainMapActivity", "GetUsersInBackground.doInBackground()");
 			IJSonProxy proxy = JSonProxy.getInstance();
 			userStates = new HashMap<User, UserState>();
@@ -448,6 +448,10 @@ public class MainMapActivity extends Activity implements
 					UserState state = proxy.getUserState(u.getId());
 					userStates.put(u, state);
 				}
+				
+				userItems = proxy.getPossibleUserItems();
+				groups = proxy.getGroups();
+				
 			} catch (InvalidSessionIDException e) {
 				return e;
 			} catch (NetworkException e) {
@@ -466,6 +470,10 @@ public class MainMapActivity extends Activity implements
 				if (MainMapActivity.this.layersFragment != null) {
 					MainMapActivity.this.layersFragment.setPeople(users);
 					dataContainer.newUsersSet(userStates);
+				}
+				if (layersFragment != null){
+					layersFragment.setItems(userItems);
+					layersFragment.setGroups(groups);
 				}
 			} else if (result instanceof NetworkException) {
 				Alerts.networkProblem(MainMapActivity.this);
@@ -586,7 +594,7 @@ public class MainMapActivity extends Activity implements
 
 	}
 
-	private class GetGroupsInBackground extends
+/*	private class GetGroupsInBackground extends
 			AsyncTask<Intent, Void, Exception> {
 
 		@Override
@@ -617,9 +625,9 @@ public class MainMapActivity extends Activity implements
 			}
 		}
 
-	}
+	}*/
 
-	private class GetUserItemsInBackground extends
+/*	private class GetUserItemsInBackground extends
 			AsyncTask<Intent, Void, Exception> {
 
 		@Override
@@ -650,7 +658,7 @@ public class MainMapActivity extends Activity implements
 			}
 		}
 
-	}
+	}*/
 
 	private class SendMessageInBackground extends
 			AsyncTask<String, Void, Exception> {
