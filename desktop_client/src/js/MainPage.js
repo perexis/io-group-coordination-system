@@ -82,7 +82,7 @@ io.main.Page.prototype.render = function() {
  * @param {!string} id - DOM id.
  */
 io.main.Page.prototype.setMenuLinkActive = function(id) {
-  var elems = ['mapButton', 'settingsButton'];
+  var elems = ['mapButton', 'settingsButton', 'groupsButton'];
   goog.array.map(elems, function(elid) {
     goog.dom.getElement(elid).className = '';
   });

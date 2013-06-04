@@ -13,18 +13,20 @@
         <textarea id="createGroupData" type="text" class="input-block-level" placeholder="Group description" rows="3"></textarea>
         <button tdescriptionype="submit" class="btn btn-primary">Create</button>
     </form>
-    <p class="lead">Review existing groups and customize their members</p>
-    <ul class="nav nav-list">
-      {foreach $group in $groups}
-        <li class="clearfix">
-          <p>{$group['id']}{sp}-{sp}{$group['description']}</p>
-          <form id="deleteGroup_{$group['id']}" class="pull-right">
-            <button type="submit" class="btn">Delete group</button>
-          </form>
-          <ul id="groups_{$group['id']}" class="nav nav-list"></ul>
-        </li>
-      {/foreach}
-    </ul>
+    {if $groups.length}
+      <p class="lead">Review existing groups and customize their members</p>
+      <ul class="nav nav-list">
+        {foreach $group in $groups}
+          <li class="clearfix">
+            <p>{$group['id']}{sp}-{sp}{$group['description']}</p>
+            <form id="deleteGroup_{$group['id']}" class="pull-right">
+              <button type="submit" class="btn">Delete group</button>
+            </form>
+            <ul id="groups_{$group['id']}" class="nav nav-list"></ul>
+          </li>
+        {/foreach}
+      </ul>
+    {/if}
   </div>
 </div>
 {/template}

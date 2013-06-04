@@ -16,12 +16,8 @@
   min-width: 300px;
 }
 
-.user-window:after {
-  content: ".";
+.user-window .user-items label {
   display: block;
-  height: 0;
-  clear: both;
-  visibility: hidden;
 }
 
 .user-window .user-items {
