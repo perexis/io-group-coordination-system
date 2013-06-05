@@ -66,22 +66,43 @@ public class LayersMenuFragment extends Fragment {
 	}
 	
 	public void setItems(Set<UserItem> items) {
-		if (adapter == null) {
+		MainMapActivity activity = (MainMapActivity) getActivity();
+		if ((adapter == null) || (activity == null)) {
 			return;
+		}
+		activity.getUserFilter().clearUserItems();
+		for (UserItem ui : items) {
+			if ((adapter.getItemsChecks().containsKey(ui.getId())) && (adapter.getItemsChecks().get(ui.getId()) == true)) {
+				activity.getUserFilter().addUserItem(ui.getId());
+			}
 		}
 		adapter.setItems(items);
 	}
 
 	public void setPeople(Set<User> people) {
-		if (adapter == null) {
+		MainMapActivity activity = (MainMapActivity) getActivity();
+		if ((adapter == null) || (activity == null)) {
 			return;
+		}
+		activity.getUserFilter().clearUsers();
+		for (User u : people) {
+			if ((adapter.getPeopleChecks().containsKey(u.getId())) && (adapter.getPeopleChecks().get(u.getId()) == true)) {
+				activity.getUserFilter().addUser(u.getId());
+			}
 		}
 		adapter.setPeople(people);
 	}
 
 	public void setGroups(Set<Group> groups) {
-		if (adapter == null) {
+		MainMapActivity activity = (MainMapActivity) getActivity();
+		if ((adapter == null) || (activity == null)) {
 			return;
+		}
+		activity.getUserFilter().clearGroups();
+		for (Group g : groups) {
+			if ((adapter.getGroupsChecks().containsKey(g.getId())) && (adapter.getGroupsChecks().get(g.getId()) == true)) {
+				activity.getUserFilter().addGroup(g.getId());
+			}
 		}
 		adapter.setGroups(groups);
 	}

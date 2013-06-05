@@ -79,14 +79,14 @@ public class LayersMenuListAdapter extends BaseExpandableListAdapter {
 		this.menuGroups.add(context.getString(R.string.menu_item_people));
 		this.menuGroups.add(context.getString(R.string.menu_item_groups));
 		this.menuGroups.add(context.getString(R.string.menu_item_layers));
-		this.items = new ArrayList<UserItem>();
-		this.people = new ArrayList<User>();
-		this.groups = new ArrayList<Group>();
-		this.layers = new ArrayList<Layer>();
-		this.itemsChecks = new HashMap<String, Boolean>();
-		this.peopleChecks = new HashMap<String, Boolean>();
-		this.groupsChecks = new HashMap<String, Boolean>();
-		this.layersChecks = new HashMap<String, Boolean>();
+		this.items = Collections.synchronizedList(new ArrayList<UserItem>());
+		this.people = Collections.synchronizedList(new ArrayList<User>());
+		this.groups = Collections.synchronizedList(new ArrayList<Group>());
+		this.layers = Collections.synchronizedList(new ArrayList<Layer>());
+		this.itemsChecks = Collections.synchronizedMap(new HashMap<String, Boolean>());
+		this.peopleChecks = Collections.synchronizedMap(new HashMap<String, Boolean>());
+		this.groupsChecks = Collections.synchronizedMap(new HashMap<String, Boolean>());
+		this.layersChecks = Collections.synchronizedMap(new HashMap<String, Boolean>());
 	}
 
 	public List<UserItem> getItems() {

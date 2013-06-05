@@ -13,6 +13,7 @@ import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
 import pl.edu.agh.io.coordinator.resources.UserState;
 import pl.edu.agh.io.coordinator.utils.Alerts;
+import pl.edu.agh.io.coordinator.utils.UserFilter;
 import pl.edu.agh.io.coordinator.utils.chat.ChatState;
 import pl.edu.agh.io.coordinator.utils.container.DataContainer;
 import pl.edu.agh.io.coordinator.utils.container.DataContainer.OnDataContainerChangesListener;
@@ -20,6 +21,7 @@ import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListener;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuState;
 import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
+import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidGroupException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidLayerException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidMapItemException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidSessionIDException;
@@ -75,9 +77,6 @@ public class MainMapActivity extends Activity implements
 
 	private ChatFragment chatFragment = ChatFragment.newInstance();
 
-	private Set<UserItem> userItems;
-	private Set<Group> groups;
-
 	private Set<Layer> layers;
 
 	private HashMap<MapItem, Marker> mapItemToMarker = new HashMap<MapItem, Marker>();
@@ -87,7 +86,13 @@ public class MainMapActivity extends Activity implements
 	
 	private Map<String, Boolean> activeLayers = new HashMap<String, Boolean>();
 	
+	private UserFilter userFilter = new UserFilter();
+	
 	//private Set<Thread> threads = new HashSet<Thread>();
+	
+	public UserFilter getUserFilter() {
+		return userFilter;
+	}
 	
 	private class MainThread extends Thread {
 		
@@ -166,7 +171,7 @@ public class MainMapActivity extends Activity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d("MainMapActivity", "starting onCreate");
 		super.onCreate(savedInstanceState);
-
+		
 		currentInstance = this;
 		
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -436,27 +441,46 @@ public class MainMapActivity extends Activity implements
 
 		private Set<User> users;
 		private Map<User, UserState> userStates;
+		private Map<User, Set<String>> userItemSets;
+		private Set<UserItem> userItems;
+		private Set<Group> groups;
+		private Map<Group, Set<String>> groupUserSets;
 		
 		@Override
 		protected Exception doInBackground(Void... params) {
 			Log.d("MainMapActivity", "GetUsersInBackground.doInBackground()");
 			IJSonProxy proxy = JSonProxy.getInstance();
 			userStates = new HashMap<User, UserState>();
+			userItemSets = new HashMap<User, Set<String>>();
+			groupUserSets = new HashMap<Group, Set<String>>();
 			try {
 				users = proxy.getUsers();
 				for (User u : users) {
 					UserState state = proxy.getUserState(u.getId());
-					userStates.put(u, state);
-				}
-				
+					Set<String> items = proxy.getUserItems(u);
+					if (state != null) {
+						userStates.put(u, state);
+					}
+					if (items != null) {
+						userItemSets.put(u, items);
+					}
+				}				
 				userItems = proxy.getPossibleUserItems();
 				groups = proxy.getGroups();
+				for (Group g : groups) {
+					Set<String> users = proxy.getGroupUsers(g);
+					if (users != null) {
+						groupUserSets.put(g, users);
+					}
+				}
 				
 			} catch (InvalidSessionIDException e) {
 				return e;
 			} catch (NetworkException e) {
 				return e;
 			} catch (InvalidUserException e) {
+				return e;
+			} catch (InvalidGroupException e) {
 				return e;
 			}
 
@@ -469,18 +493,23 @@ public class MainMapActivity extends Activity implements
 			if (result == null) {
 				if (MainMapActivity.this.layersFragment != null) {
 					MainMapActivity.this.layersFragment.setPeople(users);
+					MainMapActivity.this.layersFragment.setItems(userItems);
+					MainMapActivity.this.layersFragment.setGroups(groups);
 					dataContainer.newUsersSet(userStates);
+					dataContainer.newUserItemsSet(userItemSets);
+					dataContainer.newGroupsSet(groupUserSets);
 				}
 				if (layersFragment != null){
-					layersFragment.setItems(userItems);
-					layersFragment.setGroups(groups);
+					
 				}
 			} else if (result instanceof NetworkException) {
 				Alerts.networkProblem(MainMapActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
 				Alerts.invalidSessionId(MainMapActivity.this);
 			} else if (result instanceof InvalidUserException) {
-				Alerts.invalidUser(MainMapActivity.this);
+				//Alerts.invalidUser(MainMapActivity.this); // wywalone bo niepotrzebnie wyswietla alert
+			} else if (result instanceof InvalidGroupException) {
+				// jak wyzej
 			}
 		}
 
@@ -791,38 +820,44 @@ public class MainMapActivity extends Activity implements
 
 	@Override
 	public void itemChecked(String item) {
-		// TODO Auto-generated method stub
 		Log.d("MainMapActivity", "executing itemChecked, item = " + item);
+		userFilter.addUserItem(item);
+		dataContainer.repaintUsers();
 	}
 
 	@Override
 	public void itemUnchecked(String item) {
-		// TODO Auto-generated method stub
 		Log.d("MainMapActivity", "executing itemUnhecked, item = " + item);
+		userFilter.removeUserItem(item);
+		dataContainer.repaintUsers();
 	}
 
 	@Override
 	public void userChecked(String user) {
-		// TODO Auto-generated method stub
 		Log.d("MainMapActivity", "executing userChecked, user = " + user);
+		userFilter.addUser(user);
+		dataContainer.repaintUsers();
 	}
 
 	@Override
 	public void userUnchecked(String user) {
-		// TODO Auto-generated method stub
 		Log.d("MainMapActivity", "executing userUnchecked, user = " + user);
+		userFilter.removeUser(user);
+		dataContainer.repaintUsers();
 	}
 
 	@Override
 	public void groupChecked(String group) {
-		// TODO Auto-generated method stub
 		Log.d("MainMapActivity", "executing groupChecked, group = " + group);
+		userFilter.addGroup(group);
+		dataContainer.repaintUsers();
 	}
 
 	@Override
 	public void groupUnchecked(String group) {
-		// TODO Auto-generated method stub
 		Log.d("MainMapActivity", "executing groupUnchecked, group = " + group);
+		userFilter.removeGroup(group);
+		dataContainer.repaintUsers();
 	}
 
 	@Override
@@ -841,54 +876,37 @@ public class MainMapActivity extends Activity implements
 
 	@Override
 	public void mapItemAdded(Layer layer, MapItem mapItem) {
-		Log.d("MainMapActivity", "adding mapItem " + mapItem.getData()
-				+ " to layer " + layer.getName());
+		Log.d("MainMapActivity", "adding mapItem " + mapItem.getData() + " to layer " + layer.getName());
 		if (layer.getName().equals("notes")) {
-			if(googleMap!=null){
-			Marker marker = googleMap
-					.addMarker(new MarkerOptions()
-							.position(
-									new LatLng(mapItem.getPosition()
-											.getLatitude(), mapItem
-											.getPosition().getLongitude()))
-							.title(getString(R.string.layer_note))
-							.snippet(mapItem.getData())
-							.icon(BitmapDescriptorFactory
-									.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
-			// .icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
-			mapItemToMarker.put(mapItem, marker);
+			if (googleMap != null) {
+				Marker marker = googleMap.addMarker(new MarkerOptions()
+						.position(new LatLng(mapItem.getPosition().getLatitude(), mapItem.getPosition().getLongitude()))
+						.title(getString(R.string.layer_note)).snippet(mapItem.getData())
+						.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+				// .icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
+				mapItemToMarker.put(mapItem, marker);
 			}
 		} else if (layer.getName().equals("images")) {
-			if(googleMap!=null){
-			Marker marker = googleMap
-					.addMarker(new MarkerOptions()
-							.position(
-									new LatLng(mapItem.getPosition()
-											.getLatitude(), mapItem
-											.getPosition().getLongitude()))
-							.title(getString(R.string.layer_image))
-							.snippet(mapItem.getData())
-							.icon(BitmapDescriptorFactory
-									.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
-			mapItemToMarker.put(mapItem, marker);
+			if (googleMap != null) {
+				Marker marker = googleMap.addMarker(new MarkerOptions()
+						.position(new LatLng(mapItem.getPosition().getLatitude(), mapItem.getPosition().getLongitude()))
+						.title(getString(R.string.layer_image)).snippet(mapItem.getData())
+						.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
+				mapItemToMarker.put(mapItem, marker);
 			}
 		} else if (layer.getName().equals("videos")) {
-			if(googleMap!=null){
-			Marker marker = googleMap.addMarker(new MarkerOptions()
-					.position(mapItem.getPosition().getLatLng())
-					.title(getString(R.string.layer_video))
-					.snippet(mapItem.getData())
-					.icon(BitmapDescriptorFactory
-							.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-			mapItemToMarker.put(mapItem, marker);
+			if (googleMap != null) {
+				Marker marker = googleMap.addMarker(new MarkerOptions().position(mapItem.getPosition().getLatLng())
+						.title(getString(R.string.layer_video)).snippet(mapItem.getData())
+						.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+				mapItemToMarker.put(mapItem, marker);
 			}
 		}
 	}
 
 	@Override
 	public void mapItemRemoved(Layer layer, MapItem mapItem) {
-		Log.d(this.toString(), "removing mapItem " + mapItem.getData()
-				+ " from layer " + layer.getName());
+		Log.d(this.toString(), "removing mapItem " + mapItem.getData() + " from layer " + layer.getName());
 		if (mapItemToMarker.containsKey(mapItem)) {
 			mapItemToMarker.get(mapItem).remove(); // remove Marker from map
 			mapItemToMarker.remove(mapItem);
