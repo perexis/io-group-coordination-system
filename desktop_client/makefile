@@ -3,6 +3,7 @@ CLOSUREDIR=$(LIBDIR)/closure
 SRCDIR=src
 BUILDDIR=build
 JSDIR=$(SRCDIR)/js
+IMGDIR=$(SRCDIR)/images
 HTMLDIR=$(SRCDIR)/html
 CSSDIR=$(SRCDIR)/css
 CSSES=lib/bootstrap/bootstrap.min.css $(CSSDIR)/style.css lib/bootstrap/bootstrap-responsive.min.css 
@@ -48,12 +49,14 @@ compile: soy gendeps
 	  --compiler_flags="--warning_level=VERBOSE" \
 	  --compiler_flags="--generate_exports" \
 		--compiler_flags="--js=$(JSDIR)/gen/deps.js"	\
+		--compiler_flags="--define='goog.DEBUG=false'"	\
 		> $(BUILDDIR)/app.js
 
 copyres:
 	cat $(CSSES) | ./lib/node_modules/csso/bin/csso /dev/stdin > $(BUILDDIR)/style.css
 	cat $(LIBS) > $(BUILDDIR)/libs.js
 	cp -R $(HTMLDIR)/App.html $(BUILDDIR)
+	cp -R $(IMGDIR) $(BUILDDIR)
 
 clean:
 		rm -rf `find $(BUILDDIR) | tail -n +2`

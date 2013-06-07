@@ -34,7 +34,6 @@
 </div>
 {/template}
 
-
 /**
  * Marker window
  * @param name 
@@ -63,7 +62,6 @@
 {/foreach}
 </div>
 {/template}
-
 
 /**
  * Image window content
@@ -100,10 +98,10 @@
  */
 {template .layersMenu}
 <ul class="nav nav-list">
-  <li class="nav-header">Layers</li>
-  <li id="layer_users"><a href="#">users</a></li>
+  <li class="nav-header">Select visible layers</li>
+  <li><a id="layer_users" class="btn">users</a></li>
   {foreach $layer in $layers}
-    <li id="layer_{$layer}"><a href="#">{$layer}</a></li>
+    <li><a id="layer_{$layer}" class="btn">{$layer}</a></li>
   {/foreach}
 </ul>
 {/template}

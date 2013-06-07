@@ -69,40 +69,31 @@ io.map.Page.prototype.loadLayers = function(callback) {
   var self = this;
   this.main.api.getLayers(function(layers) {
     goog.object.forEach(layers, function(layer) {
-      self.layers[layer] = true;
+      self.layers[layer] = false;
     });
     self.numLayers = layers.length;
     callback();
     soy.renderElement(goog.dom.getElement('mapLayers'), io.soy.map.layersMenu,
         {layers: layers});
-    goog.array.forEach(layers, function(layer) {
+    var doToggle = function(layer) {
       var ul = goog.dom.getElement('layer_' + layer);
       var toggle = function() {
-        if (ul.className == '') {
-          ul.className = 'active';
+        if (!self.layers[layer]) {
+          ul.className = 'btn active';
           self.layers[layer] = true;
         } else {
-          ul.className = '';
+          ul.className = 'btn';
           self.layers[layer] = false;
         }
-        self.refreshMapItems();
+        self.refreshLayers();
       };
       toggle();
       goog.events.listen(ul, goog.events.EventType.CLICK, toggle);
-    });
-    var ulUsers = goog.dom.getElement('layer_users');
-    var toggleUsers = function() {
-      if (ulUsers.className == '') {
-        ulUsers.className = 'active';
-        self.showUsers = true;
-      } else {
-        ulUsers.className = '';
-        self.showUsers = false;
-      }
-      self.refreshUsers();
     };
-    toggleUsers();
-    goog.events.listen(ulUsers, goog.events.EventType.CLICK, toggleUsers);
+    goog.array.forEach(layers, function(layer) {
+      doToggle(layer);
+    });
+    doToggle('users');
   });
 };
 
@@ -121,7 +112,7 @@ io.map.Page.prototype.refreshUsers = function() {
     });
     self.userMarkers = newMarkers;
   };
-  if (this.showUsers) {
+  if (self.layers['users']) {
     this.main.api.getUsers(function(users) {
       var numUsers = users.length;
       var finished = function() {
@@ -154,6 +145,8 @@ io.map.Page.prototype.refreshMapItems = function() {
       }
     };
     goog.object.forEach(self.layers, function(active, layer) {
+      if (layer == 'users')
+        return;
       self.main.api.getMapItems({'layer': layer}, function(items) {
         var newMarkers = {};
         if (active) {
@@ -217,13 +210,18 @@ io.map.Page.prototype.putMapItem = function(item, newMarkers, markers, layer) {
   var id = item['id'];
   if (markers != undefined && markers[id]) {
     newMarkers[id] = markers[id];
-    newMarkers[id]['marker'].setPosition(loc);
+    var mk = newMarkers[id]['marker'];
+    if (mk.getPosition().equals(loc)) {
+      mk.setAnimation(null);
+      mk.setPosition(loc);
+    }
     delete markers[id];
   } else {
     var marker = new google.maps.Marker({
       position: loc,
       map: self.map,
-      animation: google.maps.Animation.DROP
+      animation: google.maps.Animation.DROP,
+      icon: self.getLayerIcon(layer)
     });
     var infowindow = new google.maps.InfoWindow();
     google.maps.event.addListener(marker, 'click', function() {
@@ -262,6 +260,16 @@ io.map.Page.prototype.initInfoWindow = function(item, marker) {
       goog.events.EventType.SUBMIT, deleteCallback);
 };
 
+
+io.map.Page.prototype.getLayerIcon = function(layer) {
+  var loc = 'images/';
+  if (goog.DEBUG) {
+    loc = '../images/';
+  }
+  return loc + layer + '.png';
+};
+
+
 io.map.Page.prototype.putUser = function(user, position,
     markers, newMarkers) {
   var self = this;
@@ -270,13 +278,18 @@ io.map.Page.prototype.putUser = function(user, position,
   var loc = new google.maps.LatLng(pos['latitude'], pos['longitude']);
   if (markers[id]) {
     newMarkers[id] = markers[id];
-    newMarkers[id]['marker'].setPosition(loc);
+    var mk = newMarkers[id]['marker'];
+    if (mk.getPosition().equals(loc)) {
+      mk.setAnimation(null);
+      mk.setPosition(loc);
+    }
     delete markers[id];
   } else {
     var marker = new google.maps.Marker({
       position: loc,
       map: self.map,
-      animation: google.maps.Animation.DROP
+      animation: google.maps.Animation.DROP,
+      icon: self.getLayerIcon('users')
     });
 
     var infowindow = new google.maps.InfoWindow();

@@ -347,7 +347,8 @@ io.api.ApiConnector.prototype.sendRequest = function(resource, data, callback,
   };
 
   var onException = function(e) {
-    io.log().info('Exception accessing url: ' + url + '\n' + e);
+    io.log().info('Exception accessing url: ' + url + '\nargs:' +
+        goog.debug.deepExpose(data) + '\n' + e);
     if (self.exHandlers[e]) {
       self.exHandlers[e](e);
     } else if (opt_errcallback) {

@@ -1,3 +1,7 @@
+.map-layers li {
+  padding: 5px;
+}
+
 .chat-window {
   padding: 5px;
   background-color: white;
@@ -16,7 +20,7 @@
   min-width: 300px;
 }
 
-.user-window .user-items label {
+.my-infowindow label {
   display: block;
 }
 
