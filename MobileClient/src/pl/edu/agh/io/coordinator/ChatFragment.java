@@ -1,11 +1,15 @@
 package pl.edu.agh.io.coordinator;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import pl.edu.agh.io.coordinator.resources.Message;
 import pl.edu.agh.io.coordinator.utils.chat.ChatState;
+import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -93,11 +97,15 @@ public class ChatFragment extends Fragment {
 		return view;
 	}
 
+	@SuppressLint("SimpleDateFormat")
 	public void onSendMessage() {
 		if (mListener != null && inputMessage.getText().length() != 0) {
 			mListener.onChatSendMessage(inputMessage.getText().toString());
-			chatTextView.append("\n-->" + inputMessage.getText());
-			messages.add("-->" + inputMessage.getText());
+			Date date = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+			String timeString = sdf.format(date);
+			chatTextView.append("\n" + JSonProxy.getInstance().getLoggedUser() + " (" + timeString + "): " + inputMessage.getText());
+			messages.add("\n" + JSonProxy.getInstance().getLoggedUser() + " (" + timeString + "): " + inputMessage.getText());
 			inputMessage.getText().clear();
 		}
 	}
@@ -189,12 +197,17 @@ public class ChatFragment extends Fragment {
 		super.onDestroy();
 	}
 	
+	@SuppressLint("SimpleDateFormat")
 	public void newMessage(Message m) {
 		Log.d("ChatFragment", "starting newMessage for message = " + m.getText());
+		long time = m.getSentTime();
+		Date date = new Date(time);
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+		String timeString = sdf.format(date);
 		if (chatTextView != null) {
-			chatTextView.append("\n" + m.getUserID() + " (" + m.getSentTime() + "): " + m.getText());
+			chatTextView.append("\n" + m.getUserID() + " (" + timeString + "): " + m.getText());
 		}
-		messages.add(m.getUserID() + " (" + m.getSentTime() + "): " + m.getText());
+		messages.add(m.getUserID() + " (" + timeString + "): " + m.getText());
 
 	}
 

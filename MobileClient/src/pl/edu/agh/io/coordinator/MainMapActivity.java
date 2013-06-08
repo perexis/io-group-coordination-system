@@ -19,7 +19,7 @@ import pl.edu.agh.io.coordinator.utils.container.DataContainer;
 import pl.edu.agh.io.coordinator.utils.container.DataContainer.OnDataContainerChangesListener;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListener;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuState;
-import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
+import pl.edu.agh.io.coordinator.utils.net.INetworkProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidGroupException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidLayerException;
@@ -401,7 +401,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -447,7 +447,7 @@ public class MainMapActivity extends Activity implements
 		@Override
 		protected Exception doInBackground(Void... params) {
 			Log.d("MainMapActivity", "GetUsersInBackground.doInBackground()");
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 			userStates = new HashMap<User, UserState>();
 			userItemSets = new HashMap<User, Set<String>>();
 			groupUserSets = new HashMap<Group, Set<String>>();
@@ -518,7 +518,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			try {
 				layers = proxy.getLayers();
@@ -555,7 +555,7 @@ public class MainMapActivity extends Activity implements
 
 			Log.d("MainMapActivity", "GetMapItemsInBackground.doInBackground()");
 
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			try {
 				mapItems = proxy.getMapItems(params[0]);
@@ -592,7 +592,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(MapItem... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			try {
 				proxy.removeMapItem(params[0]);
@@ -692,7 +692,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(String... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 			Log.d("MainMapActivity", "SendMessageInBackground.doInBackground()");
 			try {
 				proxy.sendMessage(params[0]);
@@ -723,7 +723,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(Void... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			try {
 				messages = proxy.getMessages();

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.resources.Group;
-import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
+import pl.edu.agh.io.coordinator.utils.net.INetworkProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidGroupException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidSessionIDException;
@@ -122,7 +122,7 @@ public class RemoveGroupActivity extends Activity {
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			try {
 				retSet = proxy.getGroups();
@@ -157,7 +157,7 @@ public class RemoveGroupActivity extends Activity {
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			Group group = new Group(selectedItem, "");
 
