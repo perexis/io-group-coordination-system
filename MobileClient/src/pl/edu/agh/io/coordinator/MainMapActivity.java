@@ -185,10 +185,6 @@ public class MainMapActivity extends Activity implements
 				AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 
 		setUpMapIfNeeded();
-		mainThread = new MainThread();
-
-		// threads.add(mainThread);
-		mainThread.start();
 
 		if (savedInstanceState != null) {
 			Log.d("MainMapActivity", "starting getting saved state");
@@ -230,6 +226,8 @@ public class MainMapActivity extends Activity implements
 		if (!isMenuCreated) {
 			invalidateOptionsMenu();
 		}
+		mainThread = new MainThread();
+		mainThread.start();
 		super.onResume();
 	}
 
@@ -253,6 +251,7 @@ public class MainMapActivity extends Activity implements
 	protected void onPause() {
 		Log.d("MainMapActivity", "starting onPause");
 		isMenuCreated = false;
+		mainThread.safelyStop();
 		super.onPause();
 	}
 	
@@ -265,7 +264,6 @@ public class MainMapActivity extends Activity implements
 	@Override
 	protected void onDestroy() {
 		Log.d("MainMapActivity", "starting onDestroy");
-		mainThread.safelyStop();
 		super.onDestroy();
 	}
 	
