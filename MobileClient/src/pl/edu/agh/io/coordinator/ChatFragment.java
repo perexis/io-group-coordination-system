@@ -20,6 +20,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class ChatFragment extends Fragment {
@@ -105,8 +106,9 @@ public class ChatFragment extends Fragment {
 			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 			String timeString = sdf.format(date);
 			chatTextView.append("\n" + JSonProxy.getInstance().getLoggedUser() + " (" + timeString + "): " + inputMessage.getText());
-			messages.add("\n" + JSonProxy.getInstance().getLoggedUser() + " (" + timeString + "): " + inputMessage.getText());
+			messages.add(JSonProxy.getInstance().getLoggedUser() + " (" + timeString + "): " + inputMessage.getText());
 			inputMessage.getText().clear();
+			scrollDown();
 		}
 	}
 
@@ -165,6 +167,7 @@ public class ChatFragment extends Fragment {
 			for (String s : messages) {
 				this.chatTextView.append("\n" + s);
 			}
+			scrollDown();
 		}
 		synchronized (this) {
 			chatActive = true;
@@ -197,6 +200,16 @@ public class ChatFragment extends Fragment {
 		super.onDestroy();
 	}
 	
+	private void scrollDown() {
+		final ScrollView sv = (ScrollView) getActivity().findViewById(R.id.scrollView1);
+		sv.post(new Runnable() {
+			@Override
+			public void run() {
+				sv.fullScroll(View.FOCUS_DOWN);
+			}
+		});
+	}
+	
 	@SuppressLint("SimpleDateFormat")
 	public void newMessage(Message m) {
 		Log.d("ChatFragment", "starting newMessage for message = " + m.getText());
@@ -208,7 +221,7 @@ public class ChatFragment extends Fragment {
 			chatTextView.append("\n" + m.getUserID() + " (" + timeString + "): " + m.getText());
 		}
 		messages.add(m.getUserID() + " (" + timeString + "): " + m.getText());
-
+		scrollDown();
 	}
 
 	public interface OnFragmentInteractionListener {
