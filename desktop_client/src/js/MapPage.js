@@ -1,6 +1,7 @@
 'use strict';
 goog.provide('io.map.Page');
 
+goog.require('goog.Uri');
 goog.require('goog.array');
 goog.require('goog.debug');
 goog.require('goog.dom');
@@ -26,12 +27,14 @@ io.map.Page = function(main, elem) {
   this.elem = elem;
   this.curClickElem = null;
   this.pendingRefresh = false;
+  this.pendingUserRefresh = false;
   this.showUsers = true;
   this.userMarkers = {};
   this.markers = {};
   this.activeInfo = null;
   this.layers = {};
   this.numLayers = 0;
+  this.zindex = 1;
   this.layerHandlers = {
     'images': this.handleImageMarker,
     'videos': this.handleVideoMarker,
@@ -63,6 +66,9 @@ io.map.Page.prototype.render = function() {
   });
   var chat = new io.chat.Page(this.main, goog.dom.getElement('chat'));
   chat.render();
+  goog.events.listen(self.main.slowTimer, goog.Timer.TICK, function() {
+    self.updateSelfState();
+  });
 };
 
 io.map.Page.prototype.loadLayers = function(callback) {
@@ -103,33 +109,37 @@ io.map.Page.prototype.refreshLayers = function() {
 };
 
 io.map.Page.prototype.refreshUsers = function() {
-  var self = this;
-  var newMarkers = {};
-  var cleanup = function() {
-    goog.object.forEach(self.userMarkers, function(obj, key) {
-      obj['info'].close();
-      obj['marker'].setVisible(false);
-    });
-    self.userMarkers = newMarkers;
-  };
-  if (self.layers['users']) {
-    this.main.api.getUsers(function(users) {
-      var numUsers = users.length;
-      var finished = function() {
-        numUsers--;
-        if (numUsers == 0) {
-          cleanup();
-        }
-      };
-      goog.array.forEach(users, function(user) {
-        self.main.api.getUserState({'user': user['id']}, function(state) {
-          self.putUser(user, state, self.userMarkers, newMarkers);
-          finished();
+  if (!this.pendingUserRefresh) {
+    var self = this;
+    self.pendingUserRefresh = true;
+    var newMarkers = {};
+    var cleanup = function() {
+      goog.object.forEach(self.userMarkers, function(obj, key) {
+        obj['info'].close();
+        obj['marker'].setVisible(false);
+      });
+      self.userMarkers = newMarkers;
+      self.pendingUserRefresh = false;
+    };
+    if (self.layers['users']) {
+      this.main.api.getUsers(function(users) {
+        var numUsers = users.length;
+        var finished = function() {
+          numUsers--;
+          if (numUsers == 0) {
+            cleanup();
+          }
+        };
+        goog.array.forEach(users, function(user) {
+          self.main.api.getUserState({'user': user['id']}, function(state) {
+            self.putUser(user, state, self.userMarkers, newMarkers);
+            finished();
+          });
         });
       });
-    });
-  } else {
-    cleanup();
+    } else {
+      cleanup();
+    }
   }
 };
 
@@ -221,7 +231,8 @@ io.map.Page.prototype.putMapItem = function(item, newMarkers, markers, layer) {
       position: loc,
       map: self.map,
       animation: google.maps.Animation.DROP,
-      icon: self.getLayerIcon(layer)
+      icon: self.getLayerIcon(layer),
+      zIndex: self.zindex++
     });
     var infowindow = new google.maps.InfoWindow();
     google.maps.event.addListener(marker, 'click', function() {
@@ -285,11 +296,21 @@ io.map.Page.prototype.putUser = function(user, position,
     }
     delete markers[id];
   } else {
+    var icon = self.getLayerIcon('users');
+    var uri = goog.Uri.parse(user['avatar']);
+    if (uri.hasScheme()) {
+      icon = {
+        'url': user['avatar'],
+        'scaledSize': new google.maps.Size(32, 32),
+        'size': new google.maps.Size(32, 32)
+      };
+    }
     var marker = new google.maps.Marker({
       position: loc,
       map: self.map,
       animation: google.maps.Animation.DROP,
-      icon: self.getLayerIcon('users')
+      icon: icon,
+      zIndex: self.zindex++
     });
 
     var infowindow = new google.maps.InfoWindow();
@@ -422,6 +443,17 @@ io.map.Page.prototype.initMap = function() {
     function(x) {
       io.log().info('Updated self state');
     });
+  });
+};
+
+
+io.map.Page.prototype.updateSelfState = function() {
+  var self = this;
+  io.geo.locate(function(position) {
+    self.main.api.updateSelfState({'newState': {'position':
+          {'latitude': position.coords.latitude,
+            'longitude': position.coords.longitude
+          }, 'speed': 0}});
   });
 };
 

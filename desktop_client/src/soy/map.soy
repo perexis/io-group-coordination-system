@@ -46,13 +46,13 @@
  */
 {template .userWindow}
 <div class="clearfix user-window my-infowindow">
-<h3>User</h3>
+<h3 class="window-logo users-logo">User</h3>
 <div class="user-details">
+<div>{if $avatar}<img src="{$avatar}">{else}{/if}</div>
 <strong>Name:</strong>{sp}{if $name or $surname}{$name}{sp}{$surname}{else}unknown{/if}<br>
 <strong>Email:</strong>{sp}{if $email}<a href="mailto:{$email}">{$email}</a>{else}unknown{/if}<br>
 <strong>Phone:</strong>{sp}{if $phone}<a href="tel:{$phone}">{$phone}</a>{else}unknown{/if}<br>
-<strong>ID:</strong>{sp}{if $id}{$id}{else}unknown{/if}<br>
-<strong>Avatar:</strong>{sp}{if $avatar}<img src="{$avatar}">{else}unknown{/if}<br>
+<strong>Login:</strong>{sp}{if $id}{$id}{else}unknown{/if}<br>
 </div>
 <div class="user-items">
 {foreach $item in $items}
@@ -68,7 +68,7 @@
  * @param url
  */
 {template .imageContent}
-<h3>Image</h3>
+<h3 class="window-logo images-logo">Image</h3>
 <div class="image-infowindow">
   <a href="{$url}" target="_blank"><img src="{$url}"></a>
 </div>
@@ -79,7 +79,7 @@
  * @param url
  */
 {template .videoContent}
-<h3>Video</h3>
+<h3 class="window-logo videos-logo">Video</h3>
 <iframe width="560" height="315" src="http://www.youtube.com/embed/{$url}" frameborder="0" allowfullscreen></iframe>
 {/template}
 
@@ -88,7 +88,7 @@
  * @param text
  */
 {template .noteContent}
-<h3>Note</h3>
+<h3 class="window-logo notes-logo">Note</h3>
 <p>{$text}</p>
 {/template}
 

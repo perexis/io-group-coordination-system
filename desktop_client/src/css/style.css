@@ -1,3 +1,14 @@
+@media (min-width: 979px) {
+  .my-fill {
+    top: 60px;
+    right: 5px;
+    bottom: 0;
+    position: absolute;
+    width: auto;
+    height: auto;
+  }
+}
+
 .map-layers li {
   padding: 5px;
 }
@@ -5,8 +16,8 @@
 .chat-window {
   padding: 5px;
   background-color: white;
-  min-height: 250px;
-  max-height: 250px;
+  min-height: 220px;
+  max-height: 220px;
   border: 1px solid #dddddd;
   border-collapse: separate;
   -webkit-border-radius: 4px;
@@ -14,6 +25,26 @@
   border-radius: 4px;
   margin-bottom: 10px;
   overflow-y: auto;
+}
+
+.window-logo {
+  padding-left: 40px;
+}
+
+.users-logo {
+  background: url('../images/users.png') no-repeat left 5px;
+}
+
+.videos-logo {
+  background: url('../images/videos.png') no-repeat left 5px;
+}
+
+.images-logo {
+  background: url('../images/images.png') no-repeat left 5px;
+}
+
+.notes-logo {
+  background: url('../images/notes.png') no-repeat left 5px;
 }
 
 .user-window {
@@ -32,23 +63,27 @@
   float: left;
 }
 
-.user-window img {
-  max-width: 100px;
-  height: auto;
-  max-height: 100px;
+.chat-form {
+  margin: 0;
 }
 
-.chat-input {
-  margin-bottom: -15px;
+.chat-input-btn {
+  width: 100%;
 }
 
 .map-canvas img {
   max-width: none;
 }
 
+.user-window img {
+  max-width: 100px;
+  height: auto;
+  max-height: 100px;
+}
+
 .map-canvas {
-  min-height: 400px;
-  height: 550px;
+  min-height: 595px;
+  height: 100%;
 }
 
 .add-element-window .marker-window {
