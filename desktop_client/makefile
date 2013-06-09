@@ -35,6 +35,7 @@ quick-compile: COMPILATION_LEVEL=SIMPLE_OPTIMIZATIONS
 quick-compile: compile
 
 compile: soy gendeps
+	mkdir -p $(BUILDDIR)/js
 	$(BUILDERPATH) \
 		--root=$(CLOSUREDIR) \
 		--root=$(JSDIR) \
@@ -50,11 +51,13 @@ compile: soy gendeps
 	  --compiler_flags="--generate_exports" \
 		--compiler_flags="--js=$(JSDIR)/gen/deps.js"	\
 		--compiler_flags="--define='goog.DEBUG=false'"	\
-		> $(BUILDDIR)/app.js
+		> $(BUILDDIR)/js/app.js
 
 copyres:
-	cat $(CSSES) | ./lib/node_modules/csso/bin/csso /dev/stdin > $(BUILDDIR)/style.css
-	cat $(LIBS) > $(BUILDDIR)/libs.js
+	mkdir -p $(BUILDDIR)/js
+	mkdir -p $(BUILDDIR)/css
+	cat $(CSSES) | ./lib/node_modules/csso/bin/csso /dev/stdin > $(BUILDDIR)/css/style.css
+	cat $(LIBS) > $(BUILDDIR)/js/libs.js
 	cp -R $(HTMLDIR)/App.html $(BUILDDIR)
 	cp -R $(IMGDIR) $(BUILDDIR)
 
