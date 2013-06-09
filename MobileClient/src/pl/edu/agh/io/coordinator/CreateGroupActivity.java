@@ -101,7 +101,7 @@ public class CreateGroupActivity extends Activity {
 			} else if (result instanceof NetworkException) {
 				Alerts.networkProblem(CreateGroupActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(CreateGroupActivity.this);
+				Alerts.invalidSessionId(CreateGroupActivity.this, null);
 			}
 		}
 
@@ -148,7 +148,7 @@ public class CreateGroupActivity extends Activity {
 			} else if (result instanceof NetworkException) {
 				Alerts.networkProblem(CreateGroupActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(CreateGroupActivity.this);
+				Alerts.invalidSessionId(CreateGroupActivity.this, null);
 			} else if (result instanceof CouldNotCreateGroupException) {
 				Toast.makeText(getApplicationContext(),
 						R.string.alert_could_not_create_group,

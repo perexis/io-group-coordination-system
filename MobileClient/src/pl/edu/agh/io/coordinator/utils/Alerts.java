@@ -4,17 +4,30 @@ import pl.edu.agh.io.coordinator.R;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.widget.Toast;
 
 public class Alerts {
 
-	public static void invalidSessionId(final Activity activity) {
+	private static volatile boolean isInvalidSessionAlertViewed = false;
+	
+	public static void invalidSessionId(final Activity activity, final AsyncTask<Intent, Void, Exception> task) {
+		if (isInvalidSessionAlertViewed) {
+			return;
+		}
+		isInvalidSessionAlertViewed = true;
 		new AlertDialog.Builder(activity).setMessage(R.string.alert_invalid_session_id_logout)
 				.setTitle(R.string.alert_invalid_session_id).setCancelable(false).setIcon(R.drawable.alerts_and_states_warning)
 				.setPositiveButton(R.string.button_ok, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						if (task != null) {
+							Intent intent = new Intent();
+							task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, intent);
+						}
 						activity.finish();
+						isInvalidSessionAlertViewed = false;
 					}
 				}).create().show();
 	}

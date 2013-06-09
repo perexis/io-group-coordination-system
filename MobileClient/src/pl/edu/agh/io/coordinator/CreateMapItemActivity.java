@@ -157,7 +157,7 @@ public class CreateMapItemActivity extends Activity implements OnItemSelectedLis
 			} else if (result instanceof NetworkException) {
 				Alerts.networkProblem(CreateMapItemActivity.this);
 			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(CreateMapItemActivity.this);
+				Alerts.invalidSessionId(CreateMapItemActivity.this, null);
 			} else if (result instanceof InvalidLayerException) {
 				Alerts.invalidLayer(CreateMapItemActivity.this);
 			}

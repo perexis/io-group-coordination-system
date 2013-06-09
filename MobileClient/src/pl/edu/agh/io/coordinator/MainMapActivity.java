@@ -473,7 +473,7 @@ public class MainMapActivity extends Activity implements
 				loggingOut = false;
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this);
+					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
 				}
 			}
 		}
@@ -552,7 +552,7 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this);
+					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
 				}
 			} else if (result instanceof InvalidUserException) {
 				//Alerts.invalidUser(MainMapActivity.this); // wywalone bo niepotrzebnie wyswietla alert
@@ -591,7 +591,7 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this);
+					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
 				}
 			}
 		}
@@ -636,7 +636,7 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this);
+					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
 				}
 			} else if (result instanceof InvalidLayerException) {
 				if (isActive) {
@@ -676,7 +676,7 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this);
+					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
 				}
 			} else if (result instanceof InvalidMapItemException) {
 				if (isActive) {
@@ -779,7 +779,7 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this);
+					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
 				}
 			}
 		}
@@ -826,7 +826,7 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this);
+					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
 				}
 			}
 		}
