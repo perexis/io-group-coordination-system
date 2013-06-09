@@ -19,7 +19,7 @@ import pl.edu.agh.io.coordinator.utils.container.DataContainer;
 import pl.edu.agh.io.coordinator.utils.container.DataContainer.OnDataContainerChangesListener;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuListener;
 import pl.edu.agh.io.coordinator.utils.layersmenu.LayersMenuState;
-import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
+import pl.edu.agh.io.coordinator.utils.net.INetworkProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidGroupException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidLayerException;
@@ -33,8 +33,10 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.AsyncTask.Status;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -63,6 +65,8 @@ public class MainMapActivity extends Activity implements
 	private boolean chatVisible = false;
 	
 	private boolean isMenuCreated = false;
+	
+	private volatile boolean isActive = false;
 	
 	private static final LatLng DEFAULT_POSITION = new LatLng(50.061368, 19.936924); // Cracow
 
@@ -105,19 +109,26 @@ public class MainMapActivity extends Activity implements
 		@Override
 		public void run() {
 			boolean isStopped = false;
+			GetUsersInBackground usersThread = null;
+			GetMessagesInBackground messagesThread = null;
+			Map<Layer, GetMapItemsInBackground> mapItemsThreadMap = new HashMap<Layer, GetMapItemsInBackground>();
 			while (true) {
 				try {
 					Thread.sleep(1000);
 					Log.d("MainMapActivity", "getting data from server");
-					new GetUsersInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+					usersThread = new GetUsersInBackground();
+					usersThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					//new GetUserItemsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 					//new GetGroupsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 					if (chatFragment.isActive()) {
-						new GetMessagesInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						messagesThread = new GetMessagesInBackground();
+						messagesThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					}
 					if (layers != null)
-						for (Layer layer : layers)
-							new GetMapItemsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, layer);
+						for (Layer layer : layers) {
+							mapItemsThreadMap.put(layer, new GetMapItemsInBackground());
+							mapItemsThreadMap.get(layer).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, layer);
+						}
 					synchronized (this) {
 						Log.d("MainMapActivity.MainThread", "checking isStopped");
 						isStopped = stopped;
@@ -125,6 +136,30 @@ public class MainMapActivity extends Activity implements
 					if (isStopped) {
 						Log.d("MainMapActivity.MainThread", "stopping main thread");
 						break;
+					}
+					if (usersThread != null) {
+						while (true) {
+							Status status = usersThread.getStatus();
+							if (status == Status.FINISHED) {
+								break;
+							}
+						}
+					}
+					if (messagesThread != null) {
+						while (true) {
+							Status status = messagesThread.getStatus();
+							if (status == Status.FINISHED) {
+								break;
+							}
+						}
+					}
+					for (GetMapItemsInBackground mapItemThread : mapItemsThreadMap.values()) {
+						while (true) {
+							Status status = mapItemThread.getStatus();
+							if (status == Status.FINISHED) {
+								break;
+							}
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -185,10 +220,6 @@ public class MainMapActivity extends Activity implements
 				AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 
 		setUpMapIfNeeded();
-		mainThread = new MainThread();
-
-		// threads.add(mainThread);
-		mainThread.start();
 
 		if (savedInstanceState != null) {
 			Log.d("MainMapActivity", "starting getting saved state");
@@ -230,6 +261,9 @@ public class MainMapActivity extends Activity implements
 		if (!isMenuCreated) {
 			invalidateOptionsMenu();
 		}
+		mainThread = new MainThread();
+		mainThread.start();
+		isActive = true;
 		super.onResume();
 	}
 
@@ -253,6 +287,8 @@ public class MainMapActivity extends Activity implements
 	protected void onPause() {
 		Log.d("MainMapActivity", "starting onPause");
 		isMenuCreated = false;
+		mainThread.safelyStop();
+		isActive = false;
 		super.onPause();
 	}
 	
@@ -265,7 +301,6 @@ public class MainMapActivity extends Activity implements
 	@Override
 	protected void onDestroy() {
 		Log.d("MainMapActivity", "starting onDestroy");
-		mainThread.safelyStop();
 		super.onDestroy();
 	}
 	
@@ -352,6 +387,7 @@ public class MainMapActivity extends Activity implements
 				loggingOut = true;
 				Intent intent = new Intent();
 				new LogoutInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, intent);
+				this.finish();
 			}
 			return true;
 		default:
@@ -359,6 +395,15 @@ public class MainMapActivity extends Activity implements
 		}
 	}
 
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			Intent intent = new Intent();
+			new LogoutInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, intent);
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
 	private void setUpMapIfNeeded() {
 		if (googleMap == null) {
 			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
@@ -403,14 +448,11 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-			try {
+				mainThread.safelyStop();
+				while (mainThread.isAlive()) {
+				}
 				proxy.logout();
 			} catch (InvalidSessionIDException e) {
 				return e;
@@ -430,7 +472,9 @@ public class MainMapActivity extends Activity implements
 				Alerts.networkProblem(MainMapActivity.this);
 				loggingOut = false;
 			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(MainMapActivity.this);
+				if (isActive) {
+					Alerts.invalidSessionId(MainMapActivity.this);
+				}
 			}
 		}
 
@@ -449,7 +493,7 @@ public class MainMapActivity extends Activity implements
 		@Override
 		protected Exception doInBackground(Void... params) {
 			Log.d("MainMapActivity", "GetUsersInBackground.doInBackground()");
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 			userStates = new HashMap<User, UserState>();
 			userItemSets = new HashMap<User, Set<String>>();
 			groupUserSets = new HashMap<Group, Set<String>>();
@@ -503,9 +547,13 @@ public class MainMapActivity extends Activity implements
 					
 				}
 			} else if (result instanceof NetworkException) {
-				Alerts.networkProblem(MainMapActivity.this);
+				if (isActive) {
+					Alerts.networkProblem(MainMapActivity.this);
+				}
 			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(MainMapActivity.this);
+				if (isActive) {
+					Alerts.invalidSessionId(MainMapActivity.this);
+				}
 			} else if (result instanceof InvalidUserException) {
 				//Alerts.invalidUser(MainMapActivity.this); // wywalone bo niepotrzebnie wyswietla alert
 			} else if (result instanceof InvalidGroupException) {
@@ -520,7 +568,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			try {
 				layers = proxy.getLayers();
@@ -538,9 +586,13 @@ public class MainMapActivity extends Activity implements
 			if (result == null) {
 				layersFragment.setLayers(layers);
 			} else if (result instanceof NetworkException) {
-				Alerts.networkProblem(MainMapActivity.this);
+				if (isActive) {
+					Alerts.networkProblem(MainMapActivity.this);
+				}
 			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(MainMapActivity.this);
+				if (isActive) {
+					Alerts.invalidSessionId(MainMapActivity.this);
+				}
 			}
 		}
 
@@ -557,7 +609,7 @@ public class MainMapActivity extends Activity implements
 
 			Log.d("MainMapActivity", "GetMapItemsInBackground.doInBackground()");
 
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			try {
 				mapItems = proxy.getMapItems(params[0]);
@@ -579,11 +631,17 @@ public class MainMapActivity extends Activity implements
 				if (layersFragment != null)
 					dataContainer.newMapItemsSet(layer, mapItems);
 			} else if (result instanceof NetworkException) {
-				Alerts.networkProblem(MainMapActivity.this);
+				if (isActive) {
+					Alerts.networkProblem(MainMapActivity.this);
+				}
 			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(MainMapActivity.this);
+				if (isActive) {
+					Alerts.invalidSessionId(MainMapActivity.this);
+				}
 			} else if (result instanceof InvalidLayerException) {
-				Alerts.invalidLayer(MainMapActivity.this);
+				if (isActive) {
+					Alerts.invalidLayer(MainMapActivity.this);
+				}
 			}
 		}
 
@@ -594,7 +652,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(MapItem... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			try {
 				proxy.removeMapItem(params[0]);
@@ -613,11 +671,17 @@ public class MainMapActivity extends Activity implements
 		protected void onPostExecute(Exception result) {
 
 			if (result instanceof NetworkException) {
-				Alerts.networkProblem(MainMapActivity.this);
+				if (isActive) {
+					Alerts.networkProblem(MainMapActivity.this);
+				}
 			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(MainMapActivity.this);
+				if (isActive) {
+					Alerts.invalidSessionId(MainMapActivity.this);
+				}
 			} else if (result instanceof InvalidMapItemException) {
-				Alerts.invalidMapItem(MainMapActivity.this);
+				if (isActive) {
+					Alerts.invalidMapItem(MainMapActivity.this);
+				}
 			}
 		}
 
@@ -694,7 +758,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(String... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 			Log.d("MainMapActivity", "SendMessageInBackground.doInBackground()");
 			try {
 				proxy.sendMessage(params[0]);
@@ -710,9 +774,13 @@ public class MainMapActivity extends Activity implements
 		protected void onPostExecute(Exception result) {
 			Log.d("MainMapActivity", "SendMessageInBackground.onPostExecute()");
 			if (result instanceof NetworkException) {
-				Alerts.networkProblem(MainMapActivity.this);
+				if (isActive) {
+					Alerts.networkProblem(MainMapActivity.this);
+				}
 			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(MainMapActivity.this);
+				if (isActive) {
+					Alerts.invalidSessionId(MainMapActivity.this);
+				}
 			}
 		}
 
@@ -725,7 +793,7 @@ public class MainMapActivity extends Activity implements
 
 		@Override
 		protected Exception doInBackground(Void... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			try {
 				messages = proxy.getMessages();
@@ -753,9 +821,13 @@ public class MainMapActivity extends Activity implements
 					}
 				}
 			} else if (result instanceof NetworkException) {
-				Alerts.networkProblem(MainMapActivity.this);
+				if (isActive) {
+					Alerts.networkProblem(MainMapActivity.this);
+				}
 			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(MainMapActivity.this);
+				if (isActive) {
+					Alerts.invalidSessionId(MainMapActivity.this);
+				}
 			}
 		}
 
@@ -882,7 +954,7 @@ public class MainMapActivity extends Activity implements
 				Marker marker = googleMap.addMarker(new MarkerOptions()
 						.position(new LatLng(mapItem.getPosition().getLatitude(), mapItem.getPosition().getLongitude()))
 						.title(getString(R.string.layer_note)).snippet(mapItem.getData())
-						.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+						.icon(BitmapDescriptorFactory.fromResource(R.drawable.note)));
 				// .icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
 				mapItemToMarker.put(mapItem, marker);
 			}
@@ -891,14 +963,14 @@ public class MainMapActivity extends Activity implements
 				Marker marker = googleMap.addMarker(new MarkerOptions()
 						.position(new LatLng(mapItem.getPosition().getLatitude(), mapItem.getPosition().getLongitude()))
 						.title(getString(R.string.layer_image)).snippet(mapItem.getData())
-						.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
+						.icon(BitmapDescriptorFactory.fromResource(R.drawable.photo)));
 				mapItemToMarker.put(mapItem, marker);
 			}
 		} else if (layer.getName().equals("videos")) {
 			if (googleMap != null) {
 				Marker marker = googleMap.addMarker(new MarkerOptions().position(mapItem.getPosition().getLatLng())
 						.title(getString(R.string.layer_video)).snippet(mapItem.getData())
-						.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+						.icon(BitmapDescriptorFactory.fromResource(R.drawable.video)));
 				mapItemToMarker.put(mapItem, marker);
 			}
 		}
@@ -921,7 +993,7 @@ public class MainMapActivity extends Activity implements
 			}
 			Marker marker = googleMap.addMarker(new MarkerOptions().position(state.getPosition().getLatLng())
 					.title(user.getName() + " " + user.getSurname())
-					.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+					.icon(BitmapDescriptorFactory.fromResource(R.drawable.person)));
 			mapUserToMarker.put(user, marker);
 		}
 	}

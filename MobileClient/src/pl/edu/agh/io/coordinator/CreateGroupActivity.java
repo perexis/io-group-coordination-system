@@ -6,7 +6,7 @@ import java.util.Set;
 
 import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.utils.Alerts;
-import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
+import pl.edu.agh.io.coordinator.utils.net.INetworkProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.CouldNotCreateGroupException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidSessionIDException;
@@ -77,7 +77,7 @@ public class CreateGroupActivity extends Activity {
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			try {
 				retSet = proxy.getGroups();
@@ -112,7 +112,7 @@ public class CreateGroupActivity extends Activity {
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 
 			Group group = new Group(inputGroupName.getText().toString(),
 					inputGroupDescription.getText().toString());

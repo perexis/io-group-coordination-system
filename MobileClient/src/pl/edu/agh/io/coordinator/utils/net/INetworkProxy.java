@@ -22,7 +22,7 @@ import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidUserException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidUserItemException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 
-public interface IJSonProxy {
+public interface INetworkProxy {
 
 	// Creates session and sets sessionID
 	public void login(String userID, String password) throws CouldNotLogInException, NetworkException;
@@ -80,5 +80,8 @@ public interface IJSonProxy {
 
 	// Receives new messages from server
 	public List<Message> getMessages() throws InvalidSessionIDException, NetworkException;
+	
+	// Returns name of the user currently logged in using this proxy
+	public String getLoggedUser();
 
 }

@@ -1,11 +1,15 @@
 package pl.edu.agh.io.coordinator;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import pl.edu.agh.io.coordinator.resources.Message;
 import pl.edu.agh.io.coordinator.utils.chat.ChatState;
+import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -16,6 +20,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class ChatFragment extends Fragment {
@@ -93,12 +98,17 @@ public class ChatFragment extends Fragment {
 		return view;
 	}
 
+	@SuppressLint("SimpleDateFormat")
 	public void onSendMessage() {
 		if (mListener != null && inputMessage.getText().length() != 0) {
 			mListener.onChatSendMessage(inputMessage.getText().toString());
-			chatTextView.append("\n-->" + inputMessage.getText());
-			messages.add("-->" + inputMessage.getText());
+			Date date = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+			String timeString = sdf.format(date);
+			chatTextView.append("\n" + JSonProxy.getInstance().getLoggedUser() + " (" + timeString + "): " + inputMessage.getText());
+			messages.add(JSonProxy.getInstance().getLoggedUser() + " (" + timeString + "): " + inputMessage.getText());
 			inputMessage.getText().clear();
+			scrollDown();
 		}
 	}
 
@@ -157,6 +167,7 @@ public class ChatFragment extends Fragment {
 			for (String s : messages) {
 				this.chatTextView.append("\n" + s);
 			}
+			scrollDown();
 		}
 		synchronized (this) {
 			chatActive = true;
@@ -189,13 +200,28 @@ public class ChatFragment extends Fragment {
 		super.onDestroy();
 	}
 	
+	private void scrollDown() {
+		final ScrollView sv = (ScrollView) getActivity().findViewById(R.id.scrollView1);
+		sv.post(new Runnable() {
+			@Override
+			public void run() {
+				sv.fullScroll(View.FOCUS_DOWN);
+			}
+		});
+	}
+	
+	@SuppressLint("SimpleDateFormat")
 	public void newMessage(Message m) {
 		Log.d("ChatFragment", "starting newMessage for message = " + m.getText());
+		long time = m.getSentTime();
+		Date date = new Date(time);
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+		String timeString = sdf.format(date);
 		if (chatTextView != null) {
-			chatTextView.append("\n" + m.getUserID() + " (" + m.getSentTime() + "): " + m.getText());
+			chatTextView.append("\n" + m.getUserID() + " (" + timeString + "): " + m.getText());
 		}
-		messages.add(m.getUserID() + " (" + m.getSentTime() + "): " + m.getText());
-
+		messages.add(m.getUserID() + " (" + timeString + "): " + m.getText());
+		scrollDown();
 	}
 
 	public interface OnFragmentInteractionListener {

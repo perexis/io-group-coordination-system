@@ -3,7 +3,7 @@ package pl.edu.agh.io.coordinator;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.Point;
 import pl.edu.agh.io.coordinator.utils.Alerts;
-import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
+import pl.edu.agh.io.coordinator.utils.net.INetworkProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidLayerException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidSessionIDException;
@@ -125,7 +125,7 @@ public class CreateMapItemActivity extends Activity implements OnItemSelectedLis
 		@Override
 		protected Exception doInBackground(Object... params) {
 			// params: Layer, Point, String
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 			try {
 				Layer layer = (Layer) params[0];
 				Point point = (Point) params[1];

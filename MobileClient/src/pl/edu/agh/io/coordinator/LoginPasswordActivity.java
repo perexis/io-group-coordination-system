@@ -1,6 +1,6 @@
 package pl.edu.agh.io.coordinator;
 
-import pl.edu.agh.io.coordinator.utils.net.IJSonProxy;
+import pl.edu.agh.io.coordinator.utils.net.INetworkProxy;
 import pl.edu.agh.io.coordinator.utils.net.JSonProxy;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.CouldNotLogInException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
@@ -66,7 +66,7 @@ public class LoginPasswordActivity extends Activity {
 
 		@Override
 		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
+			INetworkProxy proxy = JSonProxy.getInstance();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {

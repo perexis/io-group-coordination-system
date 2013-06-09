@@ -45,11 +45,12 @@ import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidUserException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.InvalidUserItemException;
 import pl.edu.agh.io.coordinator.utils.net.exceptions.NetworkException;
 
-public class JSonProxy implements IJSonProxy {
+public class JSonProxy implements INetworkProxy {
 	
 	private static JSonProxy INSTANCE;
 	private static long SESSION_ID = -1;	
 	private static String SERVER_NAME = "http://io.wojtasskorcz.eu.cloudbees.net"; // without ending slash
+	private static String LOGGED_USER = null;
 
 	private JSonProxy() {
 	}
@@ -113,6 +114,7 @@ public class JSonProxy implements IJSonProxy {
 			String exception = jsonObject.getString("exception");
 			if (exception.equals("null")) {
 				SESSION_ID = jsonObject.getLong("retval");
+				LOGGED_USER = userName;
 			} else {
 				SESSION_ID = -1;
 				throw new CouldNotLogInException();
@@ -129,9 +131,11 @@ public class JSonProxy implements IJSonProxy {
 			String jsonString = getJSonString("logout", params);
 			JSONObject jsonObject = new JSONObject(jsonString);
 			String exception = jsonObject.getString("exception");
-			SESSION_ID = -1;
 			if (exception.equals("InvalidSessionID")) {
 				throw new InvalidSessionIDException();
+			} else {
+				SESSION_ID = -1;
+				LOGGED_USER = null;
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -612,6 +616,11 @@ public class JSonProxy implements IJSonProxy {
 		};
 		Collections.sort(toReturn, comparator);
 		return toReturn;
+	}
+
+	@Override
+	public String getLoggedUser() {
+		return LOGGED_USER;
 	}
 	
 }
