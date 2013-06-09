@@ -74,7 +74,7 @@ public class MainMapActivity extends Activity implements
 	
 	private volatile boolean isActive = false;
 	
-	private static final LatLng DEFAULT_POSITION = new LatLng(50.061368, 19.936924); // Cracow
+	//private static final LatLng DEFAULT_POSITION = new LatLng(50.061368, 19.936924); // Cracow
 
 	private DataContainer dataContainer = new DataContainer(this);
 	private boolean loggingOut = false;
@@ -226,8 +226,8 @@ public class MainMapActivity extends Activity implements
 		new GetLayersInBackground().executeOnExecutor(
 				AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 
-		setUpMapIfNeeded();
 		locationClient = new LocationClient(this, this, this);
+		setUpMapIfNeeded();
 
 		if (savedInstanceState != null) {
 			Log.d("MainMapActivity", "starting getting saved state");
@@ -244,7 +244,33 @@ public class MainMapActivity extends Activity implements
 			CameraUpdate update = CameraUpdateFactory.newCameraPosition((CameraPosition) savedInstanceState
 					.getParcelable("cameraPosition"));
 			googleMap.moveCamera(update);
+		} else {
+			AsyncTask<Void, Void, Void> setLocation = new AsyncTask<Void, Void, Void>() {
+				
+				private LatLng latLng;
+				
+				@Override
+				protected Void doInBackground(Void... params) {
+					while (!locationClient.isConnected()) {
+					}
+					Location location = locationClient.getLastLocation();
+					latLng = new LatLng(location.getLatitude(), location.getLongitude());
+					Log.d("MainMapActivity", "LOCATION: " + location.getLatitude() + " " + location.getLongitude());
+					return null;
+				}
+				
+				@Override
+				protected void onPostExecute(Void result) {
+					CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f);
+					googleMap.moveCamera(cameraUpdate);
+				}
+				
+			};
+			setLocation.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
 		}
+		
+		googleMap.setMyLocationEnabled(true);
+		googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 		
 	}
 
@@ -381,9 +407,7 @@ public class MainMapActivity extends Activity implements
 			startActivity(intentRemoveGroup);
 			return true;
 		case R.id.actionCreateItem:
-			myLocation = new Location("justTest");
-			myLocation.setLatitude(50.0);
-			myLocation.setLongitude(20.0);
+			myLocation = locationClient.getLastLocation();
 			Intent intentCreateItem = new Intent(MainMapActivity.this, CreateMapItemActivity.class);
 			intentCreateItem.putExtra(ITEM_POSITION, myLocation);
 			startActivity(intentCreateItem);
@@ -422,10 +446,6 @@ public class MainMapActivity extends Activity implements
 				// TODO: print error
 			} else {
 				googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-				CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(DEFAULT_POSITION, 16.0f);
-				googleMap.moveCamera(cameraUpdate);
-				googleMap.setMyLocationEnabled(true);
-				googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
 				googleMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
 					
