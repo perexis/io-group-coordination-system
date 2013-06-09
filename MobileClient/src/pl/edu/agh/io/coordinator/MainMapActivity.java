@@ -954,7 +954,7 @@ public class MainMapActivity extends Activity implements
 				Marker marker = googleMap.addMarker(new MarkerOptions()
 						.position(new LatLng(mapItem.getPosition().getLatitude(), mapItem.getPosition().getLongitude()))
 						.title(getString(R.string.layer_note)).snippet(mapItem.getData())
-						.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+						.icon(BitmapDescriptorFactory.fromResource(R.drawable.note)));
 				// .icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
 				mapItemToMarker.put(mapItem, marker);
 			}
@@ -963,14 +963,14 @@ public class MainMapActivity extends Activity implements
 				Marker marker = googleMap.addMarker(new MarkerOptions()
 						.position(new LatLng(mapItem.getPosition().getLatitude(), mapItem.getPosition().getLongitude()))
 						.title(getString(R.string.layer_image)).snippet(mapItem.getData())
-						.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET)));
+						.icon(BitmapDescriptorFactory.fromResource(R.drawable.photo)));
 				mapItemToMarker.put(mapItem, marker);
 			}
 		} else if (layer.getName().equals("videos")) {
 			if (googleMap != null) {
 				Marker marker = googleMap.addMarker(new MarkerOptions().position(mapItem.getPosition().getLatLng())
 						.title(getString(R.string.layer_video)).snippet(mapItem.getData())
-						.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+						.icon(BitmapDescriptorFactory.fromResource(R.drawable.video)));
 				mapItemToMarker.put(mapItem, marker);
 			}
 		}
@@ -993,7 +993,7 @@ public class MainMapActivity extends Activity implements
 			}
 			Marker marker = googleMap.addMarker(new MarkerOptions().position(state.getPosition().getLatLng())
 					.title(user.getName() + " " + user.getSurname())
-					.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+					.icon(BitmapDescriptorFactory.fromResource(R.drawable.person)));
 			mapUserToMarker.put(user, marker);
 		}
 	}
