@@ -9,6 +9,7 @@ import pl.edu.agh.io.coordinator.resources.Group;
 import pl.edu.agh.io.coordinator.resources.Layer;
 import pl.edu.agh.io.coordinator.resources.MapItem;
 import pl.edu.agh.io.coordinator.resources.Message;
+import pl.edu.agh.io.coordinator.resources.Point;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserItem;
 import pl.edu.agh.io.coordinator.resources.UserState;
@@ -42,6 +43,9 @@ import android.view.MenuItem;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -56,7 +60,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainMapActivity extends Activity implements
 		ChatFragment.OnFragmentInteractionListener, LayersMenuListener,
-		OnDataContainerChangesListener {
+		OnDataContainerChangesListener,
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener {
 
 	public final static String ITEM_POSITION = "pl.edu.agh.io.coordinator.ITEM_POSITION";
 	public static MainMapActivity currentInstance = null;
@@ -77,6 +83,7 @@ public class MainMapActivity extends Activity implements
 	private ChatState savedChatState = null;
 
 	private GoogleMap googleMap;
+	private LocationClient locationClient;
 	private Location myLocation;
 
 	private ChatFragment chatFragment = ChatFragment.newInstance();
@@ -220,6 +227,7 @@ public class MainMapActivity extends Activity implements
 				AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
 
 		setUpMapIfNeeded();
+		locationClient = new LocationClient(this, this, this);
 
 		if (savedInstanceState != null) {
 			Log.d("MainMapActivity", "starting getting saved state");
@@ -264,6 +272,7 @@ public class MainMapActivity extends Activity implements
 		mainThread = new MainThread();
 		mainThread.start();
 		isActive = true;
+		locationClient.connect();
 		super.onResume();
 	}
 
@@ -289,6 +298,7 @@ public class MainMapActivity extends Activity implements
 		isMenuCreated = false;
 		mainThread.safelyStop();
 		isActive = false;
+		locationClient.disconnect();
 		super.onPause();
 	}
 	
@@ -371,7 +381,7 @@ public class MainMapActivity extends Activity implements
 			startActivity(intentRemoveGroup);
 			return true;
 		case R.id.actionCreateItem:
-			myLocation=new Location("justTest");
+			myLocation = new Location("justTest");
 			myLocation.setLatitude(50.0);
 			myLocation.setLongitude(20.0);
 			Intent intentCreateItem = new Intent(MainMapActivity.this, CreateMapItemActivity.class);
@@ -517,7 +527,12 @@ public class MainMapActivity extends Activity implements
 						groupUserSets.put(g, users);
 					}
 				}
-				
+				if (locationClient.isConnected()) {
+					Location location = locationClient.getLastLocation();
+					UserState currentState = new UserState(new Point(location.getLatitude(), location.getLongitude()),
+							location.getSpeed());
+					proxy.updateSelfState(currentState);
+				}
 			} catch (InvalidSessionIDException e) {
 				return e;
 			} catch (NetworkException e) {
@@ -832,7 +847,7 @@ public class MainMapActivity extends Activity implements
 		}
 
 	}
-
+	
 	private class WaitForChatActivation extends Thread {
 		
 		private Message message;
@@ -1004,6 +1019,24 @@ public class MainMapActivity extends Activity implements
 			mapUserToMarker.get(user).remove();
 			mapUserToMarker.remove(user);
 		}
+	}
+
+	@Override
+	public void onConnectionFailed(ConnectionResult arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onConnected(Bundle arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onDisconnected() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
