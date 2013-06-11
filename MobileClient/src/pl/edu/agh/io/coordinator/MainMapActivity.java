@@ -154,11 +154,6 @@ public class MainMapActivity extends Activity implements
 								"checking isStopped");
 						isStopped = stopped;
 					}
-					if (isStopped) {
-						Log.d("MainMapActivity.MainThread",
-								"stopping main thread");
-						break;
-					}
 					if (usersThread != null) {
 						while (true) {
 							Status status = usersThread.getStatus();
@@ -183,6 +178,11 @@ public class MainMapActivity extends Activity implements
 								break;
 							}
 						}
+					}
+					if (isStopped) {
+						Log.d("MainMapActivity.MainThread",
+								"stopping main thread");
+						break;
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -267,6 +267,11 @@ public class MainMapActivity extends Activity implements
 							.getParcelable("cameraPosition"));
 			googleMap.moveCamera(update);
 		} else {
+			Map<String, Boolean> activeLayers = new HashMap<String, Boolean>();
+			activeLayers.put("notes", true);
+			activeLayers.put("images", true);
+			activeLayers.put("videos", true);
+			this.activeLayers = activeLayers;
 			AsyncTask<Void, Void, Void> setLocation = new AsyncTask<Void, Void, Void>() {
 
 				private LatLng latLng;

@@ -1,6 +1,8 @@
 package pl.edu.agh.io.coordinator;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import pl.edu.agh.io.coordinator.resources.Group;
@@ -211,6 +213,13 @@ public class LayersMenuFragment extends Fragment {
 			adapter.setLayers(state.layers);
 			adapter.setAllChecks(state.itemsChecks, state.peopleChecks, state.groupsChecks, state.layersChecks);
 			setExpandedGroup(state.expandedGroup);
+		} else {
+			Map<String, Boolean> layersChecks = new HashMap<String, Boolean>();
+			layersChecks.put("notes", true);
+			layersChecks.put("images", true);
+			layersChecks.put("videos", true);
+			adapter.setAllChecks(new HashMap<String, Boolean>(), new HashMap<String, Boolean>(), new HashMap<String, Boolean>(),
+					layersChecks);
 		}
 		super.onStart();
 	}
