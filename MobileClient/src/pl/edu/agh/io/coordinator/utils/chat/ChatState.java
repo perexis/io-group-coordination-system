@@ -1,13 +1,16 @@
 package pl.edu.agh.io.coordinator.utils.chat;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 public class ChatState implements Parcelable {
 
 	public List<String> messages;
+	public String inputText;
 	
 	public ChatState() {
 	}
@@ -17,10 +20,13 @@ public class ChatState implements Parcelable {
 		public ChatState createFromParcel(Parcel source) {
 			ChatState state = new ChatState();
 			int messagesSize = source.readInt();
+			state.messages = new LinkedList<String>();
 			for (int i = 0; i < messagesSize; ++i) {
 				String s = source.readString();
+				Log.d("ChatState", "retrieving message from parcel");
 				state.messages.add(s);
 			}
+			state.inputText = source.readString();
 			return state;
 		}
 		@Override
@@ -40,6 +46,7 @@ public class ChatState implements Parcelable {
 		for (String s : messages) {
 			dest.writeString(s);
 		}
+		dest.writeString(inputText);
 	}
 	
 }

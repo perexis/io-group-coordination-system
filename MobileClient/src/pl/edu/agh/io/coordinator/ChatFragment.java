@@ -13,6 +13,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.text.Selection;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -167,6 +168,8 @@ public class ChatFragment extends Fragment {
 			for (String s : messages) {
 				this.chatTextView.append("\n" + s);
 			}
+			inputMessage.setText(state.inputText);
+			Selection.setSelection(inputMessage.getText(), state.inputText.length());
 			scrollDown();
 		}
 		synchronized (this) {
@@ -180,6 +183,7 @@ public class ChatFragment extends Fragment {
 		Log.d("ChatFragment", "starting onPause");
 		ChatState state = new ChatState();
 		state.messages = new LinkedList<String>(this.messages);
+		state.inputText = inputMessage.getText().toString();
 		MainMapActivity activity = (MainMapActivity) getActivity();
 		activity.setSavedChatState(state);
 		synchronized (this) {
