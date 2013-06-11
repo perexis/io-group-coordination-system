@@ -65,6 +65,8 @@ public class MainMapActivity extends Activity implements
 		GooglePlayServicesClient.ConnectionCallbacks,
 		GooglePlayServicesClient.OnConnectionFailedListener {
 
+	private static final LatLng DEFAULT_LOCATION = new LatLng(50.061671d, 19.937341d);
+	
 	public final static String ITEM_POSITION = "pl.edu.agh.io.coordinator.ITEM_POSITION";
 	public final static String EXTRA_CONTENT = "pl.edu.agh.io.coordinator.EXTRA_CONTENT";
 	public final static String EXTRA_CONTENT_TYPE = "pl.edu.agh.io.coordinator.EXTRA_CONTENT_TYPE";
@@ -274,11 +276,12 @@ public class MainMapActivity extends Activity implements
 					while (!locationClient.isConnected()) {
 					}
 					Location location = locationClient.getLastLocation();
-					latLng = new LatLng(location.getLatitude(),
-							location.getLongitude());
-					Log.d("MainMapActivity",
-							"LOCATION: " + location.getLatitude() + " "
-									+ location.getLongitude());
+					if (location == null) {
+						latLng = DEFAULT_LOCATION;
+					} else {
+						latLng = new LatLng(location.getLatitude(), location.getLongitude());
+						Log.d("MainMapActivity", "LOCATION: " + location.getLatitude() + " " + location.getLongitude());
+					}
 					return null;
 				}
 
@@ -600,10 +603,12 @@ public class MainMapActivity extends Activity implements
 				}
 				if (locationClient.isConnected()) {
 					Location location = locationClient.getLastLocation();
-					UserState currentState = new UserState(new Point(
-							location.getLatitude(), location.getLongitude()),
-							location.getSpeed());
-					proxy.updateSelfState(currentState);
+					if (location != null) {
+						UserState currentState = new UserState(new Point(
+								location.getLatitude(), location.getLongitude()),
+								location.getSpeed());
+						proxy.updateSelfState(currentState);
+					}
 				}
 			} catch (InvalidSessionIDException e) {
 				return e;

@@ -51,8 +51,12 @@ public class CreateMapItemActivity extends Activity implements OnItemSelectedLis
 		location = intent.getParcelableExtra(MainMapActivity.ITEM_POSITION);
 		
 		TextView positionView = (TextView) findViewById(R.id.textViewPosition);
-		double latitude = location.getLatitude();
-		double longitude = location.getLongitude();
+		double latitude = 0.0d;
+		double longitude = 0.0d;
+		if (location != null) {
+			latitude = location.getLatitude();
+			longitude = location.getLongitude();
+		}
 		positionView.setText(latitude + (latitude >= 0 ? "N" : "S") + " " + longitude + (longitude >= 0 ? "E" : "W"));
 
 		typeList = (Spinner) findViewById(R.id.spinnerType);
