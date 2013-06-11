@@ -13,6 +13,7 @@ import pl.edu.agh.io.coordinator.resources.MapItem;
 import pl.edu.agh.io.coordinator.resources.User;
 import pl.edu.agh.io.coordinator.resources.UserState;
 import android.app.Activity;
+import android.util.Log;
 
 public class DataContainer {
 
@@ -73,6 +74,7 @@ public class DataContainer {
 	}
 	
 	public void newGroupsSet(Map<Group, Set<String>> newGroups) {
+		Log.d("DataContainer", "starting newGroupsSet");
 		HashSet<Group> toRemove = new HashSet<Group>();
 		synchronized (groups) {
 			for (Group g : groups.keySet()) {

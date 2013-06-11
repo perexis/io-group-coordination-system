@@ -1,5 +1,6 @@
 package pl.edu.agh.io.coordinator;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class MainMapActivity extends Activity implements
 	public static MainMapActivity currentInstance = null;
 
 	public enum ContentType {
-		NOTE, IMAGE, VIDEO;
+		NOTE, IMAGE, VIDEO, USER;
 	}
 
 	private boolean layersMenuVisible = false;
@@ -101,12 +102,18 @@ public class MainMapActivity extends Activity implements
 
 	private Map<String, Boolean> activeLayers = new HashMap<String, Boolean>();
 
+	private Map<Marker, ContentType> markerTypes = Collections.synchronizedMap(new HashMap<Marker, ContentType>());
+	
 	private UserFilter userFilter = new UserFilter();
 
 	public UserFilter getUserFilter() {
 		return userFilter;
 	}
 
+	public ContentType getMarkerType(Marker marker) {
+		return markerTypes.get(marker);
+	}
+	
 	private class MainThread extends Thread {
 
 		private boolean stopped = false;
@@ -481,13 +488,14 @@ public class MainMapActivity extends Activity implements
 
 							@Override
 							public void onInfoWindowClick(Marker marker) {
+								Log.d("MainMapActivity", "clicked marker, type = " + getMarkerType(marker));
 								Toast.makeText(getApplicationContext(),
 										marker.getSnippet(), Toast.LENGTH_SHORT)
 										.show();
 								Intent content = new Intent(
 										MainMapActivity.this,
 										DisplayContentActivity.class);
-								content.putExtra(EXTRA_CONTENT_TYPE, ContentType.NOTE.toString());
+								content.putExtra(EXTRA_CONTENT_TYPE, getMarkerType(marker).toString());
 								content.putExtra(EXTRA_CONTENT,
 										marker.getSnippet());
 								startActivity(content);
@@ -986,6 +994,7 @@ public class MainMapActivity extends Activity implements
 								.fromResource(R.drawable.note)));
 				// .icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
 				mapItemToMarker.put(mapItem, marker);
+				markerTypes.put(marker, ContentType.NOTE);
 			}
 		} else if (layer.getName().equals("images")) {
 			if (googleMap != null) {
@@ -998,6 +1007,7 @@ public class MainMapActivity extends Activity implements
 						.icon(BitmapDescriptorFactory
 								.fromResource(R.drawable.photo)));
 				mapItemToMarker.put(mapItem, marker);
+				markerTypes.put(marker, ContentType.IMAGE);
 			}
 		} else if (layer.getName().equals("videos")) {
 			if (googleMap != null) {
@@ -1008,6 +1018,7 @@ public class MainMapActivity extends Activity implements
 						.icon(BitmapDescriptorFactory
 								.fromResource(R.drawable.video)));
 				mapItemToMarker.put(mapItem, marker);
+				markerTypes.put(marker, ContentType.VIDEO);
 			}
 		}
 	}
@@ -1017,8 +1028,10 @@ public class MainMapActivity extends Activity implements
 		Log.d(this.toString(), "removing mapItem " + mapItem.getData()
 				+ " from layer " + layer.getName());
 		if (mapItemToMarker.containsKey(mapItem)) {
-			mapItemToMarker.get(mapItem).remove(); // remove Marker from map
+			Marker marker = mapItemToMarker.get(mapItem);
 			mapItemToMarker.remove(mapItem);
+			markerTypes.remove(marker);
+			marker.remove(); // remove Marker from map
 		}
 	}
 
@@ -1026,7 +1039,9 @@ public class MainMapActivity extends Activity implements
 	public void userAdded(User user, UserState state) {
 		if (googleMap != null) {
 			if (mapUserToMarker.containsKey(user)) {
-				mapUserToMarker.get(user).remove();
+				Marker marker = mapUserToMarker.get(user);
+				markerTypes.remove(marker);
+				marker.remove();
 			}
 			Marker marker = googleMap.addMarker(new MarkerOptions()
 					.position(state.getPosition().getLatLng())
@@ -1034,14 +1049,17 @@ public class MainMapActivity extends Activity implements
 					.icon(BitmapDescriptorFactory
 							.fromResource(R.drawable.person)));
 			mapUserToMarker.put(user, marker);
+			markerTypes.put(marker, ContentType.USER);
 		}
 	}
 
 	@Override
 	public void userRemoved(User user) {
 		if (mapUserToMarker.containsKey(user)) {
-			mapUserToMarker.get(user).remove();
+			Marker marker = mapUserToMarker.get(user);
 			mapUserToMarker.remove(user);
+			markerTypes.remove(marker);
+			marker.remove();
 		}
 	}
 
