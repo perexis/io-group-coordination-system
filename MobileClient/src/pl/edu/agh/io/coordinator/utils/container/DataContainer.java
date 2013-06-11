@@ -89,6 +89,7 @@ public class DataContainer {
 		for (Group g : newGroups.keySet()) {
 			groups.put(g, newGroups.get(g));
 		}
+		repaintUsers();
 	}
 
 	public void newUserItemsSet(Map<User, Set<String>> newUserItems) {
@@ -106,6 +107,7 @@ public class DataContainer {
 		for (User u : newUserItems.keySet()) {
 			userItems.put(u, newUserItems.get(u));
 		}
+		repaintUsers();
 	}
 	
 	public void newMapItemsSet(Layer layer, Set<MapItem> newMapItems) {

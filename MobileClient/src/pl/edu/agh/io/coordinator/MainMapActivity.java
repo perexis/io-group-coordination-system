@@ -1050,16 +1050,14 @@ public class MainMapActivity extends Activity implements
 		if (googleMap != null) {
 			if (mapUserToMarker.containsKey(user)) {
 				Marker marker = mapUserToMarker.get(user);
-				markerTypes.remove(marker);
-				marker.remove();
+				marker.setPosition(state.getPosition().getLatLng());
+			} else {
+				Marker marker = googleMap.addMarker(new MarkerOptions().position(state.getPosition().getLatLng())
+						.title(user.getName() + " " + user.getSurname())
+						.icon(BitmapDescriptorFactory.fromResource(R.drawable.person)));
+				mapUserToMarker.put(user, marker);
+				markerTypes.put(marker, ContentType.USER);
 			}
-			Marker marker = googleMap.addMarker(new MarkerOptions()
-					.position(state.getPosition().getLatLng())
-					.title(user.getName() + " " + user.getSurname())
-					.icon(BitmapDescriptorFactory
-							.fromResource(R.drawable.person)));
-			mapUserToMarker.put(user, marker);
-			markerTypes.put(marker, ContentType.USER);
 		}
 	}
 
