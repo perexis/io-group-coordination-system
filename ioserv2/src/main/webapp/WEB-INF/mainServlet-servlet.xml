@@ -27,6 +27,11 @@
 		<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
 		<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
 	</bean>
+	
+	<mvc:resources mapping="/images/**" location="/images/" />
+		<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
+		<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+	</bean>
  
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
     	<property name="viewClass"
