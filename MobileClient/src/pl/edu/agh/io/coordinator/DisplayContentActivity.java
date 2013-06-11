@@ -42,17 +42,23 @@ public class DisplayContentActivity extends Activity {
 		case VIDEO:
 			String videoUrl = intent
 					.getStringExtra(MainMapActivity.EXTRA_CONTENT);
-			if (!videoUrl.startsWith("http://"))
+			if (!videoUrl.startsWith("http://")) {
 				videoUrl = JSonProxy.SERVER_NAME + "/videos/" + videoUrl;
-			ShowVideoFragment videoFragment = ShowVideoFragment
-					.newInstance(videoUrl);
-			fragmentTransaction.add(R.id.contentFrame, videoFragment);
+				
+			} else {
+				ShowVideoFragment videoFragment = ShowVideoFragment
+						.newInstance(videoUrl);
+				fragmentTransaction.add(R.id.contentFrame, videoFragment);
+			}
+			
 			break;
 		case USER:
-			String userName = intent.getStringExtra(MainMapActivity.EXTRA_CONTENT);
-			ShowUserFragment userFragment = ShowUserFragment.newInstance(userName);
+			String userName = intent
+					.getStringExtra(MainMapActivity.EXTRA_CONTENT);
+			ShowUserFragment userFragment = ShowUserFragment
+					.newInstance(userName);
 			fragmentTransaction.add(R.id.contentFrame, userFragment);
-			
+
 			break;
 		default:
 			break;
