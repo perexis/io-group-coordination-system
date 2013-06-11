@@ -49,7 +49,7 @@ public class JSonProxy implements INetworkProxy {
 	
 	private static JSonProxy INSTANCE;
 	private static long SESSION_ID = -1;	
-	private static String SERVER_NAME = "http://io.wojtasskorcz.eu.cloudbees.net"; // without ending slash
+	public final static String SERVER_NAME = "http://io.wojtasskorcz.eu.cloudbees.net"; // without ending slash
 	private static String LOGGED_USER = null;
 
 	private JSonProxy() {

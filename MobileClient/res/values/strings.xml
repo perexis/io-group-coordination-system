@@ -95,5 +95,8 @@
     
     <!-- DisplayContentActivity -->
     <string name="title_activity_display_content">Content</string>
+    
+    <!-- ShowImageFragment -->
+    <string name="imageHint">Image</string>
 
 </resources>
