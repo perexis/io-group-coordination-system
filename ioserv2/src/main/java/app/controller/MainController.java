@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import app.dao.RegisteredLayerDao;
 import app.dao.RegisteredUserDao;
 import app.dao.RegisteredUserItemDao;
+import app.exception.MalformedJsonException;
 import app.model.db.RegisteredLayer;
 import app.model.db.RegisteredUser;
 import app.model.db.RegisteredUserItem;
@@ -161,6 +162,9 @@ public class MainController {
 		String layer = JsonPath.with(json).getString("layer");
 		Point point = JsonPath.with(json).getObject("point", Point.class);
 		String data = JsonPath.with(json).getString("data");
+		if (point == null) {
+			throw new MalformedJsonException();
+		}
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"retval\": null, \"exception\": \"InvalidSessionID\"}";
 		}
@@ -198,6 +202,9 @@ public class MainController {
 	public synchronized String updateSelfState(@RequestBody String json, HttpServletResponse response) throws Exception {
 		Long sessionId = JsonPath.with(json).getLong("sessionID");
 		UserState newState = JsonPath.with(json).getObject("newState", UserState.class);
+		if (newState == null) {
+			throw new MalformedJsonException();
+		}
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
@@ -310,7 +317,7 @@ public class MainController {
 		Long timestamp = u.getLastMessageCheck();
 		u.setLastMessageCheck(System.currentTimeMillis());
 		if (messages.isEmpty()) {
-			return "{\"retval\": [], \"exception\": \"null\"}";
+			return "{\"retval\": [], \"exception\": null}";
 		}
 		List<Message> newMessages = new ArrayList<>();
 		for (Message m : messages) {
@@ -343,6 +350,9 @@ public class MainController {
 	public synchronized String createGroup(@RequestBody String json, HttpServletResponse response) throws Exception {
 		Long sessionId = JsonPath.with(json).getLong("sessionID");
 		Group group = JsonPath.with(json).getObject("group", Group.class);
+		if (group == null) {
+			throw new MalformedJsonException();
+		}
 		if (!sessions.containsKey(sessionId)) {
 			return "{\"exception\": \"InvalidSessionID\"}";
 		}
