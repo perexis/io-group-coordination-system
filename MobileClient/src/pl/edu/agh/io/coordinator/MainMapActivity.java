@@ -61,20 +61,24 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MainMapActivity extends Activity implements
 		ChatFragment.OnFragmentInteractionListener, LayersMenuListener,
 		OnDataContainerChangesListener,
-        GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener {
+		GooglePlayServicesClient.ConnectionCallbacks,
+		GooglePlayServicesClient.OnConnectionFailedListener {
 
 	public final static String ITEM_POSITION = "pl.edu.agh.io.coordinator.ITEM_POSITION";
+	public final static String EXTRA_CONTENT = "pl.edu.agh.io.coordinator.EXTRA_CONTENT";
+	public final static String EXTRA_CONTENT_TYPE = "pl.edu.agh.io.coordinator.EXTRA_CONTENT_TYPE";
 	public static MainMapActivity currentInstance = null;
-	
+
+	public enum ContentType {
+		NOTE, IMAGE, VIDEO;
+	}
+
 	private boolean layersMenuVisible = false;
 	private boolean chatVisible = false;
-	
+
 	private boolean isMenuCreated = false;
-	
+
 	private volatile boolean isActive = false;
-	
-	//private static final LatLng DEFAULT_POSITION = new LatLng(50.061368, 19.936924); // Cracow
 
 	private DataContainer dataContainer = new DataContainer(this);
 	private boolean loggingOut = false;
@@ -94,25 +98,23 @@ public class MainMapActivity extends Activity implements
 	private HashMap<User, Marker> mapUserToMarker = new HashMap<User, Marker>();
 
 	private MainThread mainThread;
-	
+
 	private Map<String, Boolean> activeLayers = new HashMap<String, Boolean>();
-	
+
 	private UserFilter userFilter = new UserFilter();
-	
-	//private Set<Thread> threads = new HashSet<Thread>();
-	
+
 	public UserFilter getUserFilter() {
 		return userFilter;
 	}
-	
+
 	private class MainThread extends Thread {
-		
+
 		private boolean stopped = false;
-		
+
 		public synchronized void safelyStop() {
 			stopped = true;
 		}
-		
+
 		@Override
 		public void run() {
 			boolean isStopped = false;
@@ -124,24 +126,28 @@ public class MainMapActivity extends Activity implements
 					Thread.sleep(1000);
 					Log.d("MainMapActivity", "getting data from server");
 					usersThread = new GetUsersInBackground();
-					usersThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-					//new GetUserItemsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
-					//new GetGroupsInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Intent());
+					usersThread
+							.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					if (chatFragment.isActive()) {
 						messagesThread = new GetMessagesInBackground();
-						messagesThread.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+						messagesThread
+								.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 					}
 					if (layers != null)
 						for (Layer layer : layers) {
-							mapItemsThreadMap.put(layer, new GetMapItemsInBackground());
-							mapItemsThreadMap.get(layer).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, layer);
+							mapItemsThreadMap.put(layer,
+									new GetMapItemsInBackground());
+							mapItemsThreadMap.get(layer).executeOnExecutor(
+									AsyncTask.THREAD_POOL_EXECUTOR, layer);
 						}
 					synchronized (this) {
-						Log.d("MainMapActivity.MainThread", "checking isStopped");
+						Log.d("MainMapActivity.MainThread",
+								"checking isStopped");
 						isStopped = stopped;
 					}
 					if (isStopped) {
-						Log.d("MainMapActivity.MainThread", "stopping main thread");
+						Log.d("MainMapActivity.MainThread",
+								"stopping main thread");
 						break;
 					}
 					if (usersThread != null) {
@@ -160,7 +166,8 @@ public class MainMapActivity extends Activity implements
 							}
 						}
 					}
-					for (GetMapItemsInBackground mapItemThread : mapItemsThreadMap.values()) {
+					for (GetMapItemsInBackground mapItemThread : mapItemsThreadMap
+							.values()) {
 						while (true) {
 							Status status = mapItemThread.getStatus();
 							if (status == Status.FINISHED) {
@@ -173,9 +180,9 @@ public class MainMapActivity extends Activity implements
 				}
 			}
 		}
-		
+
 	}
-	
+
 	public LayersMenuState getSavedLayersMenuState() {
 		return this.savedLayersMenuState;
 	}
@@ -183,15 +190,15 @@ public class MainMapActivity extends Activity implements
 	public void setSavedLayersMenuState(LayersMenuState state) {
 		this.savedLayersMenuState = state;
 	}
-	
+
 	public ChatState getSavedChatState() {
 		return this.savedChatState;
 	}
-	
+
 	public void setSavedChatState(ChatState state) {
 		this.savedChatState = state;
 	}
-	
+
 	public boolean isLayerActive(String layer) {
 		if (activeLayers.containsKey(layer)) {
 			return this.activeLayers.get(layer);
@@ -199,23 +206,24 @@ public class MainMapActivity extends Activity implements
 			return false;
 		}
 	}
-	
+
 	private void initFragments(FragmentManager fragmentManager) {
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		FragmentTransaction fragmentTransaction = fragmentManager
+				.beginTransaction();
 		fragmentTransaction.add(R.id.layersFrame, layersFragment);
 		fragmentTransaction.hide(layersFragment);
 		fragmentTransaction.add(R.id.chatFrame, chatFragment);
 		fragmentTransaction.hide(chatFragment);
 		fragmentTransaction.commit();
 	}
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d("MainMapActivity", "starting onCreate");
 		super.onCreate(savedInstanceState);
-		
+
 		currentInstance = this;
-		
+
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_main_map);
@@ -231,47 +239,57 @@ public class MainMapActivity extends Activity implements
 
 		if (savedInstanceState != null) {
 			Log.d("MainMapActivity", "starting getting saved state");
-			layersMenuVisible = savedInstanceState.getBoolean("layersMenuVisible");
+			layersMenuVisible = savedInstanceState
+					.getBoolean("layersMenuVisible");
 			chatVisible = savedInstanceState.getBoolean("chatVisible");
-			savedLayersMenuState = savedInstanceState.getParcelable("savedLayersMenuState");
-			activeLayers = new HashMap<String, Boolean>(savedLayersMenuState.layersChecks);
+			savedLayersMenuState = savedInstanceState
+					.getParcelable("savedLayersMenuState");
+			activeLayers = new HashMap<String, Boolean>(
+					savedLayersMenuState.layersChecks);
 			savedChatState = savedInstanceState.getParcelable("savedChatState");
 			if (savedChatState != null) {
-				Log.d("MainMapActivity", "starting ... " + savedChatState.messages.size());
+				Log.d("MainMapActivity", "starting ... "
+						+ savedChatState.messages.size());
 			} else {
 				Log.d("MainMapActivity", "starting ... " + "null");
 			}
-			CameraUpdate update = CameraUpdateFactory.newCameraPosition((CameraPosition) savedInstanceState
-					.getParcelable("cameraPosition"));
+			CameraUpdate update = CameraUpdateFactory
+					.newCameraPosition((CameraPosition) savedInstanceState
+							.getParcelable("cameraPosition"));
 			googleMap.moveCamera(update);
 		} else {
 			AsyncTask<Void, Void, Void> setLocation = new AsyncTask<Void, Void, Void>() {
-				
+
 				private LatLng latLng;
-				
+
 				@Override
 				protected Void doInBackground(Void... params) {
 					while (!locationClient.isConnected()) {
 					}
 					Location location = locationClient.getLastLocation();
-					latLng = new LatLng(location.getLatitude(), location.getLongitude());
-					Log.d("MainMapActivity", "LOCATION: " + location.getLatitude() + " " + location.getLongitude());
+					latLng = new LatLng(location.getLatitude(),
+							location.getLongitude());
+					Log.d("MainMapActivity",
+							"LOCATION: " + location.getLatitude() + " "
+									+ location.getLongitude());
 					return null;
 				}
-				
+
 				@Override
 				protected void onPostExecute(Void result) {
-					CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 16.0f);
+					CameraUpdate cameraUpdate = CameraUpdateFactory
+							.newLatLngZoom(latLng, 16.0f);
 					googleMap.moveCamera(cameraUpdate);
 				}
-				
+
 			};
-			setLocation.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+			setLocation.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+					(Void[]) null);
 		}
-		
+
 		googleMap.setMyLocationEnabled(true);
 		googleMap.getUiSettings().setMyLocationButtonEnabled(true);
-		
+
 	}
 
 	@Override
@@ -281,13 +299,13 @@ public class MainMapActivity extends Activity implements
 		initFragments(fragmentManager);
 		super.onRestart();
 	}
-	
+
 	@Override
 	protected void onStart() {
 		Log.d("MainMapActivity", "starting onStart");
 		super.onStart();
 	}
-	
+
 	@Override
 	protected void onResume() {
 		Log.d("MainMapActivity", "starting onResume");
@@ -306,7 +324,8 @@ public class MainMapActivity extends Activity implements
 	protected void onSaveInstanceState(Bundle outState) {
 		Log.d("MainMapActivity", "starting onSaveInstanceState");
 		FragmentManager fragmentManager = getFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		FragmentTransaction fragmentTransaction = fragmentManager
+				.beginTransaction();
 		fragmentTransaction.remove(layersFragment);
 		fragmentTransaction.remove(chatFragment);
 		fragmentTransaction.commit();
@@ -317,7 +336,7 @@ public class MainMapActivity extends Activity implements
 		outState.putParcelable("cameraPosition", googleMap.getCameraPosition());
 		super.onSaveInstanceState(outState);
 	}
-	
+
 	@Override
 	protected void onPause() {
 		Log.d("MainMapActivity", "starting onPause");
@@ -327,19 +346,19 @@ public class MainMapActivity extends Activity implements
 		locationClient.disconnect();
 		super.onPause();
 	}
-	
+
 	@Override
 	protected void onStop() {
 		Log.d("MainMapActivity", "starting onStop");
 		super.onStop();
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		Log.d("MainMapActivity", "starting onDestroy");
 		super.onDestroy();
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		Log.d("MainMapActivity", "starting onCreateOptionsMenu");
@@ -356,19 +375,21 @@ public class MainMapActivity extends Activity implements
 		FragmentManager fragmentManager = getFragmentManager();
 		if (layersMenuVisible) {
 			Log.d("MainMapActivity", "getting saved state: layersMenuVisible");
-			FragmentTransaction lmvTransaction = fragmentManager.beginTransaction();
+			FragmentTransaction lmvTransaction = fragmentManager
+					.beginTransaction();
 			lmvTransaction.show(layersFragment);
 			lmvTransaction.commit();
 		}
 		if (chatVisible) {
 			Log.d("MainMapActivity", "getting saved state: chatVisible");
-			FragmentTransaction cvTransaction = fragmentManager.beginTransaction();
+			FragmentTransaction cvTransaction = fragmentManager
+					.beginTransaction();
 			cvTransaction.show(chatFragment);
 			cvTransaction.commit();
 		}
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -377,7 +398,8 @@ public class MainMapActivity extends Activity implements
 			chatVisible = !item.isChecked();
 			item.setChecked(!item.isChecked());
 			FragmentManager fragmentManager = getFragmentManager();
-			FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+			FragmentTransaction fragmentTransaction = fragmentManager
+					.beginTransaction();
 			if (item.isChecked()) {
 				fragmentTransaction.show(chatFragment);
 			} else
@@ -389,7 +411,8 @@ public class MainMapActivity extends Activity implements
 			layersMenuVisible = !item.isChecked();
 			item.setChecked(!item.isChecked());
 			FragmentManager fragmentManager2 = getFragmentManager();
-			FragmentTransaction fragmentTransaction2 = fragmentManager2.beginTransaction();
+			FragmentTransaction fragmentTransaction2 = fragmentManager2
+					.beginTransaction();
 			if (item.isChecked()) {
 				// fragmentTransaction2.add(R.id.layersFrame, layersFragment);
 				fragmentTransaction2.show(layersFragment);
@@ -399,28 +422,33 @@ public class MainMapActivity extends Activity implements
 			fragmentTransaction2.commit();
 			return true;
 		case R.id.actionCreateGroup:
-			Intent intentCreateGroup = new Intent(MainMapActivity.this, CreateGroupActivity.class);
+			Intent intentCreateGroup = new Intent(MainMapActivity.this,
+					CreateGroupActivity.class);
 			startActivity(intentCreateGroup);
 			return true;
 		case R.id.actionRemoveGroup:
-			Intent intentRemoveGroup = new Intent(MainMapActivity.this, RemoveGroupActivity.class);
+			Intent intentRemoveGroup = new Intent(MainMapActivity.this,
+					RemoveGroupActivity.class);
 			startActivity(intentRemoveGroup);
 			return true;
 		case R.id.actionCreateItem:
 			myLocation = locationClient.getLastLocation();
-			Intent intentCreateItem = new Intent(MainMapActivity.this, CreateMapItemActivity.class);
+			Intent intentCreateItem = new Intent(MainMapActivity.this,
+					CreateMapItemActivity.class);
 			intentCreateItem.putExtra(ITEM_POSITION, myLocation);
 			startActivity(intentCreateItem);
 			return true;
 		case R.id.actionSettings:
-			Intent intentSettings = new Intent(MainMapActivity.this, NotImplementedYetActivity.class);
+			Intent intentSettings = new Intent(MainMapActivity.this,
+					NotImplementedYetActivity.class);
 			startActivity(intentSettings);
 			return true;
 		case R.id.actionLogout:
 			if (!loggingOut) {
 				loggingOut = true;
 				Intent intent = new Intent();
-				new LogoutInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, intent);
+				new LogoutInBackground().executeOnExecutor(
+						AsyncTask.THREAD_POOL_EXECUTOR, intent);
 				this.finish();
 			}
 			return true;
@@ -433,11 +461,12 @@ public class MainMapActivity extends Activity implements
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			Intent intent = new Intent();
-			new LogoutInBackground().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, intent);
+			new LogoutInBackground().executeOnExecutor(
+					AsyncTask.THREAD_POOL_EXECUTOR, intent);
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-	
+
 	private void setUpMapIfNeeded() {
 		if (googleMap == null) {
 			googleMap = ((MapFragment) getFragmentManager().findFragmentById(
@@ -447,29 +476,43 @@ public class MainMapActivity extends Activity implements
 			} else {
 				googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-				googleMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-					
-					@Override
-					public void onInfoWindowClick(Marker marker) {
-						Toast.makeText(getApplicationContext(), marker.getSnippet(), Toast.LENGTH_SHORT).show();
-					}
-					
-				});
+				googleMap
+						.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
 
-				googleMap.setOnMapLongClickListener(new OnMapLongClickListener() {
-					
-					@Override
-					public void onMapLongClick(LatLng arg0) {
-						Intent intentCreateItem = new Intent(MainMapActivity.this, CreateMapItemActivity.class);
-						Location location = new Location("Map item");
-						location.setLatitude(arg0.latitude);
-						location.setLongitude(arg0.longitude);
-						intentCreateItem.putExtra(ITEM_POSITION, location);
-						startActivity(intentCreateItem);
-					}
-					
-				});
-				
+							@Override
+							public void onInfoWindowClick(Marker marker) {
+								Toast.makeText(getApplicationContext(),
+										marker.getSnippet(), Toast.LENGTH_SHORT)
+										.show();
+								Intent content = new Intent(
+										MainMapActivity.this,
+										DisplayContentActivity.class);
+								content.putExtra(EXTRA_CONTENT_TYPE, ContentType.NOTE.toString());
+								content.putExtra(EXTRA_CONTENT,
+										marker.getSnippet());
+								startActivity(content);
+							}
+
+						});
+
+				googleMap
+						.setOnMapLongClickListener(new OnMapLongClickListener() {
+
+							@Override
+							public void onMapLongClick(LatLng arg0) {
+								Intent intentCreateItem = new Intent(
+										MainMapActivity.this,
+										CreateMapItemActivity.class);
+								Location location = new Location("Map item");
+								location.setLatitude(arg0.latitude);
+								location.setLongitude(arg0.longitude);
+								intentCreateItem.putExtra(ITEM_POSITION,
+										location);
+								startActivity(intentCreateItem);
+							}
+
+						});
+
 			}
 		}
 	}
@@ -503,15 +546,15 @@ public class MainMapActivity extends Activity implements
 				loggingOut = false;
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
+					Alerts.invalidSessionId(MainMapActivity.this,
+							new LogoutInBackground());
 				}
 			}
 		}
 
 	}
 
-	private class GetUsersInBackground extends
-			AsyncTask<Void, Void, Exception> {
+	private class GetUsersInBackground extends AsyncTask<Void, Void, Exception> {
 
 		private Set<User> users;
 		private Map<User, UserState> userStates;
@@ -519,7 +562,7 @@ public class MainMapActivity extends Activity implements
 		private Set<UserItem> userItems;
 		private Set<Group> groups;
 		private Map<Group, Set<String>> groupUserSets;
-		
+
 		@Override
 		protected Exception doInBackground(Void... params) {
 			Log.d("MainMapActivity", "GetUsersInBackground.doInBackground()");
@@ -538,7 +581,7 @@ public class MainMapActivity extends Activity implements
 					if (items != null) {
 						userItemSets.put(u, items);
 					}
-				}				
+				}
 				userItems = proxy.getPossibleUserItems();
 				groups = proxy.getGroups();
 				for (Group g : groups) {
@@ -549,7 +592,8 @@ public class MainMapActivity extends Activity implements
 				}
 				if (locationClient.isConnected()) {
 					Location location = locationClient.getLastLocation();
-					UserState currentState = new UserState(new Point(location.getLatitude(), location.getLongitude()),
+					UserState currentState = new UserState(new Point(
+							location.getLatitude(), location.getLongitude()),
 							location.getSpeed());
 					proxy.updateSelfState(currentState);
 				}
@@ -578,8 +622,8 @@ public class MainMapActivity extends Activity implements
 					dataContainer.newUserItemsSet(userItemSets);
 					dataContainer.newGroupsSet(groupUserSets);
 				}
-				if (layersFragment != null){
-					
+				if (layersFragment != null) {
+
 				}
 			} else if (result instanceof NetworkException) {
 				if (isActive) {
@@ -587,10 +631,12 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
+					Alerts.invalidSessionId(MainMapActivity.this,
+							new LogoutInBackground());
 				}
 			} else if (result instanceof InvalidUserException) {
-				//Alerts.invalidUser(MainMapActivity.this); // wywalone bo niepotrzebnie wyswietla alert
+				// Alerts.invalidUser(MainMapActivity.this); // wywalone bo
+				// niepotrzebnie wyswietla alert
 			} else if (result instanceof InvalidGroupException) {
 				// jak wyzej
 			}
@@ -626,7 +672,8 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
+					Alerts.invalidSessionId(MainMapActivity.this,
+							new LogoutInBackground());
 				}
 			}
 		}
@@ -671,7 +718,8 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
+					Alerts.invalidSessionId(MainMapActivity.this,
+							new LogoutInBackground());
 				}
 			} else if (result instanceof InvalidLayerException) {
 				if (isActive) {
@@ -711,7 +759,8 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
+					Alerts.invalidSessionId(MainMapActivity.this,
+							new LogoutInBackground());
 				}
 			} else if (result instanceof InvalidMapItemException) {
 				if (isActive) {
@@ -721,72 +770,6 @@ public class MainMapActivity extends Activity implements
 		}
 
 	}
-
-/*	private class GetGroupsInBackground extends
-			AsyncTask<Intent, Void, Exception> {
-
-		@Override
-		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
-
-			try {
-				groups = proxy.getGroups();
-			} catch (InvalidSessionIDException e) {
-				return e;
-			} catch (NetworkException e) {
-				return e;
-			}
-
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Exception result) {
-
-			if (result == null) {
-				if (layersFragment != null)
-					layersFragment.setGroups(groups);
-			} else if (result instanceof NetworkException) {
-				Alerts.networkProblem(MainMapActivity.this);
-			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(MainMapActivity.this);
-			}
-		}
-
-	}*/
-
-/*	private class GetUserItemsInBackground extends
-			AsyncTask<Intent, Void, Exception> {
-
-		@Override
-		protected Exception doInBackground(Intent... params) {
-			IJSonProxy proxy = JSonProxy.getInstance();
-
-			try {
-				userItems = proxy.getPossibleUserItems();
-			} catch (InvalidSessionIDException e) {
-				return e;
-			} catch (NetworkException e) {
-				return e;
-			}
-
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Exception result) {
-
-			if (result == null) {
-				if (layersFragment != null)
-					layersFragment.setItems(userItems);
-			} else if (result instanceof NetworkException) {
-				Alerts.networkProblem(MainMapActivity.this);
-			} else if (result instanceof InvalidSessionIDException) {
-				Alerts.invalidSessionId(MainMapActivity.this);
-			}
-		}
-
-	}*/
 
 	private class SendMessageInBackground extends
 			AsyncTask<String, Void, Exception> {
@@ -814,7 +797,8 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
+					Alerts.invalidSessionId(MainMapActivity.this,
+							new LogoutInBackground());
 				}
 			}
 		}
@@ -849,7 +833,9 @@ public class MainMapActivity extends Activity implements
 					if (!chatFragment.isActive()) {
 						Log.d("MainMapActivity", "starting dropping message");
 						new WaitForChatActivation(m).start();
-						//new AddMessageAfterActivation(m).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
+						// new
+						// AddMessageAfterActivation(m).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+						// (Void) null);
 					} else {
 						Log.d("MainMapActivity", "starting adding message");
 						chatFragment.newMessage(m);
@@ -861,21 +847,22 @@ public class MainMapActivity extends Activity implements
 				}
 			} else if (result instanceof InvalidSessionIDException) {
 				if (isActive) {
-					Alerts.invalidSessionId(MainMapActivity.this, new LogoutInBackground());
+					Alerts.invalidSessionId(MainMapActivity.this,
+							new LogoutInBackground());
 				}
 			}
 		}
 
 	}
-	
+
 	private class WaitForChatActivation extends Thread {
-		
+
 		private Message message;
-		
+
 		public WaitForChatActivation(Message message) {
 			this.message = message;
 		}
-		
+
 		@Override
 		public void run() {
 			Log.d("MainMapActivity", "starting waiting thread");
@@ -887,38 +874,40 @@ public class MainMapActivity extends Activity implements
 				}
 			}
 			Log.d("MainMapActivity", "finished waiting thread");
-			new AddMessageAfterActivation(message).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
+			new AddMessageAfterActivation(message).executeOnExecutor(
+					AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 		}
-		
+
 	}
-	
+
 	private class AddMessageAfterActivation extends AsyncTask<Void, Void, Void> {
-		
+
 		private Message message;
-		
+
 		public AddMessageAfterActivation(Message message) {
 			this.message = message;
 		}
-		
+
 		@Override
 		protected Void doInBackground(Void... params) {
 			return null;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Void result) {
 			ChatFragment chatFragment = MainMapActivity.currentInstance.chatFragment;
 			if ((chatFragment != null) && (chatFragment.isActive())) {
-				Log.d("MainMapActivity", "starting adding message after waiting");
+				Log.d("MainMapActivity",
+						"starting adding message after waiting");
 				chatFragment.newMessage(message);
 			} else {
 				Log.d("MainMapActivity", "starting dropping message again");
 				new WaitForChatActivation(message).start();
 			}
 		}
-		
+
 	}
-	
+
 	@Override
 	public void onChatSendMessage(String text) {
 		new SendMessageInBackground().executeOnExecutor(
@@ -983,29 +972,41 @@ public class MainMapActivity extends Activity implements
 
 	@Override
 	public void mapItemAdded(Layer layer, MapItem mapItem) {
-		Log.d("MainMapActivity", "adding mapItem " + mapItem.getData() + " to layer " + layer.getName());
+		Log.d("MainMapActivity", "adding mapItem " + mapItem.getData()
+				+ " to layer " + layer.getName());
 		if (layer.getName().equals("notes")) {
 			if (googleMap != null) {
 				Marker marker = googleMap.addMarker(new MarkerOptions()
-						.position(new LatLng(mapItem.getPosition().getLatitude(), mapItem.getPosition().getLongitude()))
-						.title(getString(R.string.layer_note)).snippet(mapItem.getData())
-						.icon(BitmapDescriptorFactory.fromResource(R.drawable.note)));
+						.position(
+								new LatLng(mapItem.getPosition().getLatitude(),
+										mapItem.getPosition().getLongitude()))
+						.title(getString(R.string.layer_note))
+						.snippet(mapItem.getData())
+						.icon(BitmapDescriptorFactory
+								.fromResource(R.drawable.note)));
 				// .icon(BitmapDescriptorFactory.fromResource(R.drawable.action_help)));
 				mapItemToMarker.put(mapItem, marker);
 			}
 		} else if (layer.getName().equals("images")) {
 			if (googleMap != null) {
 				Marker marker = googleMap.addMarker(new MarkerOptions()
-						.position(new LatLng(mapItem.getPosition().getLatitude(), mapItem.getPosition().getLongitude()))
-						.title(getString(R.string.layer_image)).snippet(mapItem.getData())
-						.icon(BitmapDescriptorFactory.fromResource(R.drawable.photo)));
+						.position(
+								new LatLng(mapItem.getPosition().getLatitude(),
+										mapItem.getPosition().getLongitude()))
+						.title(getString(R.string.layer_image))
+						.snippet(mapItem.getData())
+						.icon(BitmapDescriptorFactory
+								.fromResource(R.drawable.photo)));
 				mapItemToMarker.put(mapItem, marker);
 			}
 		} else if (layer.getName().equals("videos")) {
 			if (googleMap != null) {
-				Marker marker = googleMap.addMarker(new MarkerOptions().position(mapItem.getPosition().getLatLng())
-						.title(getString(R.string.layer_video)).snippet(mapItem.getData())
-						.icon(BitmapDescriptorFactory.fromResource(R.drawable.video)));
+				Marker marker = googleMap.addMarker(new MarkerOptions()
+						.position(mapItem.getPosition().getLatLng())
+						.title(getString(R.string.layer_video))
+						.snippet(mapItem.getData())
+						.icon(BitmapDescriptorFactory
+								.fromResource(R.drawable.video)));
 				mapItemToMarker.put(mapItem, marker);
 			}
 		}
@@ -1013,7 +1014,8 @@ public class MainMapActivity extends Activity implements
 
 	@Override
 	public void mapItemRemoved(Layer layer, MapItem mapItem) {
-		Log.d(this.toString(), "removing mapItem " + mapItem.getData() + " from layer " + layer.getName());
+		Log.d(this.toString(), "removing mapItem " + mapItem.getData()
+				+ " from layer " + layer.getName());
 		if (mapItemToMarker.containsKey(mapItem)) {
 			mapItemToMarker.get(mapItem).remove(); // remove Marker from map
 			mapItemToMarker.remove(mapItem);
@@ -1026,9 +1028,11 @@ public class MainMapActivity extends Activity implements
 			if (mapUserToMarker.containsKey(user)) {
 				mapUserToMarker.get(user).remove();
 			}
-			Marker marker = googleMap.addMarker(new MarkerOptions().position(state.getPosition().getLatLng())
+			Marker marker = googleMap.addMarker(new MarkerOptions()
+					.position(state.getPosition().getLatLng())
 					.title(user.getName() + " " + user.getSurname())
-					.icon(BitmapDescriptorFactory.fromResource(R.drawable.person)));
+					.icon(BitmapDescriptorFactory
+							.fromResource(R.drawable.person)));
 			mapUserToMarker.put(user, marker);
 		}
 	}
@@ -1044,19 +1048,19 @@ public class MainMapActivity extends Activity implements
 	@Override
 	public void onConnectionFailed(ConnectionResult arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onConnected(Bundle arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onDisconnected() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

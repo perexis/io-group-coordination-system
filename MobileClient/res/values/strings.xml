@@ -16,7 +16,7 @@
     <string name="title_activity_remove_group">Remove Group</string>
     <string name="title_activity_create_map_item">Create Map Item</string>
     <string name="button_remove">Remove</string>
-    
+
     <!-- Layer -->
     <string name="layer_note">Note</string>
     <string name="layer_image">Image</string>
@@ -67,30 +67,33 @@
     <string name="menu_item_people">People</string>
     <string name="menu_item_groups">Groups</string>
     <string name="menu_item_layers">Map Items</string>
-    
+
     <!-- RemoveGroupActivity -->
     <string name="alert_group_removed">Group removed</string>
     <string name="label_select_group_to_remove">Select group to remove:</string>
-	<string name="alert_could_not_remove_group">Could not remove group</string>
-	
-	<!-- ChatFragment -->
-	<string name="button_send_message">Send</string>
-	<string name="hint_message">Message</string>
-	
-	<!-- CreateMapItemActivity -->
-	<string name="label_position">Position:</string>
-	<string name="label_type">Type:</string>
-	<string name="button_submit">Submit</string>
-	<string name="alert_map_item_created">Item successfully added</string>
+    <string name="alert_could_not_remove_group">Could not remove group</string>
+
+    <!-- ChatFragment -->
+    <string name="button_send_message">Send</string>
+    <string name="hint_message">Message</string>
+
+    <!-- CreateMapItemActivity -->
+    <string name="label_position">Position:</string>
+    <string name="label_type">Type:</string>
+    <string name="button_submit">Submit</string>
+    <string name="alert_map_item_created">Item successfully added</string>
+
     <string-array name="item_type_array">
         <item>Note</item>
         <item>Image</item>
         <item>Video</item>
     </string-array>
-	
-	
-	<!-- NoteCreateDataFragment -->
-	<string name="hint_type_here">Type here</string>
-	<string name="label_note">Note:</string>
-	
+
+    <!-- NoteCreateDataFragment -->
+    <string name="hint_type_here">Type here</string>
+    <string name="label_note">Note:</string>
+    
+    <!-- DisplayContentActivity -->
+    <string name="title_activity_display_content">Content</string>
+
 </resources>
