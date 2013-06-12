@@ -153,7 +153,6 @@ public class ShowUserFragment extends Fragment {
 				InputStream in = new java.net.URL(userAvatar).openStream();
 				bitmapImage = BitmapFactory.decodeStream(in);
 			} catch (Exception e) {
-				Log.e("ShowUserFragment", e.getMessage());
 				e.printStackTrace();
 			}
 			return bitmapImage;

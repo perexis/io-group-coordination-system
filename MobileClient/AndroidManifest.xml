@@ -67,7 +67,7 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyC1uNfqw8S3SLp15cWmbFxB9XHgm7VIcTw" />
+            android:value="AIzaSyDFaJZTTODuoxyngEGPOHKhmb3UB51LzGg" />
 
         <activity
             android:name="pl.edu.agh.io.coordinator.DisplayContentActivity"

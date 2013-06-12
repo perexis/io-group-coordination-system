@@ -44,25 +44,25 @@ public class LayersMenuState implements Parcelable {
 			int itemsSize = source.readInt();
 			lms.items = new HashSet<UserItem>();
 			for (int i = 0; i < itemsSize; ++i) {
-				UserItem ui = source.readParcelable(null);
+				UserItem ui = source.readParcelable(UserItem.class.getClassLoader());
 				lms.items.add(ui);
 			}
 			int peopleSize = source.readInt();
 			lms.people = new HashSet<User>();
 			for (int i = 0; i < peopleSize; ++i) {
-				User u = source.readParcelable(null);
+				User u = source.readParcelable(User.class.getClassLoader());
 				lms.people.add(u);
 			}
 			int groupsSize = source.readInt();
 			lms.groups = new HashSet<Group>();
 			for (int i = 0; i < groupsSize; ++i) {
-				Group g = source.readParcelable(null);
+				Group g = source.readParcelable(Group.class.getClassLoader());
 				lms.groups.add(g);
 			}
 			int layersSize = source.readInt();
 			lms.layers = new HashSet<Layer>();
 			for (int i = 0; i < layersSize; ++i) {
-				Layer l = source.readParcelable(null);
+				Layer l = source.readParcelable(Layer.class.getClassLoader());
 				lms.layers.add(l);
 			}
 			int itemsChecksSize = source.readInt();
