@@ -98,5 +98,16 @@
     
     <!-- ShowImageFragment -->
     <string name="imageHint">Image</string>
+    
+    <!-- ShowUserFragment -->
+    <string name="labelName">"Name: "</string>
+    <string name="labelSurname">"Surname: "</string>
+    <string name="labelNick">"Nick: "</string>
+    <string name="labelPhone">"Phone: "</string>
+    <string name="labelEmail">"Email: "</string>
+    <string name="buttonCall">Call</string>
+    <string name="buttonComposeEmail">Compose email</string>
+    <string name="descriptionAvatar">Avatar</string>
+    <string name="could_not_load_user_avatar">Could not load user avatar</string>
 
 </resources>

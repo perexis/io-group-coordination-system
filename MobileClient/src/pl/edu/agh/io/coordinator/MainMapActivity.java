@@ -70,6 +70,12 @@ public class MainMapActivity extends Activity implements
 	public final static String ITEM_POSITION = "pl.edu.agh.io.coordinator.ITEM_POSITION";
 	public final static String EXTRA_CONTENT = "pl.edu.agh.io.coordinator.EXTRA_CONTENT";
 	public final static String EXTRA_CONTENT_TYPE = "pl.edu.agh.io.coordinator.EXTRA_CONTENT_TYPE";
+	public final static String USER_NAME = "pl.edu.agh.io.coordinator.USER_NAME";
+	public final static String USER_SURNAME = "pl.edu.agh.io.coordinator.USER_SURNAME";
+	public final static String USER_NICK = "pl.edu.agh.io.coordinator.USER_NICK";
+	public final static String USER_PHONE = "pl.edu.agh.io.coordinator.USER_TELEPHONE";
+	public final static String USER_MAIL = "pl.edu.agh.io.coordinator.USER_MAIL";
+	public final static String USER_AVATAR = "pl.edu.agh.io.coordinator.USER_AVATAR";
 	public static MainMapActivity currentInstance = null;
 
 	public enum ContentType {
@@ -497,15 +503,24 @@ public class MainMapActivity extends Activity implements
 							@Override
 							public void onInfoWindowClick(Marker marker) {
 								Log.d("MainMapActivity", "clicked marker, type = " + getMarkerType(marker));
-								Toast.makeText(getApplicationContext(),
+								/*Toast.makeText(getApplicationContext(),
 										marker.getSnippet(), Toast.LENGTH_SHORT)
-										.show();
+										.show();*/
 								Intent content = new Intent(
 										MainMapActivity.this,
 										DisplayContentActivity.class);
 								content.putExtra(EXTRA_CONTENT_TYPE, getMarkerType(marker).toString());
 								content.putExtra(EXTRA_CONTENT,
 										marker.getSnippet());
+								if(getMarkerType(marker)==ContentType.USER){
+									User u = dataContainer.getUserById(marker.getSnippet());
+									content.putExtra(USER_NAME, u.getName());
+									content.putExtra(USER_SURNAME, u.getSurname());
+									content.putExtra(USER_NICK, u.getId());
+									content.putExtra(USER_PHONE, u.getPhone());
+									content.putExtra(USER_MAIL, u.getEmail());
+									content.putExtra(USER_AVATAR, u.getAvatar());
+								}
 								startActivity(content);
 							}
 

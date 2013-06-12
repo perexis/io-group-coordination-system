@@ -24,6 +24,7 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="pl.edu.agh.io.coordinator.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
 
     <application
         android:allowBackup="true"
