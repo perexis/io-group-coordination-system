@@ -21,6 +21,7 @@ public class DataContainer {
 	private MainMapActivity activity;
 	private Map<MapItem, Layer> mapItems = Collections.synchronizedMap(new HashMap<MapItem, Layer>());
 	private Map<User, UserState> users = Collections.synchronizedMap(new HashMap<User, UserState>());
+	private Map<String, User> usersById = Collections.synchronizedMap(new HashMap<String, User>());
 	private Map<Group, Set<String>> groups = Collections.synchronizedMap(new HashMap<Group, Set<String>>());
 	private Map<User, Set<String>> userItems = Collections.synchronizedMap(new HashMap<User, Set<String>>());
 	
@@ -50,6 +51,10 @@ public class DataContainer {
 		this.activity = (MainMapActivity) activity;
 	}
 
+	public User getUserById(String id) {
+		return usersById.get(id);
+	}
+	
 	public void newUsersSet(Map<User, UserState> newUsers) {
 		HashSet<User> toRemove = new HashSet<User>();
 		synchronized (users) {
@@ -62,10 +67,12 @@ public class DataContainer {
 		}
 		for (User u : toRemove) {
 			users.remove(u);
+			usersById.remove(u.getId());
 		}
 		for (User u : newUsers.keySet()) {
 			if ((!users.containsKey(u)) || (!users.get(u).equals(newUsers.get(u)))) {
 				users.put(u, newUsers.get(u));
+				usersById.put(u.getId(), u);
 				if (activity.getUserFilter().isEligible(u.getId(), getItemsForUser(u), getGroupsForUser(u))) {
 					listener.userAdded(u, newUsers.get(u));
 				}

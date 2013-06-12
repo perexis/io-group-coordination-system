@@ -1054,6 +1054,7 @@ public class MainMapActivity extends Activity implements
 			} else {
 				Marker marker = googleMap.addMarker(new MarkerOptions().position(state.getPosition().getLatLng())
 						.title(user.getName() + " " + user.getSurname())
+						.snippet(user.getId())
 						.icon(BitmapDescriptorFactory.fromResource(R.drawable.person)));
 				mapUserToMarker.put(user, marker);
 				markerTypes.put(marker, ContentType.USER);
