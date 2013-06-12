@@ -31,6 +31,7 @@ io.main.Page = function(login, sid, api, logout, root) {
   this.timer = new goog.Timer(2000);
   this.slowTimer = new goog.Timer(5000);
   this.timer.start();
+  this.slowTimer.start();
   var self = this;
   api.setExceptionHandler('InvalidSessionID', function(e) {
     io.log().warning('Session has expired, logging out');
