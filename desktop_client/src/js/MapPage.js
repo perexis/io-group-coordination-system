@@ -379,8 +379,10 @@ io.map.Page.prototype.onMapClick = function(e) {
   goog.object.forEach(self.layers, function(active, layer) {
     goog.array.insert(layers, layer);
   });
+  var lrs = goog.array.clone(layers);
+  goog.array.remove(lrs, 'users');
   var infowindow = new google.maps.InfoWindow({
-    content: soy.renderAsFragment(io.soy.map.addElement, {layers: layers})});
+    content: soy.renderAsFragment(io.soy.map.addElement, {layers: lrs})});
   infowindow.open(this.map, marker);
   this.curClick = {'info': infowindow, 'marker': marker};
   google.maps.event.addListener(infowindow, 'closeclick', function(e) {
@@ -453,7 +455,9 @@ io.map.Page.prototype.updateSelfState = function() {
     self.main.api.updateSelfState({'newState': {'position':
           {'latitude': position.coords.latitude,
             'longitude': position.coords.longitude
-          }, 'speed': 0}});
+          }, 'speed': 0}}, function(x) {
+      // Do nothing
+    });
   });
 };
 

@@ -9,6 +9,29 @@
   }
 }
 
+.add_radio {
+  height: 32px;
+  width: 90px;
+  background-repeat: no-repeat;
+  background-position: right;
+}
+
+.background-users {
+  background-image: url('../images/users.png');
+}
+
+.background-videos {
+  background-image: url('../images/videos.png');
+}
+
+.background-images {
+  background-image: url('../images/images.png');
+}
+
+.background-notes {
+  background-image: url('../images/notes.png');
+}
+
 .map-layers li {
   padding: 5px;
 }
@@ -29,22 +52,8 @@
 
 .window-logo {
   padding-left: 40px;
-}
-
-.users-logo {
-  background: url('../images/users.png') no-repeat left 5px;
-}
-
-.videos-logo {
-  background: url('../images/videos.png') no-repeat left 5px;
-}
-
-.images-logo {
-  background: url('../images/images.png') no-repeat left 5px;
-}
-
-.notes-logo {
-  background: url('../images/notes.png') no-repeat left 5px;
+  background-repeat: no-repeat;
+  background-position: left 5px;
 }
 
 .user-window {
