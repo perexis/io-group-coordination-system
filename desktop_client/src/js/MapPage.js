@@ -221,7 +221,7 @@ io.map.Page.prototype.putMapItem = function(item, newMarkers, markers, layer) {
   if (markers != undefined && markers[id]) {
     newMarkers[id] = markers[id];
     var mk = newMarkers[id]['marker'];
-    if (mk.getPosition().equals(loc)) {
+    if (!mk.getPosition().equals(loc)) {
       mk.setAnimation(null);
       mk.setPosition(loc);
     }
@@ -290,7 +290,7 @@ io.map.Page.prototype.putUser = function(user, position,
   if (markers[id]) {
     newMarkers[id] = markers[id];
     var mk = newMarkers[id]['marker'];
-    if (mk.getPosition().equals(loc)) {
+    if (!mk.getPosition().equals(loc)) {
       mk.setAnimation(null);
       mk.setPosition(loc);
     }
@@ -443,7 +443,7 @@ io.map.Page.prototype.initMap = function() {
     self.main.api.updateSelfState({'newState': {'position':
           {'latitude': point.lat(), 'longitude': point.lng()}, 'speed': 0}},
     function(x) {
-      io.log().info('Updated self state');
+      // Do nothing
     });
   });
 };
