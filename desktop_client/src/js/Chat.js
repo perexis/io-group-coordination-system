@@ -2,6 +2,7 @@
 goog.provide('io.chat.Page');
 
 goog.require('goog.array');
+goog.require('goog.date.Date');
 goog.require('goog.debug');
 goog.require('goog.dom');
 goog.require('goog.object');
@@ -36,7 +37,7 @@ io.chat.Page.prototype.render = function() {
     var msg = ci.value;
     ci.value = '';
     self.main.api.sendMessage({'message': msg}, function() {
-      self.addMessage(self.main.login, msg);
+      self.addMessage(self.main.login, msg, new goog.date.DateTime());
     });
   };
   goog.events.listen(goog.dom.getElement('chatForm'),
@@ -51,19 +52,22 @@ io.chat.Page.prototype.refreshChat = function() {
   var self = this;
   this.main.api.getMessages(function(msgs) {
     goog.array.forEach(msgs, function(msg) {
-      self.addMessage(msg['id'], msg['text']);
+      var date = new goog.date.DateTime();
+      date.setTime(msg['sentTime']);
+      self.addMessage(msg['id'], msg['text'], date);
     });
   });
 };
 
 
-io.chat.Page.prototype.addMessage = function(login, msg) {
+io.chat.Page.prototype.addMessage = function(login, msg, date) {
   var cw = goog.dom.getElement('chatWindow');
   if (this.isFirst) {
     soy.renderElement(cw, io.soy.main.empty);
     this.isFirst = false;
   }
-  var elem = soy.renderAsFragment(io.soy.chat.msg, {login: login, msg: msg});
+  var elem = soy.renderAsFragment(io.soy.chat.msg,
+      {login: login, msg: msg, date: date.toIsoTimeString()});
   goog.dom.appendChild(cw, elem);
   cw.scrollTop = cw.scrollHeight;
 };

@@ -28,17 +28,24 @@ io.main.Page = function(login, sid, api, logout, root) {
   this.api = api;
   this.logout = logout;
   this.root = root;
-  this.timer = new goog.Timer(2000);
-  this.slowTimer = new goog.Timer(5000);
+  this.restartTimers();
   this.timer.start();
   this.slowTimer.start();
   var self = this;
   api.setExceptionHandler('InvalidSessionID', function(e) {
     io.log().warning('Session has expired, logging out');
-    self.timer.stop();
-    self.slowTimer.stop();
+    self.restartTimers();
     self.logout('Session has expired');
   });
+};
+
+io.main.Page.prototype.restartTimers = function() {
+  if (this.timer != undefined) {
+    this.timer.stop();
+    this.slowTimer.stop();
+  }
+  this.timer = new goog.Timer(2000);
+  this.slowTimer = new goog.Timer(5000);
 };
 
 io.main.Page.prototype.render = function() {
@@ -49,22 +56,25 @@ io.main.Page.prototype.render = function() {
 
   var self = this;
   var onLogoutBtn = function() {
+    self.restartTimers();
     io.log().info('Logging out');
     self.api.logout(function() {
-      self.timer.stop();
       self.logout();
     });
   };
 
   var onMapBtn = function() {
+    self.restartTimers();
     (new io.map.Page(self, self.pageDiv)).render();
   };
 
   var onSettingsBtn = function() {
+    self.restartTimers();
     (new io.settings.Page(self, self.pageDiv)).render();
   };
 
   var onGroupsBtn = function() {
+    self.restartTimers();
     (new io.groups.Page(self, self.pageDiv)).render();
   };
 

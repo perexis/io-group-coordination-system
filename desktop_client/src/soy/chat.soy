@@ -17,8 +17,9 @@
 /**
  * @param login - the loging.
  * @param msg - the message.
+ * @param date - the date.
  */
 {template .msg}
-<p><span class="muted">>{sp}</span><small>{$login}:{sp}{$msg}</small></p>
+<p><small><span class="muted">{$date}{sp}>{sp}</span>{$login}:{sp}{$msg}</small></p>
 {/template}
 
