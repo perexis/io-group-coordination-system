@@ -458,8 +458,8 @@ io.map.Page.prototype.initMap = function() {
 
 
 io.map.Page.prototype.updateSelfStateArtificial = function() {
-  this.E += this.Estep + Math.random() / 40000;
-  this.W += this.Wstep + Math.random() / 40000;
+  this.E += this.Estep * (Math.random() + 0.2);
+  this.W += this.Wstep * (Math.random() + 0.2);
   this.main.api.updateSelfState({'newState': {'position':
         {'latitude': this.W,
           'longitude': this.E
