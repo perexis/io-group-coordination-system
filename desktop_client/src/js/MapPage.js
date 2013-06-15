@@ -447,13 +447,13 @@ io.map.Page.prototype.initMap = function() {
   google.maps.event.addListener(this.map, 'click', function(e) {
     self.onMapClick(e);
   });
-  io.geo.locate(function(position) {
-    var point = new google.maps.LatLng(position.coords.latitude,
-        position.coords.longitude);
-    //self.map.setCenter(point);
-    //self.map.setZoom(18);
-    self.updateSelfState();
-  });
+  //io.geo.locate(function(position) {
+  //  var point = new google.maps.LatLng(position.coords.latitude,
+  //      position.coords.longitude);
+  //self.map.setCenter(point);
+  //self.map.setZoom(18);
+  //  self.updateSelfState();
+  //});
 };
 
 
