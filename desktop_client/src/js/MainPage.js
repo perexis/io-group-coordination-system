@@ -46,6 +46,8 @@ io.main.Page.prototype.restartTimers = function() {
   }
   this.timer = new goog.Timer(2000);
   this.slowTimer = new goog.Timer(5000);
+  this.timer.start();
+  this.slowTimer.start();
 };
 
 io.main.Page.prototype.render = function() {
