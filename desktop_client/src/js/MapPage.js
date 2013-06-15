@@ -45,6 +45,18 @@ io.map.Page = function(main, elem) {
   this.main.api.getPossibleUserItems(function(items) {
     self.possibleItems = items;
   });
+
+  this.W = 50.062663;
+  this.E = 19.916278;
+  this.Wstep = 0.000025;
+  this.Estep = 0.000025;
+  if (Math.random() > 0.5) {
+    this.Wstep = -this.Wstep;
+  }
+
+  if (Math.random() > 0.5) {
+    this.Estep = -this.Estep;
+  }
 };
 
 
@@ -426,8 +438,8 @@ io.map.Page.prototype.initMap = function() {
   var E = 19.9125939;
   var mapDiv = goog.dom.getElement('map');
   var mapOptions = {
-    center: new google.maps.LatLng(W, E),
-    zoom: 10,
+    center: new google.maps.LatLng(this.W, this.E),
+    zoom: 18,
     mapTypeId: google.maps.MapTypeId.ROADMAP
   };
   this.map = new google.maps.Map(mapDiv, mapOptions);
@@ -438,18 +450,27 @@ io.map.Page.prototype.initMap = function() {
   io.geo.locate(function(position) {
     var point = new google.maps.LatLng(position.coords.latitude,
         position.coords.longitude);
-    self.map.setCenter(point);
-    self.map.setZoom(18);
-    self.main.api.updateSelfState({'newState': {'position':
-          {'latitude': point.lat(), 'longitude': point.lng()}, 'speed': 0}},
-    function(x) {
-      // Do nothing
-    });
+    //self.map.setCenter(point);
+    //self.map.setZoom(18);
+    self.updateSelfState();
   });
 };
 
 
+io.map.Page.prototype.updateSelfStateArtificial = function() {
+  this.E += this.Estep + Math.random() / 40000;
+  this.W += this.Wstep + Math.random() / 40000;
+  this.main.api.updateSelfState({'newState': {'position':
+        {'latitude': this.W,
+          'longitude': this.E
+        }, 'speed': 0}}, function(x) {
+    // Do nothing
+  });
+};
+
 io.map.Page.prototype.updateSelfState = function() {
+  this.updateSelfStateArtificial();
+  return;
   var self = this;
   io.geo.locate(function(position) {
     self.main.api.updateSelfState({'newState': {'position':
