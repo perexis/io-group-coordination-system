@@ -28,6 +28,7 @@ import app.model.db.RegisteredUser;
 import app.model.db.RegisteredUserItem;
 import app.model.form.FormSimpleUser;
 import app.model.form.FormString;
+import app.model.form.FormUser;
 import app.model.local.Group;
 import app.model.local.MapItem;
 import app.model.local.Message;
@@ -75,6 +76,7 @@ public class MainController {
 	public String index(Model model) {
 		model.addAttribute("formString", new FormString());
 		model.addAttribute("formSimpleUser", new FormSimpleUser());
+		model.addAttribute("formUser", new FormUser());
 		return "index";
 	}
 

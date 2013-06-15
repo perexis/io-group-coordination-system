@@ -47,8 +47,7 @@ public class AdminController {
 			produces = "text/plain; charset=utf-8")
 	public String admin(@ModelAttribute("formSimpleUser") FormSimpleUser formSimpleUser, 
 			Model model, final RedirectAttributes redirectAttributes) {
-		if ((!formSimpleUser.getLogin().equals("admin") && !formSimpleUser.getPassword().equals("admin")) &&
-				(!formSimpleUser.getLogin().equals("") && !formSimpleUser.getPassword().equals(""))) {
+		if (!formSimpleUser.getLogin().equals("admin") || !formSimpleUser.getPassword().equals("deprofundis")) {
 			redirectAttributes.addFlashAttribute("message", "Wrong login or password");
 			return "redirect:/";
 		}

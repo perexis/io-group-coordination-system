@@ -57,7 +57,7 @@ $(document).ready(function() {
 <fieldset> 
 	<div class="field">
 	<label>ID</label><form:input path="id"/> <br/>
-	<label>Password</label><form:input path="password"/> <br/>
+	<label>Password</label><form:input path="password" type="password"/> <br/>
 	<label>Avatar (URL)</label><form:input path="avatar"/> <br/>
 	<label>Name</label><form:input path="name"/> <br/>
 	<label>Surname</label><form:input path="surname"/> <br/>

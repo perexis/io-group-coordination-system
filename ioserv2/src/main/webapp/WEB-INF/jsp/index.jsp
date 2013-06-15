@@ -38,24 +38,47 @@ $(document).ready(function() {
 			}
 		});
 	});
+	$(".userCreationForm").submit(function(event) {
+		event.preventDefault();
+		$("#result").html('');
+
+		form = $(this);
+		formData = form.serialize();
+		formAction = form.attr('action');
+		
+		$.ajax({
+			type : "POST",
+			url : formAction,
+			data : formData,
+			success : function(data) {
+				form.get(0).reset();
+				$('div#result').show();
+				$("#result").html(data);
+				$("html, body").animate({ scrollTop: 0 }, "fast");
+			},
+			error : function(errMsg) {
+				$('div#result').hide();
+				alert("Error: " + errMsg.returned_val);
+			}
+		});
+	});
 });
 </script>
-<title>JSON testing page</title>
+<title>Main page</title>
 </head>
 
 <body>
 
 <div id="result">${message}</div>
-<h3>JSON testing page</h3>
+<h3>Main page</h3>
 
 <hr/>
-
-Log in as admin (login: admin, pass: admin (or just leave blank)):
+Log in as admin:
 <form:form action="/admin/" modelAttribute="formSimpleUser" method="post">
 <fieldset> 
 	<div class="field">
 	<label>Login</label><form:input path="login"/> <br/>
-	<label>Password</label><form:input path="password"/>
+	<label>Password</label><form:input path="password" type="password"/>
 	</div>
 	<div class="submit"><input type="submit" value="Log in!"></div>
 </fieldset>
@@ -63,6 +86,23 @@ Log in as admin (login: admin, pass: admin (or just leave blank)):
 
 <hr/>
 
+Register a new user:
+<form:form class="userCreationForm" action="/admin/addUser" modelAttribute="formUser" method="post">
+<fieldset> 
+	<div class="field">
+	<label>ID</label><form:input path="id"/> <br/>
+	<label>Password</label><form:input path="password" type="password"/> <br/>
+	<label>Avatar (URL)</label><form:input path="avatar"/> <br/>
+	<label>Name</label><form:input path="name"/> <br/>
+	<label>Surname</label><form:input path="surname"/> <br/>
+	<label>Phone</label><form:input path="phone"/> <br/>
+	<label>Email</label><form:input path="email"/>
+	</div>
+	<div class="submit"><input type="submit" value="Register" ></div>
+</fieldset>
+</form:form>
+
+<%--
 <form:form class="testForm" action="/login" modelAttribute="formString" method="post">
 	<input class="testSubmit" type="submit" value="/login">
 	<form:input path="value" size="100" value="{\"id\": \"ID\", \"password\": \"PASS\"}"/>
@@ -173,6 +213,7 @@ Log in as admin (login: admin, pass: admin (or just leave blank)):
 	<input class="testSubmit" type="submit" value="/getMessages">
 	<form:input path="value" size="100" value="{\"sessionID\": SESSION}"/>
 </form:form>
+--%>
 
 </body>
 
